@@ -2,7 +2,7 @@
   "name": "fasm-highlight",
   "displayName": "FASM Highlight",
   "description": "(Unofficial) Language support for Flat Assembler (FASM) with syntax highlighting, code snippets, and compiler integration",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "kumar-047",
   "icon": "icon.png",
   "engines": {
