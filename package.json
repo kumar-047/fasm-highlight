@@ -1,7 +1,7 @@
 {
-  "name": "fasm-language-support",
-  "displayName": "FASM - Flat Assembler",
-  "description": "Language support for Flat Assembler (FASM) with syntax highlighting, code snippets, and compiler integration",
+  "name": "fasm-highlight",
+  "displayName": "FASM Highlight",
+  "description": "(Unofficial) Language support for Flat Assembler (FASM) with syntax highlighting, code snippets, and compiler integration",
   "version": "0.1.0",
   "publisher": "kumar-047",
   "icon": "icon.png",
@@ -119,7 +119,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/kumar-047/fasm-language-support"
+    "url": "https://github.com/kumar-047/fasm-highlight"
   },
   "license": "MIT"
 }
