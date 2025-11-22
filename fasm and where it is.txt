@@ -1,0 +1,13 @@
+C:\fasmw17332 , location of fasmw17332
+
+to run FASM 
+ just go to terminal and run fasm and the terminal show the output like below this 
+ > fasm        
+flat assembler  version 1.73.32
+usage: fasm <source> [output]
+usage: fasm <source> [output]
+optional settings:
+ -m <limit>         set the limit in kilobytes for the available memory
+ -p <limit>         set the maximum allowed number of passes
+ -d <name>=<value>  define symbolic variable    
+ -s <file>          dump symbolic information for debugging

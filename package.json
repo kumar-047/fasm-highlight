@@ -1,0 +1,125 @@
+{
+  "name": "fasm-language-support",
+  "displayName": "FASM - Flat Assembler",
+  "description": "Language support for Flat Assembler (FASM) with syntax highlighting, code snippets, and compiler integration",
+  "version": "0.1.0",
+  "publisher": "kumar-047",
+  "icon": "icon.png",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets"
+  ],
+  "keywords": [
+    "fasm",
+    "assembly",
+    "assembler",
+    "x86",
+    "x86-64",
+    "asm"
+  ],
+
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "fasm",
+        "aliases": [
+          "FASM",
+          "Flat Assembler",
+          "fasm"
+        ],
+        "extensions": [
+          ".asm",
+          ".inc"
+        ],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./icon.png",
+          "dark": "./icon.png"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "fasm",
+        "scopeName": "source.fasm",
+        "path": "./syntaxes/fasm.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "fasm",
+        "path": "./snippets/fasm.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "fasm.build",
+        "title": "FASM: Build",
+        "category": "FASM"
+      },
+      {
+        "command": "fasm.buildAndRun",
+        "title": "FASM: Build and Run",
+        "category": "FASM"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "fasm.build",
+        "key": "ctrl+shift+b",
+        "when": "editorLangId == fasm"
+      },
+      {
+        "command": "fasm.buildAndRun",
+        "key": "ctrl+shift+r",
+        "when": "editorLangId == fasm"
+      }
+    ],
+    "configuration": {
+      "title": "FASM",
+      "properties": {
+        "fasm.compilerPath": {
+          "type": "string",
+          "default": "C:\\fasmw17332\\fasm.exe",
+          "description": "Path to the FASM compiler executable"
+        },
+        "fasm.memoryLimit": {
+          "type": "number",
+          "default": 65536,
+          "description": "Memory limit in kilobytes (default: 64MB)"
+        },
+        "fasm.passesLimit": {
+          "type": "number",
+          "default": 100,
+          "description": "Maximum number of passes"
+        },
+        "fasm.generateSymbols": {
+          "type": "boolean",
+          "default": false,
+          "description": "Generate symbolic information for debugging (-s flag)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/vscode": "^1.75.0",
+    "@vscode/vsce": "^2.22.0",
+    "typescript": "^5.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kumar-047/fasm-language-support"
+  },
+  "license": "MIT"
+}

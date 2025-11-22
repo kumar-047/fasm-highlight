@@ -1,0 +1,199 @@
+{
+  "Windows 32-bit Program": {
+    "prefix": "win32",
+    "body": [
+      "format PE console",
+      "entry start",
+      "",
+      "include 'win32a.inc'",
+      "",
+      "section '.text' code readable executable",
+      "",
+      "start:",
+      "\t${1:; Your code here}",
+      "\t",
+      "\t; Exit program",
+      "\tpush 0",
+      "\tcall [ExitProcess]",
+      "",
+      "section '.idata' import data readable writeable",
+      "",
+      "\tlibrary kernel32,'KERNEL32.DLL'",
+      "",
+      "\timport kernel32,\\",
+      "\t\tExitProcess,'ExitProcess'",
+      "$0"
+    ],
+    "description": "Windows 32-bit console application template"
+  },
+  "Windows 64-bit Program": {
+    "prefix": "win64",
+    "body": [
+      "format PE64 console",
+      "entry start",
+      "",
+      "include 'win64a.inc'",
+      "",
+      "section '.text' code readable executable",
+      "",
+      "start:",
+      "\tsub rsp,8*5\t\t; Reserve stack space for API calls",
+      "\t",
+      "\t${1:; Your code here}",
+      "\t",
+      "\t; Exit program",
+      "\txor ecx,ecx",
+      "\tcall [ExitProcess]",
+      "",
+      "section '.idata' import data readable writeable",
+      "",
+      "\tlibrary kernel32,'KERNEL32.DLL'",
+      "",
+      "\timport kernel32,\\",
+      "\t\tExitProcess,'ExitProcess'",
+      "$0"
+    ],
+    "description": "Windows 64-bit console application template"
+  },
+  "Linux Program": {
+    "prefix": "linux",
+    "body": [
+      "format ELF64 executable",
+      "",
+      "segment readable executable",
+      "",
+      "entry start",
+      "",
+      "start:",
+      "\t${1:; Your code here}",
+      "\t",
+      "\t; Exit program",
+      "\tmov rax,60\t\t; sys_exit",
+      "\txor rdi,rdi\t\t; exit code 0",
+      "\tsyscall",
+      "$0"
+    ],
+    "description": "Linux 64-bit ELF executable template"
+  },
+  "Procedure": {
+    "prefix": "proc",
+    "body": [
+      "${1:procedure_name}:",
+      "\tpush ebp",
+      "\tmov ebp,esp",
+      "\t",
+      "\t${2:; Procedure body}",
+      "\t",
+      "\tmov esp,ebp",
+      "\tpop ebp",
+      "\tret$0"
+    ],
+    "description": "Standard procedure with prologue and epilogue"
+  },
+  "Procedure 64-bit": {
+    "prefix": "proc64",
+    "body": [
+      "${1:procedure_name}:",
+      "\tpush rbp",
+      "\tmov rbp,rsp",
+      "\t",
+      "\t${2:; Procedure body}",
+      "\t",
+      "\tmov rsp,rbp",
+      "\tpop rbp",
+      "\tret$0"
+    ],
+    "description": "64-bit procedure with prologue and epilogue"
+  },
+  "Macro": {
+    "prefix": "macro",
+    "body": [
+      "macro ${1:macro_name} ${2:parameters}",
+      "{",
+      "\t${3:; Macro body}",
+      "}$0"
+    ],
+    "description": "Macro definition"
+  },
+  "Structure": {
+    "prefix": "struct",
+    "body": [
+      "struc ${1:structure_name}",
+      "{",
+      "\t${2:.field1 dd ?}",
+      "\t${3:.field2 dd ?}",
+      "}$0"
+    ],
+    "description": "Structure definition"
+  },
+  "If Conditional": {
+    "prefix": "if",
+    "body": [
+      "if ${1:condition}",
+      "\t${2:; Code if true}",
+      "else",
+      "\t${3:; Code if false}",
+      "end if$0"
+    ],
+    "description": "Conditional assembly block"
+  },
+  "Repeat Block": {
+    "prefix": "repeat",
+    "body": [
+      "repeat ${1:count}",
+      "\t${2:; Repeated code}",
+      "end repeat$0"
+    ],
+    "description": "Repeat block"
+  },
+  "Include File": {
+    "prefix": "include",
+    "body": [
+      "include '${1:filename.inc}'$0"
+    ],
+    "description": "Include directive"
+  },
+  "MessageBox Win32": {
+    "prefix": "msgbox32",
+    "body": [
+      "push 0\t\t\t; MB_OK",
+      "push ${1:title}",
+      "push ${2:message}",
+      "push 0\t\t\t; NULL",
+      "call [MessageBoxA]$0"
+    ],
+    "description": "Display MessageBox (Win32)"
+  },
+  "MessageBox Win64": {
+    "prefix": "msgbox64",
+    "body": [
+      "sub rsp,8*5",
+      "xor r9,r9\t\t; MB_OK",
+      "lea r8,[${1:title}]",
+      "lea rdx,[${2:message}]",
+      "xor rcx,rcx\t\t; NULL",
+      "call [MessageBoxA]",
+      "add rsp,8*5$0"
+    ],
+    "description": "Display MessageBox (Win64)"
+  },
+  "Data Section": {
+    "prefix": "datasec",
+    "body": [
+      "section '.data' data readable writeable",
+      "",
+      "\t${1:variable} db ${2:'data'},0$0"
+    ],
+    "description": "Data section definition"
+  },
+  "Loop": {
+    "prefix": "loop",
+    "body": [
+      "mov ecx,${1:count}",
+      "@@:",
+      "\t${2:; Loop body}",
+      "\tloop @b$0"
+    ],
+    "description": "Loop construct using loop instruction"
+  }
+}
