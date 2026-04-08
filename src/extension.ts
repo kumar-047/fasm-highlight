@@ -1,8 +1,8 @@
-import * as vscode from 'vscode';
+import * as fs from 'fs';
 import * as path from 'path';
-import { FasmCompiler } from "./fasmCompiler";  
-
-// FASM Extension Activation
+import * as vscode from 'vscode';
+import { createBuildPlan } from './compiler/buildTarget';
+import { FasmCompiler } from './fasmCompiler';
 
 let outputChannel: vscode.OutputChannel;
 let fasmCompiler: FasmCompiler;
@@ -10,11 +10,9 @@ let fasmCompiler: FasmCompiler;
 export function activate(context: vscode.ExtensionContext) {
     console.log('FASM extension is now active');
 
-    // Create output channel
     outputChannel = vscode.window.createOutputChannel('FASM');
     fasmCompiler = new FasmCompiler(outputChannel);
 
-    // Register build command
     const buildCommand = vscode.commands.registerCommand('fasm.build', async () => {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
@@ -23,31 +21,28 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         const document = editor.document;
-        if (document.languageId !== 'fasm') {
-            vscode.window.showErrorMessage('Current file is not a FASM file');
+        await document.save();
+
+        const buildPlan = createBuildPlan(document);
+        if (!buildPlan.canBuild) {
+            vscode.window.showErrorMessage(buildPlan.buildReason ?? 'This file cannot be built.');
             return;
         }
 
-        // Save the file first
-        await document.save();
+        showBuildHeader(buildPlan.sourcePath, buildPlan.outputPath);
 
-        const filePath = document.fileName;
-        const outputPath = filePath.replace(/\.(asm|inc)$/i, '.exe');
-
-        outputChannel.show(true);
-        outputChannel.appendLine(`Building ${path.basename(filePath)}...`);
-        outputChannel.appendLine('');
-
-        const success = await fasmCompiler.compile(filePath, outputPath);
-
-        if (success) {
-            vscode.window.showInformationMessage(`Build successful: ${path.basename(outputPath)}`);
-        } else {
+        const success = await fasmCompiler.compile(buildPlan.sourcePath);
+        if (!success) {
             vscode.window.showErrorMessage('Build failed. Check output for details.');
+            return;
         }
+
+        const message = buildPlan.outputPath
+            ? `Build successful: ${path.basename(buildPlan.outputPath)}`
+            : 'Build successful. Output path is compiler-defined for this source format.';
+        vscode.window.showInformationMessage(message);
     });
 
-    // Register build and run command
     const buildAndRunCommand = vscode.commands.registerCommand('fasm.buildAndRun', async () => {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
@@ -56,44 +51,60 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         const document = editor.document;
-        if (document.languageId !== 'fasm') {
-            vscode.window.showErrorMessage('Current file is not a FASM file');
+        await document.save();
+
+        const buildPlan = createBuildPlan(document);
+        if (!buildPlan.canBuild) {
+            vscode.window.showErrorMessage(buildPlan.buildReason ?? 'This file cannot be built.');
             return;
         }
 
-        // Save the file first
-        await document.save();
+        showBuildHeader(buildPlan.sourcePath, buildPlan.outputPath);
 
-        const filePath = document.fileName;
-        const outputPath = filePath.replace(/\.(asm|inc)$/i, '.exe');
+        const success = await fasmCompiler.compile(buildPlan.sourcePath);
+        if (!success) {
+            vscode.window.showErrorMessage('Build failed. Check output for details.');
+            return;
+        }
 
-        outputChannel.show(true);
-        outputChannel.appendLine(`Building ${path.basename(filePath)}...`);
+        if (!buildPlan.outputPath || !buildPlan.canRun) {
+            const message = buildPlan.runReason ?? 'Build succeeded, but automatic run is not available for this output.';
+            vscode.window.showWarningMessage(message);
+            outputChannel.appendLine(message);
+            return;
+        }
+
+        if (!fs.existsSync(buildPlan.outputPath)) {
+            const message = `Build succeeded, but the inferred output was not found: ${buildPlan.outputPath}`;
+            vscode.window.showWarningMessage(message);
+            outputChannel.appendLine(message);
+            return;
+        }
+
+        vscode.window.showInformationMessage(`Build successful, running ${path.basename(buildPlan.outputPath)}...`);
+        outputChannel.appendLine('');
+        outputChannel.appendLine('='.repeat(60));
+        outputChannel.appendLine('Running program:');
+        outputChannel.appendLine('='.repeat(60));
         outputChannel.appendLine('');
 
-        const success = await fasmCompiler.compile(filePath, outputPath);
-
-        if (success) {
-            vscode.window.showInformationMessage(`Build successful, running ${path.basename(outputPath)}...`);
-            outputChannel.appendLine('');
-            outputChannel.appendLine('='.repeat(60));
-            outputChannel.appendLine('Running program:');
-            outputChannel.appendLine('='.repeat(60));
-            outputChannel.appendLine('');
-
-            await fasmCompiler.run(outputPath);
-        } else {
-            vscode.window.showErrorMessage('Build failed. Check output for details.');
-        }
+        await fasmCompiler.run(buildPlan.outputPath);
     });
 
-    context.subscriptions.push(buildCommand);
-    context.subscriptions.push(buildAndRunCommand);
-    context.subscriptions.push(outputChannel);
+    context.subscriptions.push(buildCommand, buildAndRunCommand, outputChannel);
 }
 
 export function deactivate() {
-    if (outputChannel) {
-        outputChannel.dispose();
+    outputChannel?.dispose();
+}
+
+function showBuildHeader(sourcePath: string, outputPath?: string) {
+    outputChannel.show(true);
+    outputChannel.appendLine(`Building ${path.basename(sourcePath)}...`);
+    if (outputPath) {
+        outputChannel.appendLine(`Expected output: ${path.basename(outputPath)}`);
+    } else {
+        outputChannel.appendLine('Expected output: compiler-defined (not inferred by the extension)');
     }
+    outputChannel.appendLine('');
 }

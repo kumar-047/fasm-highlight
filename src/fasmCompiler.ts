@@ -1,6 +1,6 @@
-import * as vscode from 'vscode';
 import * as cp from 'child_process';
 import * as path from 'path';
+import * as vscode from 'vscode';
 
 export class FasmCompiler {
     private outputChannel: vscode.OutputChannel;
@@ -9,12 +9,6 @@ export class FasmCompiler {
         this.outputChannel = outputChannel;
     }
 
-    /**
-     * Compile a FASM source file
-     * @param sourcePath Path to the .asm source file
-     * @param outputPath Path for the output executable
-     * @returns Promise<boolean> true if compilation succeeded
-     */
     async compile(sourcePath: string, outputPath?: string): Promise<boolean> {
         const config = vscode.workspace.getConfiguration('fasm');
         const compilerPath = config.get<string>('compilerPath', 'C:\\fasmw17332\\fasm.exe');
@@ -22,19 +16,18 @@ export class FasmCompiler {
         const passesLimit = config.get<number>('passesLimit', 100);
         const generateSymbols = config.get<boolean>('generateSymbols', false);
 
-        // Build command arguments
         const args: string[] = [sourcePath];
-
         if (outputPath) {
             args.push(outputPath);
         }
 
-        // Add optional flags
         args.push('-m', memoryLimit.toString());
         args.push('-p', passesLimit.toString());
 
         if (generateSymbols) {
-            const symbolsPath = outputPath ? outputPath.replace(/\.exe$/i, '.fas') : sourcePath.replace(/\.(asm|inc)$/i, '.fas');
+            const symbolsPath = outputPath
+                ? outputPath.replace(/\.exe$/i, '.fas')
+                : sourcePath.replace(/\.(asm|inc)$/i, '.fas');
             args.push('-s', symbolsPath);
         }
 
@@ -73,21 +66,18 @@ export class FasmCompiler {
                 this.outputChannel.appendLine('');
 
                 if (code === 0) {
-                    this.outputChannel.appendLine('✓ Build succeeded');
+                    this.outputChannel.appendLine('Build succeeded');
                     resolve(true);
-                } else {
-                    this.outputChannel.appendLine(`✗ Build failed with exit code ${code}`);
-                    this.parseErrors(stdout + stderr, sourcePath);
-                    resolve(false);
+                    return;
                 }
+
+                this.outputChannel.appendLine(`Build failed with exit code ${code}`);
+                this.parseErrors(stdout + stderr, sourcePath);
+                resolve(false);
             });
         });
     }
 
-    /**
-     * Run a compiled executable
-     * @param exePath Path to the executable
-     */
     async run(exePath: string): Promise<void> {
         return new Promise<void>((resolve) => {
             const process = cp.spawn(exePath, [], {
@@ -115,25 +105,19 @@ export class FasmCompiler {
         });
     }
 
-    /**
-     * Parse FASM error messages and display diagnostics
-     * @param output Compiler output
-     * @param sourcePath Source file path
-     */
     private parseErrors(output: string, sourcePath: string) {
         this.outputChannel.appendLine('');
         this.outputChannel.appendLine('Errors:');
 
-        // FASM error format: filename [line] error message
         const errorRegex = /^(.+?)\s+\[(\d+)\]\s+(.+)$/gm;
-        let match;
+        let match: RegExpExecArray | null;
 
         while ((match = errorRegex.exec(output)) !== null) {
             const [, file, line, message] = match;
-            this.outputChannel.appendLine(`  Line ${line}: ${message}`);
+            const displayFile = file || sourcePath;
+            this.outputChannel.appendLine(`  ${displayFile}:${line} ${message}`);
         }
 
-        // Also look for general error messages
         const generalErrorRegex = /error:(.+)/gi;
         while ((match = generalErrorRegex.exec(output)) !== null) {
             this.outputChannel.appendLine(`  ${match[1].trim()}`);

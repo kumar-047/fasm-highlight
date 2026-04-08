@@ -1,7 +1,7 @@
 {
   "name": "fasm-highlight",
   "displayName": "FASM Highlight",
-  "description": "(Unofficial) Language support for Flat Assembler (FASM) with syntax highlighting, code snippets, and compiler integration",
+  "description": "Unofficial Flat Assembler (FASM) language support with syntax highlighting, snippets, and basic build commands",
   "version": "0.1.1",
   "publisher": "kumar-047",
   "icon": "icon.png",
@@ -85,22 +85,22 @@
         "fasm.compilerPath": {
           "type": "string",
           "default": "C:\\fasmw17332\\fasm.exe",
-          "description": "Path to the FASM compiler executable"
+          "description": "Path to the FASM compiler executable. The default value is Windows-specific."
         },
         "fasm.memoryLimit": {
           "type": "number",
           "default": 65536,
-          "description": "Memory limit in kilobytes (default: 64MB)"
+          "description": "Memory limit in kilobytes passed to FASM with -m"
         },
         "fasm.passesLimit": {
           "type": "number",
           "default": 100,
-          "description": "Maximum number of passes"
+          "description": "Maximum number of passes passed to FASM with -p"
         },
         "fasm.generateSymbols": {
           "type": "boolean",
           "default": false,
-          "description": "Generate symbolic information for debugging (-s flag)"
+          "description": "Generate symbolic information for debugging with the -s flag"
         }
       }
     }

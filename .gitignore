@@ -1,1 +1,7 @@
-node_modules
+node_modules/
+out/
+*.vsix
+
+# Local/reference artifacts that do not need normal source control updates
+fasm and where it is.txt
+FASM.pdf

@@ -1,10 +1,11 @@
-; Simple calculator demonstrating macros and arithmetic
-format PE console
+; Calculator example that teaches simple arithmetic macros
+; and basic Win32 string formatting for output.
+format PE GUI 4.0
 entry start
 
 include 'win32a.inc'
 
-; Macro for adding two numbers
+; Add two constants and store the result in memory.
 macro add_numbers a, b, result
 {
     mov eax, a
@@ -12,7 +13,7 @@ macro add_numbers a, b, result
     mov [result], eax
 }
 
-; Macro for multiplying two numbers
+; Multiply two constants and store the result in memory.
 macro mul_numbers a, b, result
 {
     mov eax, a
@@ -23,37 +24,23 @@ macro mul_numbers a, b, result
 section '.text' code readable executable
 
 start:
-    ; Add 10 + 20
     add_numbers 10, 20, num1
-    
-    ; Multiply 5 * 6
-    mul_numbers 5, 6, num2
-    
-    ; Display results using console output
-    push num1
-    push format_str1
+    mul_numbers 7, 6, num2
+
+    ; Build one readable result string inside the buffer.
+    push [num2]
+    push [num1]
+    push result_format
     push buffer
-    call [wsprintf]
-    add esp, 12
-    
+    call [wsprintfA]
+    add esp, 16
+
+    push 0
+    push caption
     push buffer
-    call [printf]
-    add esp, 4
-    
-    push num2
-    push format_str2
-    push buffer
-    call [wsprintf]
-    add esp, 12
-    
-    push buffer
-    call [printf]
-    add esp, 4
-    
-    ; Pause (wait for key)
-    call [_getch]
-    
-    ; Exit
+    push 0
+    call [MessageBoxA]
+
     push 0
     call [ExitProcess]
 
@@ -62,22 +49,17 @@ section '.data' data readable writeable
     num1 dd 0
     num2 dd 0
     buffer rb 256
-    format_str1 db '10 + 20 = %d',13,10,0
-    format_str2 db '5 * 6 = %d',13,10,0
+    result_format db '10 + 20 = %d',13,10,'7 * 6 = %d',0
+    caption db 'Calculator Example',0
 
 section '.idata' import data readable writeable
 
     library kernel32,'KERNEL32.DLL',\
-            msvcrt,'MSVCRT.DLL',\
             user32,'USER32.DLL'
 
     import kernel32,\
            ExitProcess,'ExitProcess'
-           
-    import msvcrt,\
-           printf,'printf',\
-           wsprintf,'wsprintf',\
-           _getch,'_getch'
-           
+
     import user32,\
+           MessageBoxA,'MessageBoxA',\
            wsprintfA,'wsprintfA'
