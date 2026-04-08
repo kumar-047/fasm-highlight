@@ -10,7 +10,8 @@
   },
   "categories": [
     "Programming Languages",
-    "Snippets"
+    "Snippets",
+    "Themes"
   ],
   "keywords": [
     "fasm",
@@ -47,6 +48,13 @@
         "language": "fasm",
         "scopeName": "source.fasm",
         "path": "./syntaxes/fasm.tmLanguage.json"
+      }
+    ],
+    "themes": [
+      {
+        "label": "FASM Workshop Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/fasm-workshop-dark-color-theme.json"
       }
     ],
     "snippets": [
@@ -107,6 +115,7 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
+    "lint": "tsc --noEmit -p ./",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "package": "vsce package"

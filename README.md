@@ -6,6 +6,7 @@ FASM Highlight is an unofficial Flat Assembler language support extension for VS
 
 - FASM language registration for `.asm` and `.inc`
 - syntax highlighting
+- bundled optional theme: `FASM Workshop Dark`
 - snippets for common program structures
 - language configuration for comments, brackets, and folding
 - `FASM: Build`
@@ -44,6 +45,16 @@ The repository includes example programs in `examples/`:
 - `hello_win32.asm`
 - `calculator.asm`
 - `snake.asm`
+
+## Theme
+
+The extension now includes an optional dark theme tuned for assembly-heavy editing:
+
+- restrained dark background
+- higher contrast for mnemonics, directives, registers, labels, and numbers
+- colors chosen to make data flow and control flow easier to scan in FASM source
+
+You can enable it from the editor theme picker as `FASM Workshop Dark`.
 
 ## Development
 

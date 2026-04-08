@@ -1,0 +1,181 @@
+{
+  "$schema": "vscode://schemas/color-theme",
+  "name": "FASM Workshop Dark",
+  "type": "dark",
+  "colors": {
+    "editor.background": "#111417",
+    "editor.foreground": "#d7e0e8",
+    "editorLineNumber.foreground": "#536170",
+    "editorLineNumber.activeForeground": "#9fb0c2",
+    "editorCursor.foreground": "#ffcd70",
+    "editor.selectionBackground": "#2e3a46",
+    "editor.inactiveSelectionBackground": "#25303a",
+    "editor.lineHighlightBackground": "#171d23",
+    "editorIndentGuide.background1": "#202930",
+    "editorIndentGuide.activeBackground1": "#32414d",
+    "editorWhitespace.foreground": "#25303a",
+    "editorBracketMatch.background": "#2d394400",
+    "editorBracketMatch.border": "#7db2d9",
+    "editorGutter.modifiedBackground": "#7db2d9",
+    "editorGutter.addedBackground": "#87b06d",
+    "editorGutter.deletedBackground": "#d66c6c",
+    "activityBar.background": "#14191e",
+    "sideBar.background": "#12171c",
+    "panel.background": "#101419",
+    "statusBar.background": "#161c21",
+    "tab.activeBackground": "#161c21",
+    "tab.inactiveBackground": "#111417",
+    "titleBar.activeBackground": "#161c21"
+  },
+  "tokenColors": [
+    {
+      "scope": [
+        "comment.line.semicolon.fasm"
+      ],
+      "settings": {
+        "foreground": "#6e7f8f",
+        "fontStyle": "italic"
+      }
+    },
+    {
+      "scope": [
+        "string.quoted.single.fasm",
+        "string.quoted.double.fasm"
+      ],
+      "settings": {
+        "foreground": "#d9b26f"
+      }
+    },
+    {
+      "scope": [
+        "constant.character.escape.fasm"
+      ],
+      "settings": {
+        "foreground": "#ffd78a",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": [
+        "entity.name.label.fasm",
+        "entity.name.label.local.fasm",
+        "entity.name.label.anonymous.fasm"
+      ],
+      "settings": {
+        "foreground": "#7ec9c3",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": [
+        "entity.name.section.fasm"
+      ],
+      "settings": {
+        "foreground": "#8fd0ff",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": [
+        "storage.type.data.fasm",
+        "storage.type.size.fasm"
+      ],
+      "settings": {
+        "foreground": "#89c37b"
+      }
+    },
+    {
+      "scope": [
+        "keyword.control.directive.structure.fasm",
+        "keyword.control.directive.macro.fasm",
+        "keyword.control.directive.include.fasm",
+        "keyword.control.directive.constant.fasm",
+        "keyword.control.directive.format.fasm",
+        "keyword.control.directive.section.fasm",
+        "keyword.control.directive.entry.fasm",
+        "keyword.control.directive.addressing.fasm",
+        "keyword.control.directive.conditional.fasm",
+        "keyword.control.directive.linkage.fasm",
+        "keyword.control.directive.other.fasm"
+      ],
+      "settings": {
+        "foreground": "#c792ea"
+      }
+    },
+    {
+      "scope": [
+        "support.function.call-convention.fasm",
+        "support.function.builtin.fasm"
+      ],
+      "settings": {
+        "foreground": "#5fb3b3"
+      }
+    },
+    {
+      "scope": [
+        "keyword.mnemonic.data-movement.fasm",
+        "keyword.mnemonic.arithmetic.fasm",
+        "keyword.mnemonic.logical.fasm",
+        "keyword.mnemonic.control-flow.fasm",
+        "keyword.mnemonic.string.fasm",
+        "keyword.mnemonic.flag.fasm",
+        "keyword.mnemonic.misc.fasm",
+        "keyword.mnemonic.fpu.fasm",
+        "keyword.mnemonic.mmx.fasm",
+        "keyword.mnemonic.sse.fasm",
+        "keyword.mnemonic.avx.fasm"
+      ],
+      "settings": {
+        "foreground": "#ff8f6b"
+      }
+    },
+    {
+      "scope": [
+        "variable.language.register.general.64bit.fasm",
+        "variable.language.register.general.32bit.fasm",
+        "variable.language.register.general.16bit.fasm",
+        "variable.language.register.general.8bit.fasm",
+        "variable.language.register.segment.fasm",
+        "variable.language.register.control.fasm",
+        "variable.language.register.debug.fasm",
+        "variable.language.register.fpu.fasm",
+        "variable.language.register.mmx.fasm",
+        "variable.language.register.xmm.fasm",
+        "variable.language.register.ymm.fasm",
+        "variable.language.register.zmm.fasm"
+      ],
+      "settings": {
+        "foreground": "#7db2d9"
+      }
+    },
+    {
+      "scope": [
+        "variable.other.constant.fasm"
+      ],
+      "settings": {
+        "foreground": "#f07178"
+      }
+    },
+    {
+      "scope": [
+        "constant.numeric.hex.fasm",
+        "constant.numeric.binary.fasm",
+        "constant.numeric.octal.fasm",
+        "constant.numeric.decimal.fasm"
+      ],
+      "settings": {
+        "foreground": "#f7c76b"
+      }
+    },
+    {
+      "scope": [
+        "keyword.operator.special.fasm",
+        "keyword.operator.word.fasm",
+        "keyword.operator.arithmetic.fasm"
+      ],
+      "settings": {
+        "foreground": "#c0c8d0"
+      }
+    }
+  ]
+}

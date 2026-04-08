@@ -5,8 +5,11 @@
   "patterns": [
     { "include": "#comments" },
     { "include": "#strings" },
+    { "include": "#sections" },
     { "include": "#labels" },
+    { "include": "#constants" },
     { "include": "#directives" },
+    { "include": "#keywords" },
     { "include": "#instructions" },
     { "include": "#registers" },
     { "include": "#numbers" },
@@ -48,6 +51,14 @@
         }
       ]
     },
+    "sections": {
+      "patterns": [
+        {
+          "name": "entity.name.section.fasm",
+          "match": "'\\.[A-Za-z0-9_]+'"
+        }
+      ]
+    },
     "labels": {
       "patterns": [
         {
@@ -55,8 +66,12 @@
           "match": "^\\s*@@:"
         },
         {
+          "name": "entity.name.label.local.fasm",
+          "match": "^\\s*\\.[A-Za-z_][A-Za-z0-9_]*:"
+        },
+        {
           "name": "entity.name.label.fasm",
-          "match": "^\\s*[a-zA-Z_][a-zA-Z0-9_]*:"
+          "match": "^\\s*[A-Za-z_][A-Za-z0-9_]*:"
         },
         {
           "name": "keyword.control.label-reference.fasm",
@@ -64,19 +79,27 @@
         }
       ]
     },
+    "constants": {
+      "patterns": [
+        {
+          "name": "variable.other.constant.fasm",
+          "match": "\\b[A-Z_][A-Z0-9_]*\\b"
+        }
+      ]
+    },
     "directives": {
       "patterns": [
         {
-          "name": "keyword.control.directive.data.fasm",
+          "name": "storage.type.data.fasm",
           "match": "\\b(db|dw|dd|dq|dt|df|dp|du|rb|rw|rd|rq|rt|file)\\b"
         },
         {
           "name": "keyword.control.directive.structure.fasm",
-          "match": "\\b(struc|ends|union|common)\\b"
+          "match": "\\b(struc|ends|struct|union|common)\\b"
         },
         {
           "name": "keyword.control.directive.macro.fasm",
-          "match": "\\b(macro|endm|local|purge|rept|irp|irpc|match|forward|reverse)\\b"
+          "match": "\\b(macro|endm|local|purge|rept|irp|irpc|match|forward|reverse|restore)\\b"
         },
         {
           "name": "keyword.control.directive.include.fasm",
@@ -84,7 +107,7 @@
         },
         {
           "name": "keyword.control.directive.constant.fasm",
-          "match": "\\b(equ)\\b"
+          "match": "\\b(equ|fix|define)\\b"
         },
         {
           "name": "keyword.control.directive.format.fasm",
@@ -96,7 +119,7 @@
         },
         {
           "name": "keyword.control.directive.entry.fasm",
-          "match": "\\b(entry|start)\\b"
+          "match": "\\b(entry)\\b"
         },
         {
           "name": "keyword.control.directive.addressing.fasm",
@@ -104,11 +127,27 @@
         },
         {
           "name": "keyword.control.directive.conditional.fasm",
-          "match": "\\b(if|else|elseif|endif|ifdef|ifndef|ifused|ifnused|ifid|ifnid|ifidn|ifnidn)\\b"
+          "match": "\\b(if|else|elseif|endif|ifdef|ifndef|ifused|ifnused|ifid|ifnid|ifidn|ifnidn|while|break)\\b"
+        },
+        {
+          "name": "keyword.control.directive.linkage.fasm",
+          "match": "\\b(export|import|public|extrn|library)\\b"
         },
         {
           "name": "keyword.control.directive.other.fasm",
-          "match": "\\b(align|virtual|end|display|org|load|store|times|repeat|while|break|export|import|public|extrn|library)\\b"
+          "match": "\\b(align|virtual|end|display|org|load|store|times|repeat)\\b"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "support.function.call-convention.fasm",
+          "match": "\\b(invoke|stdcall|cinvoke|ccall|fastcall|proc|endp)\\b"
+        },
+        {
+          "name": "support.function.builtin.fasm",
+          "match": "\\b(sizeof|lengthof|length|size)\\b"
         }
       ]
     },
