@@ -2,7 +2,7 @@
   "name": "fasm-highlight",
   "displayName": "FASM Highlight",
   "description": "Unofficial Flat Assembler (FASM) language support with syntax highlighting, hover intelligence, snippets, and build commands for Windows, Linux, and macOS",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "publisher": "kumar-047",
   "icon": "icon.png",
   "engines": {
