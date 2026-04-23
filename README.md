@@ -6,7 +6,7 @@ FASM Highlight is an unofficial Flat Assembler language support extension for VS
 
 - FASM language registration for `.asm` and `.inc`
 - syntax highlighting for instructions, directives, registers, and preprocessor keywords
-- hover intelligence for instructions, registers, directives, data directives, and size specifiers
+- hover for instructions, registers, directives, data directives, and size specifiers
 - bundled optional theme: `FASM Workshop Dark`
 - snippets for Windows (PE32/PE64), Linux (ELF32/ELF64), macOS (Mach-O64), and object file templates
 - language configuration for comments, brackets, and folding
@@ -20,6 +20,10 @@ FASM Highlight is an unofficial Flat Assembler language support extension for VS
 - compiler output is written to the `FASM` output channel
 - compiler path and limits are configurable in settings
 - output format detection covers PE, PE64, ELF, ELF64, MZ, Mach-O, COFF, MS COFF, MS64 COFF, and binary
+
+## Requirements
+
+To use the build commands (`FASM: Build` and `FASM: Build and Run`), the Flat Assembler (`fasm` or `fasm.exe`) must be installed. Ensure it is accessible via your system `PATH` or configure the exact path using the `fasm.compilerPath` setting.
 
 ## Configuration
 
@@ -39,14 +43,6 @@ On Linux and macOS, the compiler path defaults to `fasm` (looked up from PATH).
 - **Windows**: Full support. Default compiler path, PE build/run, Win32/Win64 snippets.
 - **Linux**: Build and run support for ELF executables. Snippets for ELF32, ELF64, and ELF object files.
 - **macOS**: Build target detection for Mach-O format. Snippet template provided (requires fasmg or fasm2 include packages for Mach-O output).
-
-## Examples
-
-The repository includes example programs in `examples/`:
-
-- `hello_win32.asm`
-- `calculator.asm`
-- `snake.asm`
 
 ## Theme
 
@@ -86,7 +82,7 @@ If you want to add your own personal style, override fonts, or adjust the richne
 ## Development
 
 ```powershell
-cd flat-assembler-extetion
+cd fasm-highlight
 npm install
 npm run compile
 ```
@@ -102,8 +98,15 @@ This extension targets FASM 1.73 (covers versions 1.73.32 through 1.73.35).
 ## Notes
 
 - `src/` is the editable TypeScript source
-- `out/` contains generated JavaScript
 - hover data references the FASM 1.73 Programmer's Manual with specific section citations
+
+## Known Issues
+
+Please report any bugs, missing instructions, or feature requests on the repository's Issues page.
+
+## Release Notes
+
+See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
 
 ## License
 
