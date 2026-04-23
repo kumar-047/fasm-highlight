@@ -18,17 +18,17 @@ Current implemented areas:
 - build command
 - build-and-run command
 
-Do not describe hover support, real diagnostics, or full cross-platform support as implemented unless the code actually provides them.
+Do not describe real diagnostics or full cross-platform support as implemented unless the code actually provides them. Hover support is currently implemented via `src/language/hoverProvider.ts`.
 
 ## Main Source Roots
 
 Read these paths first when relevant:
 
 - `D:\Projects\test2\flat-assembler-extetion`
-- `D:\Projects\test2\fasm-full`
+- `D:\Projects\test2\fasm-official-repos`
 
 Use `flat-assembler-extetion` for implementation truth.
-Use `fasm-full` for local FASM syntax, examples, packaging references, and toolchain behavior research.
+Use `fasm-official-repos` for local FASM syntax, examples, packaging references, and toolchain behavior research.
 
 ## Before You Edit
 

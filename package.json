@@ -1,8 +1,8 @@
 {
   "name": "fasm-highlight",
   "displayName": "FASM Highlight",
-  "description": "Unofficial Flat Assembler (FASM) language support with syntax highlighting, snippets, and basic build commands",
-  "version": "0.1.1",
+  "description": "Unofficial Flat Assembler (FASM) language support with syntax highlighting, hover intelligence, snippets, and build commands for Windows, Linux, and macOS",
+  "version": "0.2.0",
   "publisher": "kumar-047",
   "icon": "icon.png",
   "engines": {
@@ -22,6 +22,9 @@
     "asm"
   ],
 
+  "activationEvents": [
+    "onLanguage:fasm"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "languages": [
@@ -92,8 +95,8 @@
       "properties": {
         "fasm.compilerPath": {
           "type": "string",
-          "default": "C:\\fasmw17332\\fasm.exe",
-          "description": "Path to the FASM compiler executable. The default value is Windows-specific."
+          "default": "C:\\fasmw17335\\fasm.exe",
+          "description": "Path to the FASM compiler executable. On Windows, defaults to C:\\fasmw17335\\fasm.exe. On Linux/macOS, defaults to 'fasm' from PATH."
         },
         "fasm.memoryLimit": {
           "type": "number",

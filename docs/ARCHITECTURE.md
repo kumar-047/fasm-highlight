@@ -11,6 +11,9 @@ Main files:
 - `package.json`
 - `src/extension.ts`
 - `src/fasmCompiler.ts`
+- `src/compiler/buildTarget.ts`
+- `src/language/hoverProvider.ts`
+- `src/data/fasmReferenceData.ts`
 - `syntaxes/fasm.tmLanguage.json`
 - `language-configuration.json`
 - `snippets/fasm.json`

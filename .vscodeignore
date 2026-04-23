@@ -9,3 +9,9 @@ vsc-extension-quickstart.md
 **/*.map
 **/*.ts
 node_modules/**
+docs/**
+AI_INSTRUCTIONS.md
+FASM.pdf
+fasm and where it is.txt
+*.vsix
+examples/*.exe

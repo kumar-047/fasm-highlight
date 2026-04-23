@@ -63,22 +63,47 @@ export function createBuildPlan(document: vscode.TextDocument): BuildPlan {
     };
 }
 
+type OutputFormat = 'pe' | 'elf' | 'macho' | 'mz' | 'coff' | 'binary' | 'unknown';
+
 function inferOutputPath(sourcePath: string, sourceText: string): string | undefined {
     const basePath = sourcePath.replace(/\.[^.]+$/, '');
+    const format = detectFormat(sourceText);
 
-    if (hasFormatDirective(sourceText, 'PE') || hasFormatDirective(sourceText, 'PE64') || hasFormatDirective(sourceText, 'MZ')) {
-        return `${basePath}.exe`;
+    switch (format) {
+        case 'pe':
+        case 'mz':
+            return `${basePath}.exe`;
+        case 'elf':
+        case 'macho':
+            return basePath;
+        case 'coff':
+            return process.platform === 'win32' ? `${basePath}.obj` : `${basePath}.o`;
+        case 'binary':
+        case 'unknown':
+            return undefined;
     }
+}
 
+function detectFormat(sourceText: string): OutputFormat {
+    if (hasFormatDirective(sourceText, 'PE') || hasFormatDirective(sourceText, 'PE64')) {
+        return 'pe';
+    }
+    if (hasFormatDirective(sourceText, 'MZ')) {
+        return 'mz';
+    }
     if (hasFormatDirective(sourceText, 'ELF') || hasFormatDirective(sourceText, 'ELF32') || hasFormatDirective(sourceText, 'ELF64')) {
-        return basePath;
+        return 'elf';
     }
-
     if (hasFormatDirective(sourceText, 'MACHO') || hasFormatDirective(sourceText, 'MACHO64')) {
-        return basePath;
+        return 'macho';
     }
-
-    return undefined;
+    if (hasFormatDirective(sourceText, 'COFF') || hasFormatDirective(sourceText, 'MS COFF') || hasFormatDirective(sourceText, 'MS64 COFF')) {
+        return 'coff';
+    }
+    if (hasFormatDirective(sourceText, 'binary')) {
+        return 'binary';
+    }
+    return 'unknown';
 }
 
 function hasFormatDirective(sourceText: string, formatName: string): boolean {
@@ -88,6 +113,11 @@ function hasFormatDirective(sourceText: string, formatName: string): boolean {
 
 function isRunnableOnCurrentPlatform(outputPath: string): boolean {
     const extension = path.extname(outputPath).toLowerCase();
+
+    // Object files are never directly runnable
+    if (extension === '.obj' || extension === '.o') {
+        return false;
+    }
 
     if (process.platform === 'win32') {
         return extension === '.exe';

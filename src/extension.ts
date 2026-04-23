@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { createBuildPlan } from './compiler/buildTarget';
 import { FasmCompiler } from './fasmCompiler';
+import { FasmHoverProvider } from './language/hoverProvider';
 
 let outputChannel: vscode.OutputChannel;
 let fasmCompiler: FasmCompiler;
@@ -12,6 +13,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     outputChannel = vscode.window.createOutputChannel('FASM');
     fasmCompiler = new FasmCompiler(outputChannel);
+    const hoverProvider = vscode.languages.registerHoverProvider('fasm', new FasmHoverProvider());
 
     const buildCommand = vscode.commands.registerCommand('fasm.build', async () => {
         const editor = vscode.window.activeTextEditor;
@@ -91,7 +93,7 @@ export function activate(context: vscode.ExtensionContext) {
         await fasmCompiler.run(buildPlan.outputPath);
     });
 
-    context.subscriptions.push(buildCommand, buildAndRunCommand, outputChannel);
+    context.subscriptions.push(buildCommand, buildAndRunCommand, hoverProvider, outputChannel);
 }
 
 export function deactivate() {

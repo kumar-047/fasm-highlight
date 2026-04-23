@@ -11,7 +11,8 @@ export class FasmCompiler {
 
     async compile(sourcePath: string, outputPath?: string): Promise<boolean> {
         const config = vscode.workspace.getConfiguration('fasm');
-        const compilerPath = config.get<string>('compilerPath', 'C:\\fasmw17332\\fasm.exe');
+        const defaultPath = process.platform === 'win32' ? 'C:\\fasmw17335\\fasm.exe' : 'fasm';
+        const compilerPath = config.get<string>('compilerPath', defaultPath);
         const memoryLimit = config.get<number>('memoryLimit', 65536);
         const passesLimit = config.get<number>('passesLimit', 100);
         const generateSymbols = config.get<boolean>('generateSymbols', false);
@@ -72,7 +73,7 @@ export class FasmCompiler {
                 }
 
                 this.outputChannel.appendLine(`Build failed with exit code ${code}`);
-                this.parseErrors(stdout + stderr, sourcePath);
+                this.parseErrors(stdout + stderr);
                 resolve(false);
             });
         });
@@ -105,22 +106,38 @@ export class FasmCompiler {
         });
     }
 
-    private parseErrors(output: string, sourcePath: string) {
+    private parseErrors(output: string) {
         this.outputChannel.appendLine('');
         this.outputChannel.appendLine('Errors:');
 
-        const errorRegex = /^(.+?)\s+\[(\d+)\]\s+(.+)$/gm;
-        let match: RegExpExecArray | null;
+        // FASM error format is multi-line:
+        //   file [line]:
+        //           instruction
+        //   error: message.
+        const locationRegex = /^(.+?)\s+\[(\d+)\]/gm;
+        const errorRegex = /error:\s*(.+)/gi;
 
-        while ((match = errorRegex.exec(output)) !== null) {
-            const [, file, line, message] = match;
-            const displayFile = file || sourcePath;
-            this.outputChannel.appendLine(`  ${displayFile}:${line} ${message}`);
+        // Collect all file:line references
+        const locations: Array<{ file: string; line: string }> = [];
+        let match: RegExpExecArray | null;
+        while ((match = locationRegex.exec(output)) !== null) {
+            locations.push({ file: match[1].trim(), line: match[2] });
         }
 
-        const generalErrorRegex = /error:(.+)/gi;
-        while ((match = generalErrorRegex.exec(output)) !== null) {
-            this.outputChannel.appendLine(`  ${match[1].trim()}`);
+        // Collect all error messages
+        const errors: string[] = [];
+        while ((match = errorRegex.exec(output)) !== null) {
+            errors.push(match[1].trim());
+        }
+
+        // Pair the last location with the error message
+        if (locations.length > 0 && errors.length > 0) {
+            const loc = locations[locations.length - 1];
+            this.outputChannel.appendLine(`  ${loc.file}:${loc.line} ${errors[0]}`);
+        } else {
+            for (const err of errors) {
+                this.outputChannel.appendLine(`  ${err}`);
+            }
         }
     }
 }

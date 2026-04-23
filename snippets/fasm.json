@@ -195,5 +195,89 @@
       "\tloop @b$0"
     ],
     "description": "Loop construct using loop instruction"
+  },
+  "Linux 32-bit Program": {
+    "prefix": "linux32",
+    "body": [
+      "format ELF executable 3",
+      "",
+      "segment readable executable",
+      "",
+      "entry start",
+      "",
+      "start:",
+      "\t${1:; Your code here}",
+      "\t",
+      "\t; Exit program",
+      "\tmov eax,1\t\t; sys_exit",
+      "\txor ebx,ebx\t\t; exit code 0",
+      "\tint 0x80",
+      "",
+      "segment readable writeable",
+      "",
+      "\t${2:; Data here}",
+      "$0"
+    ],
+    "description": "Linux 32-bit ELF executable template (int 0x80 syscalls)"
+  },
+  "macOS 64-bit Program": {
+    "prefix": "macos64",
+    "body": [
+      "; Note: Mach-O format requires fasmg or fasm2 include packages",
+      "format MachO64 executable",
+      "",
+      "segment '__TEXT' readable executable",
+      "",
+      "entry $",
+      "",
+      "\t${1:; Your code here}",
+      "\t",
+      "\t; Exit program",
+      "\tmov rax,0x2000001\t; sys_exit (macOS class 2)",
+      "\txor rdi,rdi\t\t; exit code 0",
+      "\tsyscall",
+      "$0"
+    ],
+    "description": "macOS 64-bit Mach-O executable template (requires fasmg)"
+  },
+  "ELF Object File": {
+    "prefix": "elfobj",
+    "body": [
+      "format ELF",
+      "",
+      "section '.text' executable",
+      "",
+      "public ${1:_start} as '${2:_start}'",
+      "",
+      "${1:_start}:",
+      "\t${3:; Your code here}",
+      "\tret",
+      "",
+      "section '.data' writeable",
+      "",
+      "\t${4:; Data here}",
+      "$0"
+    ],
+    "description": "ELF object file template for linking"
+  },
+  "MS COFF Object File": {
+    "prefix": "coffobj",
+    "body": [
+      "format MS COFF",
+      "",
+      "section '.text' code readable executable",
+      "",
+      "public ${1:_main} as '${2:_main}'",
+      "",
+      "${1:_main}:",
+      "\t${3:; Your code here}",
+      "\tret",
+      "",
+      "section '.data' data readable writeable",
+      "",
+      "\t${4:; Data here}",
+      "$0"
+    ],
+    "description": "MS COFF object file template for linking with MSVC/MinGW"
   }
 }
