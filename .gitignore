@@ -5,3 +5,11 @@ out/
 # Local/reference artifacts that do not need normal source control updates
 fasm and where it is.txt
 FASM.pdf
+
+# Local IDE and AI documentation folders
+.vscode/
+.docs/
+.examples/
+docs/
+examples/
+AI_INSTRUCTIONS.md
