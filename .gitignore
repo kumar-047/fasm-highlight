@@ -3,6 +3,11 @@ out/
 coverage/
 *.vsix
 
+# Secrets
+.env
+.env.*
+!.env.example
+
 # Local/reference artifacts that do not need normal source control updates
 fasm and where it is.txt
 FASM.pdf

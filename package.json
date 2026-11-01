@@ -244,7 +244,7 @@
     "test": "jest",
     "check": "npm run typecheck && npm run lint && npm test",
     "package": "vsce package",
-    "publish:openvsx": "npx ovsx publish"
+    "publish:openvsx": "node scripts/publish-openvsx.js"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

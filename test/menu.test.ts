@@ -76,6 +76,22 @@ describe('documentation', () => {
     });
 });
 
+describe('secrets', () => {
+    const lines = (file: string) => fs.readFileSync(path.join(ROOT, file), 'utf8').split(/\r?\n/);
+
+    test('git ignores .env but keeps the example', () => {
+        expect(lines('.gitignore')).toEqual(expect.arrayContaining(['.env', '.env.*', '!.env.example']));
+    });
+
+    test('the extension package leaves out every .env file', () => {
+        expect(lines('.vscodeignore')).toEqual(expect.arrayContaining(['.env', '.env.*']));
+    });
+
+    test('the example file holds no token', () => {
+        expect(lines('.env.example')).toContain('OVSX_PAT=');
+    });
+});
+
 describe('settings', () => {
     test.each(['fasm.compilerPath', 'fasm.format.commentColumn', 'fasm.format.operandColumn', 'fasm.format.spaceAfterComma', 'fasm.format.maxBlankLines'])('%s exists', (setting) => {
         expect(contributes.configuration.properties[setting]).toBeDefined();

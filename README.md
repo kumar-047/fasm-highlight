@@ -144,6 +144,8 @@ npm run compile
 npm run check
 ```
 
+To publish, copy `.env.example` to `.env`, add your Open VSX token, and run `npm run publish:openvsx`. Git ignores `.env`.
+
 Press `F5` in your editor to try the extension in a test window. Grammar word lists live in `src/grammar`, and `npm run compile` regenerates `syntaxes/fasm.tmLanguage.json`.
 
 ## License

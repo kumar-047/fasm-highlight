@@ -22,3 +22,5 @@ out/grammar/constants/grammarPatterns.js
 jest.config.js
 eslint.config.mjs
 **/tsconfig.*.json
+.env
+.env.*
