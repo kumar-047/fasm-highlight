@@ -1,6 +1,6 @@
 {
   "$schema": "vscode://schemas/color-theme",
-  "name": "FASM Workshop Dark",
+  "name": "FASM Colors",
   "type": "dark",
   "colors": {
     "editor.background": "#111417",
@@ -48,18 +48,10 @@
     },
     {
       "scope": [
-        "constant.character.escape.fasm"
-      ],
-      "settings": {
-        "foreground": "#ffd78a",
-        "fontStyle": "bold"
-      }
-    },
-    {
-      "scope": [
         "entity.name.label.fasm",
         "entity.name.label.local.fasm",
-        "entity.name.label.anonymous.fasm"
+        "entity.name.label.anonymous.fasm",
+        "keyword.control.label-reference.fasm"
       ],
       "settings": {
         "foreground": "#7ec9c3",
@@ -97,7 +89,10 @@
         "keyword.control.directive.addressing.fasm",
         "keyword.control.directive.conditional.fasm",
         "keyword.control.directive.linkage.fasm",
-        "keyword.control.directive.other.fasm"
+        "keyword.control.directive.other.fasm",
+        "keyword.control.directive.repeat.fasm",
+        "keyword.control.directive.statement.fasm",
+        "keyword.other.format.fasm"
       ],
       "settings": {
         "foreground": "#c792ea",
@@ -106,8 +101,7 @@
     },
     {
       "scope": [
-        "support.function.call-convention.fasm",
-        "support.function.builtin.fasm"
+        "support.function.macro-helper.fasm"
       ],
       "settings": {
         "foreground": "#5fb3b3",
@@ -116,17 +110,20 @@
     },
     {
       "scope": [
-        "keyword.mnemonic.data-movement.fasm",
-        "keyword.mnemonic.arithmetic.fasm",
-        "keyword.mnemonic.logical.fasm",
-        "keyword.mnemonic.control-flow.fasm",
-        "keyword.mnemonic.string.fasm",
-        "keyword.mnemonic.flag.fasm",
-        "keyword.mnemonic.misc.fasm",
-        "keyword.mnemonic.fpu.fasm",
-        "keyword.mnemonic.mmx.fasm",
-        "keyword.mnemonic.sse.fasm",
-        "keyword.mnemonic.avx.fasm"
+        "keyword.other.mnemonic.data-movement.fasm",
+        "keyword.other.mnemonic.arithmetic.fasm",
+        "keyword.other.mnemonic.logical.fasm",
+        "keyword.other.mnemonic.control-flow.fasm",
+        "keyword.other.mnemonic.string.fasm",
+        "keyword.other.mnemonic.flag.fasm",
+        "keyword.other.mnemonic.misc.fasm",
+        "keyword.other.mnemonic.fpu.fasm",
+        "keyword.other.mnemonic.mmx.fasm",
+        "keyword.other.mnemonic.sse.fasm",
+        "keyword.other.mnemonic.avx.fasm",
+        "keyword.other.mnemonic.conditional.fasm",
+        "keyword.other.mnemonic.system.fasm",
+        "keyword.other.mnemonic.extension.fasm"
       ],
       "settings": {
         "foreground": "#ff8f6b",
@@ -148,7 +145,10 @@
         "variable.language.register.ymm.fasm",
         "variable.language.register.zmm.fasm",
         "variable.language.register.opmask.fasm",
-        "variable.language.register.bounds.fasm"
+        "variable.language.register.bounds.fasm",
+        "variable.language.register.instruction-pointer.fasm",
+        "variable.language.register.test.fasm",
+        "variable.language.register.amx.fasm"
       ],
       "settings": {
         "foreground": "#7db2d9"
@@ -156,19 +156,11 @@
     },
     {
       "scope": [
-        "variable.other.constant.fasm"
-      ],
-      "settings": {
-        "foreground": "#f07178",
-        "fontStyle": "bold"
-      }
-    },
-    {
-      "scope": [
         "constant.numeric.hex.fasm",
         "constant.numeric.binary.fasm",
         "constant.numeric.octal.fasm",
-        "constant.numeric.decimal.fasm"
+        "constant.numeric.decimal.fasm",
+        "constant.numeric.float.fasm"
       ],
       "settings": {
         "foreground": "#f7c76b"

@@ -1,0 +1,19 @@
+// Section numbers from the flat assembler 1.73 manual (FASM.pdf). test/manual.test.ts compares them with the PDF.
+export const MANUAL_SECTIONS = [
+    '1.1', '1.1.1', '1.1.2', '1.1.3', '1.1.4', '1.1.5', '1.1.6', '1.1.7',
+    '1.2', '1.2.1', '1.2.2', '1.2.3', '1.2.4', '1.2.5', '1.2.6',
+    '2.1', '2.1.1', '2.1.2', '2.1.3', '2.1.4', '2.1.5', '2.1.6', '2.1.7', '2.1.8', '2.1.9', '2.1.10',
+    '2.1.11', '2.1.12', '2.1.13', '2.1.14', '2.1.15', '2.1.16', '2.1.17', '2.1.18', '2.1.19', '2.1.20',
+    '2.1.21', '2.1.22', '2.1.23', '2.1.24', '2.1.25',
+    '2.2', '2.2.1', '2.2.2', '2.2.3', '2.2.4', '2.2.5', '2.2.6',
+    '2.3', '2.3.1', '2.3.2', '2.3.3', '2.3.4', '2.3.5', '2.3.6', '2.3.7',
+    '2.4', '2.4.1', '2.4.2', '2.4.3', '2.4.4'
+] as const;
+
+export type ManualSection = (typeof MANUAL_SECTIONS)[number];
+
+const MANUAL_BASE_URL = 'https://flatassembler.net/docs.php?article=manual';
+
+export function manualUrl(section: ManualSection): string {
+    return `${MANUAL_BASE_URL}#${section}`;
+}

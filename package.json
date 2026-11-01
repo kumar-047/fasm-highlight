@@ -1,7 +1,7 @@
 {
   "name": "fasm-highlight",
   "displayName": "FASM Highlight",
-  "description": "Unofficial Flat Assembler (FASM) language support with syntax highlighting, hover intelligence, snippets, and build commands for Windows, Linux, and macOS",
+  "description": "Syntax highlighting, hover cards, snippets and build commands for flat assembler (fasm). Unofficial.",
   "version": "0.2.1",
   "publisher": "kumar-047",
   "icon": "icon.png",
@@ -19,9 +19,9 @@
     "assembler",
     "x86",
     "x86-64",
-    "asm"
+    "asm",
+    "flat assembler"
   ],
-
   "activationEvents": [
     "onLanguage:fasm"
   ],
@@ -55,9 +55,9 @@
     ],
     "themes": [
       {
-        "label": "FASM Workshop Dark",
+        "label": "FASM Colors",
         "uiTheme": "vs-dark",
-        "path": "./themes/fasm-workshop-dark-color-theme.json"
+        "path": "./themes/fasm-colors-color-theme.json"
       }
     ],
     "snippets": [
@@ -69,12 +69,12 @@
     "commands": [
       {
         "command": "fasm.build",
-        "title": "FASM: Build",
+        "title": "Build",
         "category": "FASM"
       },
       {
         "command": "fasm.buildAndRun",
-        "title": "FASM: Build and Run",
+        "title": "Build and Run",
         "category": "FASM"
       }
     ],
@@ -95,8 +95,8 @@
       "properties": {
         "fasm.compilerPath": {
           "type": "string",
-          "default": "C:\\fasmw17335\\fasm.exe",
-          "description": "Path to the FASM compiler executable. On Windows, defaults to C:\\fasmw17335\\fasm.exe. On Linux/macOS, defaults to 'fasm' from PATH."
+          "default": "",
+          "description": "Path to the fasm executable. Leave empty to use C:\\fasmw17335\\fasm.exe on Windows and fasm from PATH on other systems."
         },
         "fasm.memoryLimit": {
           "type": "number",
@@ -118,20 +118,36 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "lint": "tsc --noEmit -p ./",
-    "compile": "tsc -p ./",
+    "compile": "tsc -p ./ && node scripts/generate-grammar.js",
     "watch": "tsc -watch -p ./",
-    "package": "vsce package"
+    "typecheck": "tsc -p ./ --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "lint": "eslint src test scripts",
+    "test": "jest",
+    "check": "npm run typecheck && npm run lint && npm test",
+    "package": "vsce package",
+    "publish:openvsx": "npx ovsx publish"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@types/jest": "^29.5.14",
     "@types/node": "^18.0.0",
     "@types/vscode": "^1.75.0",
     "@vscode/vsce": "^2.22.0",
-    "typescript": "^5.0.0"
+    "eslint": "^9.39.5",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.4.15",
+    "typescript": "^5.0.0",
+    "typescript-eslint": "^8.72.1",
+    "vscode-oniguruma": "^2.0.1",
+    "vscode-textmate": "^9.3.2"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/kumar-047/fasm-highlight"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "homepage": "https://github.com/kumar-047/fasm-highlight#readme",
+  "bugs": {
+    "url": "https://github.com/kumar-047/fasm-highlight/issues"
+  }
 }

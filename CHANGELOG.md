@@ -2,6 +2,39 @@
 
 All notable changes to the `fasm-highlight` extension are documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- all 1,931 instructions in fasm 1.73.35, and the registers that were missing, such as `rip`, `eip`, `xmm16-31` and `ymm16-31`
+- float, `$FF`, `10d`, `17q` and `1_000` number highlighting, `@b`, `@f` and `@r` references, and section names
+- format keywords on `format`, `section`, `segment` and `data` lines
+- hover cards for 44 more instructions, and basic hover cards for all other instructions and registers
+- Jest, ESLint and typecheck scripts
+
+### Changed
+
+- grammar word lists are now generated from one data table
+- renamed the `keyword.mnemonic` scopes to `keyword.other.mnemonic`
+- renamed the theme to `FASM Colors`
+- hover categories reduced to 7, with manual links built in one place
+- split the build commands into their own module
+
+### Fixed
+
+- strings now end at the end of the line, so a missing quote no longer colours the following lines
+- removed words that aren't fasm 1 keywords, such as `endif`, `ifdef` and `offset`, and the rule that coloured every all-caps word
+- `and`, `or`, `xor`, `not`, `shl` and `shr` are now coloured as operators inside expressions
+- corrected wrong manual sections, the `macro` and `struc` hover syntax, and the `fs` and `gs` hover text
+- PE platform notes now appear for plain `format PE`
+- the compiler path no longer defaults to a Windows path on Linux and macOS
+
+## [0.2.1] - 2026-04-24
+
+### Changed
+
+- updated the README
+
 ## [0.2.0] - 2026-04-23
 
 ### Fixed

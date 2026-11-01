@@ -13,6 +13,30 @@ Checked on 2026-11-01 against the extension code, the official repos, flatassemb
 5. Support every architecture FASM can assemble for (section 5).
 6. Add one side panel with three tabs, opened by a gear icon on the current FASM file.
 
+## Publishing and editors
+
+The extension is published on **Open VSX**, for Antigravity and other VS Code-compatible editors, not only VS Code.
+
+- [x] Add a `publish:openvsx` script and the `homepage`, `bugs`, license and repository fields it relies on.
+- [ ] Use only the standard extension API, and test any newer feature in Antigravity as well as VS Code, because these editors may be on older VS Code versions.
+- [ ] Have a fallback for anything newer. `secondarySidebar` is the first case: the panel must still work from the activity bar.
+- [ ] Don't rely on anything exclusive to the Microsoft Marketplace, including its sponsor field, until it's confirmed on Open VSX.
+
+## Findings from the fasmg manual
+
+Checked against the [fasmg manual](https://flatassembler.net/docs.php?article=fasmg_manual) and real fasmg `g.l8vn` output. fasm 2 runs on fasmg and has no manual of its own, so it follows these rules too.
+
+- **Blocks:** `end macro`, `end if`, `end match`, `end rawmatch`, `end struc`, `end namespace`, `end repeat`, `end while`, `end iterate`, `end irpv`, `end postpone`, `end virtual` and `end calminstruction`. Folding needs these pairs.
+- **Case:** names are case-sensitive unless marked, as in `name?`.
+- **CALM:** commands such as `arrange`, `jyes` and `jno` should only be coloured inside `calminstruction` blocks.
+- **Position:** instructions are recognised as the first word, or the second word after a label, which could replace colouring by word list for fasmg.
+- **Line continuation:** a line ending in `\` continues, so the next line's first word isn't always a new statement.
+- **Include scan:** must handle `macro name?`, `name!`, `name:`, and the catch-all `?` and `??` macros.
+- **Output:** with no format extension, `ok.asm` builds to `ok`.
+- **Hover links:** fasmg sections are numbered 0 to 17 and need their own list. Whether links can jump to a section is unchecked.
+- **Errors:** one `file [line]:` block per level of the macro stack, then `Processed:` and `Error:` lines. `-e5` reports several errors in one run. The current parser would read `macro x [1]` as a file location, so fasmg needs its own.
+- **Still to read:** sections 16 and 17 of the manual, before CALM support.
+
 ## What this changes in CHANGE_LIST.md
 
 - **Scope:** "FASM 1 only" no longer applies.
@@ -244,7 +268,7 @@ Each stage is useful alone. The panel comes after the rest so it has real featur
 - The panel, secondary sidebar registration and workspace-level token colours in a running extension
 - The double `FASM:` prefix on screen (seen in the manifest only)
 - The Marketplace sponsor field, which I didn't check in the docs
-- fasmg error output, and anything on Linux or macOS
+- Anything on Linux or macOS, and anything in Antigravity
 - Semantic tokens for instructions in a running extension
 - Assembling the 8051, AVR, JVM, WebAssembly and AArch64 examples
 - FASMARM's syntax, command name and license, and the community packages themselves

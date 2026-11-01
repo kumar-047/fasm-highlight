@@ -2,6 +2,10 @@ import * as cp from 'child_process';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
+export function defaultCompilerPath(platform: NodeJS.Platform): string {
+    return platform === 'win32' ? 'C:\\fasmw17335\\fasm.exe' : 'fasm';
+}
+
 export class FasmCompiler {
     private outputChannel: vscode.OutputChannel;
 
@@ -11,8 +15,7 @@ export class FasmCompiler {
 
     async compile(sourcePath: string, outputPath?: string): Promise<boolean> {
         const config = vscode.workspace.getConfiguration('fasm');
-        const defaultPath = process.platform === 'win32' ? 'C:\\fasmw17335\\fasm.exe' : 'fasm';
-        const compilerPath = config.get<string>('compilerPath', defaultPath);
+        const compilerPath = config.get<string>('compilerPath', '') || defaultCompilerPath(process.platform);
         const memoryLimit = config.get<number>('memoryLimit', 65536);
         const passesLimit = config.get<number>('passesLimit', 100);
         const generateSymbols = config.get<boolean>('generateSymbols', false);
@@ -36,26 +39,26 @@ export class FasmCompiler {
             this.outputChannel.appendLine(`Command: "${compilerPath}" ${args.join(' ')}`);
             this.outputChannel.appendLine('');
 
-            const process = cp.spawn(compilerPath, args, {
+            const child = cp.spawn(compilerPath, args, {
                 cwd: path.dirname(sourcePath)
             });
 
             let stdout = '';
             let stderr = '';
 
-            process.stdout.on('data', (data) => {
+            child.stdout.on('data', (data) => {
                 const text = data.toString();
                 stdout += text;
                 this.outputChannel.append(text);
             });
 
-            process.stderr.on('data', (data) => {
+            child.stderr.on('data', (data) => {
                 const text = data.toString();
                 stderr += text;
                 this.outputChannel.append(text);
             });
 
-            process.on('error', (error) => {
+            child.on('error', (error) => {
                 this.outputChannel.appendLine(`Error: ${error.message}`);
                 this.outputChannel.appendLine('');
                 this.outputChannel.appendLine('Make sure FASM is installed and the compiler path is correct.');
@@ -63,7 +66,7 @@ export class FasmCompiler {
                 resolve(false);
             });
 
-            process.on('close', (code) => {
+            child.on('close', (code) => {
                 this.outputChannel.appendLine('');
 
                 if (code === 0) {
@@ -81,24 +84,24 @@ export class FasmCompiler {
 
     async run(exePath: string): Promise<void> {
         return new Promise<void>((resolve) => {
-            const process = cp.spawn(exePath, [], {
+            const child = cp.spawn(exePath, [], {
                 cwd: path.dirname(exePath)
             });
 
-            process.stdout.on('data', (data) => {
+            child.stdout.on('data', (data) => {
                 this.outputChannel.append(data.toString());
             });
 
-            process.stderr.on('data', (data) => {
+            child.stderr.on('data', (data) => {
                 this.outputChannel.append(data.toString());
             });
 
-            process.on('error', (error) => {
+            child.on('error', (error) => {
                 this.outputChannel.appendLine(`Error running program: ${error.message}`);
                 resolve();
             });
 
-            process.on('close', (code) => {
+            child.on('close', (code) => {
                 this.outputChannel.appendLine('');
                 this.outputChannel.appendLine(`Program exited with code ${code}`);
                 resolve();

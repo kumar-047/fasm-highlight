@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
-import { HoverEntry, PlatformContext, hoverEntries } from '../data/fasmReferenceData';
+import { HoverEntry, PlatformContext, findHoverEntry } from '../data/hoverEntries';
+import { manualUrl } from '../data/manual';
 
 export class FasmHoverProvider implements vscode.HoverProvider {
     provideHover(document: vscode.TextDocument, position: vscode.Position): vscode.Hover | undefined {
@@ -14,17 +15,17 @@ export class FasmHoverProvider implements vscode.HoverProvider {
             return undefined;
         }
 
-        const entry = hoverEntries.get(lookupToken);
+        const entry = findHoverEntry(lookupToken);
         if (!entry) {
             return undefined;
         }
 
-        const platformContext = detectPlatformContext(document);
+        const platformContext = detectPlatformContext(document.getText());
         return new vscode.Hover(buildHoverMarkdown(entry, platformContext), range);
     }
 }
 
-function normalizeHoverToken(token: string): string | undefined {
+export function normalizeHoverToken(token: string): string | undefined {
     if (token === '@@' || /^@[bfr]$/i.test(token)) {
         return undefined;
     }
@@ -33,7 +34,7 @@ function normalizeHoverToken(token: string): string | undefined {
     return trimmed.toLowerCase();
 }
 
-function buildHoverMarkdown(entry: HoverEntry, platformContext: PlatformContext): vscode.MarkdownString {
+export function buildHoverMarkdown(entry: HoverEntry, platformContext: PlatformContext): vscode.MarkdownString {
     const markdown = new vscode.MarkdownString(undefined, true);
     markdown.appendMarkdown(`**${entry.symbol}**`);
     markdown.appendMarkdown(`  \n*${entry.category}*`);
@@ -64,18 +65,16 @@ function buildHoverMarkdown(entry: HoverEntry, platformContext: PlatformContext)
         markdown.appendCodeblock(entry.example, 'fasm');
     }
 
-    if (entry.referenceSource) {
-        markdown.appendMarkdown(`\n\n**Local Reference**\n- \`${entry.referenceSource}\``);
+    if (entry.section) {
+        markdown.appendMarkdown(`\n\n[Manual section ${entry.section}](${manualUrl(entry.section)})`);
     }
 
     markdown.isTrusted = false;
     return markdown;
 }
 
-function detectPlatformContext(document: vscode.TextDocument): PlatformContext {
-    const text = document.getText();
-
-    if (/^\s*format\s+PE64?\b/im.test(text)) {
+export function detectPlatformContext(text: string): PlatformContext {
+    if (/^\s*format\s+PE(?:64)?\b/im.test(text)) {
         return 'pe';
     }
 

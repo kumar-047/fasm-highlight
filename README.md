@@ -7,7 +7,7 @@ FASM Highlight is an unofficial Flat Assembler language support extension for VS
 - FASM language registration for `.asm` and `.inc`
 - syntax highlighting for instructions, directives, registers, and preprocessor keywords
 - hover for instructions, registers, directives, data directives, and size specifiers
-- bundled optional theme: `FASM Workshop Dark`
+- bundled optional theme: `FASM Colors`
 - snippets for Windows (PE32/PE64), Linux (ELF32/ELF64), macOS (Mach-O64), and object file templates
 - language configuration for comments, brackets, and folding
 - `FASM: Build`
@@ -53,7 +53,7 @@ The extension includes an optional dark theme tuned for assembly-heavy editing:
 - colors chosen to make data flow and control flow easier to scan in FASM source
 - rich typography (bold instructions/constants, italic directives/data types)
 
-You can enable it from the editor theme picker as `FASM Workshop Dark`.
+You can enable it from the editor theme picker as `FASM Colors`.
 
 ### Customizing Styles & Fonts
 
@@ -64,10 +64,10 @@ If you want to add your own personal style, override fonts, or adjust the richne
   "editor.fontFamily": "'Fira Code', Consolas, monospace",
   "editor.fontLigatures": true,
   "editor.tokenColorCustomizations": {
-    "[FASM Workshop Dark]": {
+    "[FASM Colors]": {
       "textMateRules": [
         {
-          "scope": "keyword.mnemonic",
+          "scope": "keyword.other.mnemonic",
           "settings": {
             "foreground": "#ffaa00",
             "fontStyle": "bold underline"
@@ -98,6 +98,8 @@ This extension targets FASM 1.73 (covers versions 1.73.32 through 1.73.35).
 ## Notes
 
 - `src/` is the editable TypeScript source
+- `syntaxes/fasm.tmLanguage.json` is generated from `src/data/symbols.ts` by `npm run compile`
+- `npm run check` runs the typecheck, ESLint and Jest
 - hover data references the FASM 1.73 Programmer's Manual with specific section citations
 
 ## Known Issues

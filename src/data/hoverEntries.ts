@@ -1,11 +1,23 @@
+import { ManualSection } from './manual';
+import { findSymbolGroup } from './symbols';
+
+export type HoverCategory =
+    | 'Instruction'
+    | 'Register'
+    | 'Directive'
+    | 'Preprocessor'
+    | 'Data'
+    | 'Format'
+    | 'Macro helper';
+
 export interface HoverEntry {
     readonly symbol: string;
-    readonly category: string;
+    readonly category: HoverCategory;
     readonly summary: string;
     readonly syntax?: string;
     readonly notes?: readonly string[];
     readonly example?: string;
-    readonly referenceSource?: string;
+    readonly section?: ManualSection;
     readonly platformNotes?: Partial<Record<PlatformContext, readonly string[]>>;
 }
 
@@ -14,7 +26,7 @@ export type PlatformContext = 'generic' | 'pe' | 'elf32' | 'elf64' | 'mz';
 const entries: HoverEntry[] = [
     {
         symbol: 'format',
-        category: 'Directive',
+        category: 'Format',
         summary: 'Selects the output format for the assembled file.',
         syntax: 'format binary|PE|PE64|ELF|ELF64|MZ|COFF|MS COFF|MS64 COFF ...',
         notes: [
@@ -22,15 +34,15 @@ const entries: HoverEntry[] = [
             'Default output format is flat binary. Each format has its own set of additional directives.'
         ],
         example: 'format PE GUI 4.0',
-        referenceSource: 'FASM 1.73 Manual, Section 2.4 — flatassembler.net/docs.php?article=manual#2.4'
+        section: '2.4'
     },
     {
         symbol: 'entry',
-        category: 'Directive',
+        category: 'Format',
         summary: 'Marks the program entry symbol for formats that support entry points.',
         syntax: 'entry start_label',
         example: 'entry start',
-        referenceSource: 'FASM 1.73 Manual, Section 2.4 — flatassembler.net/docs.php?article=manual#2.4',
+        section: '2.4',
         platformNotes: {
             pe: ['For PE output, entry sets the RVA of the program entry point.'],
             elf32: ['Common in executable ELF sources, though the surrounding format and layout decide the final binary structure.'],
@@ -39,316 +51,300 @@ const entries: HoverEntry[] = [
     },
     {
         symbol: 'include',
-        category: 'Preprocessor Directive',
+        category: 'Preprocessor',
         summary: 'Includes another source file before assembly continues.',
         syntax: "include 'file.inc'",
         notes: [
             'Typically used for macro packages, platform include files, and API declarations.'
         ],
         example: "include 'win32a.inc'",
-        referenceSource: 'FASM 1.73 Manual, Section 2.3 — flatassembler.net/docs.php?article=manual#2.3'
+        section: '2.3.1'
     },
     {
         symbol: 'section',
-        category: 'Directive',
+        category: 'Format',
         summary: 'Begins a named section in formatted output such as PE or ELF.',
         syntax: "section '.text' code readable executable",
-        referenceSource: 'FASM 1.73 Manual, Section 2.4 — flatassembler.net/docs.php?article=manual#2.4',
+        section: '2.4',
         platformNotes: {
             pe: ['PE sources commonly use named sections such as .text, .data, and .idata.'],
-            elf32: ['ELF examples often use segment, but section-based layouts are also valid in many FASM sources.'],
-            elf64: ['ELF64 examples in the local reference often prefer segment for compact executable samples.']
+            elf32: ['ELF examples often use segment, but section-based layouts are also valid in many FASM sources.']
         }
     },
     {
         symbol: 'segment',
-        category: 'Directive',
+        category: 'Format',
         summary: 'Begins a segment or section-like block depending on the output format.',
         syntax: 'segment readable executable',
-        referenceSource: 'FASM 1.73 Manual, Section 2.4 — flatassembler.net/docs.php?article=manual#2.4',
-        platformNotes: {
-            elf32: ['The local ELF example uses segment readable executable and segment readable writeable.'],
-            elf64: ['The local ELF64 example also uses segment blocks for code and writable data.']
-        }
+        section: '2.4'
     },
     {
         symbol: 'macro',
-        category: 'Preprocessor Directive',
+        category: 'Preprocessor',
         summary: 'Defines a macroinstruction expanded by the preprocessor.',
-        syntax: 'macro name [parameters] ... endm',
+        syntax: 'macro name [parameters] { ... }',
         notes: [
             'Use local inside the macro body when you need unique private symbols.'
         ],
         example: 'macro clear_reg reg { xor reg, reg }',
-        referenceSource: 'FASM 1.73 Manual, Section 2.3.3 — flatassembler.net/docs.php?article=manual#2.3.3'
+        section: '2.3.3'
     },
     {
         symbol: 'struc',
-        category: 'Preprocessor Directive',
+        category: 'Preprocessor',
         summary: 'Defines a labeled macroinstruction for structure-like layouts.',
-        syntax: 'struc NAME ... ends',
+        syntax: 'struc NAME [parameters] { ... }',
         example: 'struc POINT { .x dd ? ; .y dd ? }',
-        referenceSource: 'FASM 1.73 Manual, Section 2.3.4 — flatassembler.net/docs.php?article=manual#2.3.4'
+        section: '2.3.4'
     },
     {
         symbol: 'proc',
-        category: 'Macro / Calling Convention Helper',
+        category: 'Macro helper',
         summary: 'Common macro-based procedure declaration used by include packages.',
         syntax: 'proc Name [args]',
         notes: [
             'This is usually provided by include files such as win32a.inc or helper macro packages, not by the core assembler itself.'
         ],
-        referenceSource: 'FASM 1.73 Manual, Extended Macros — flatassembler.net/docs.php?article=manual#2.4.3',
         platformNotes: {
-            pe: ['In Win32-style sources this often comes from win32a.inc helper macros.'],
-            elf32: ['The local ELF dynamic examples also define proc as a macro helper inside proc32.inc.']
+            pe: ['In Win32-style sources this often comes from win32a.inc helper macros.']
         }
     },
     {
         symbol: 'endp',
-        category: 'Macro / Calling Convention Helper',
+        category: 'Macro helper',
         summary: 'Closes a proc block created by macro packages.',
         syntax: 'endp',
         notes: [
             'Like proc, this is generally macro-package syntax rather than a core assembler keyword.'
-        ],
-        referenceSource: 'FASM 1.73 Manual, Extended Macros — flatassembler.net/docs.php?article=manual#2.4.3'
+        ]
     },
     {
         symbol: 'invoke',
-        category: 'Macro / Calling Convention Helper',
+        category: 'Macro helper',
         summary: 'Calls an API or procedure using a macro package that prepares arguments for the target calling convention.',
         syntax: 'invoke Function,arg1,arg2,...',
         notes: [
             'Usually comes from platform include files or helper macro packages, not the core assembler syntax.'
         ],
-        referenceSource: 'FASM 1.73 Manual, Extended Macros — flatassembler.net/docs.php?article=manual#2.4.3',
         platformNotes: {
-            pe: ['In Win32 sources this is commonly used for imported API calls when helper macros are available.'],
-            elf32: ['The local ELF dynamic helper package also defines invoke in proc32.inc.']
+            pe: ['In Win32 sources this is commonly used for imported API calls when helper macros are available.']
         }
     },
     {
         symbol: 'stdcall',
-        category: 'Macro / Calling Convention Helper',
+        category: 'Macro helper',
         summary: 'Invokes a procedure using stdcall-style argument setup through a macro package.',
         syntax: 'stdcall Procedure,arg1,arg2,...',
-        referenceSource: 'FASM 1.73 Manual, Extended Macros — flatassembler.net/docs.php?article=manual#2.4.3',
         platformNotes: {
-            pe: ['Especially common in Win32 API-style macro layers.'],
-            elf32: ['Present in the local dynamic ELF helper macros too, even though the binary format is different.']
+            pe: ['Especially common in Win32 API-style macro layers.']
         }
     },
     {
         symbol: 'cinvoke',
-        category: 'Macro / Calling Convention Helper',
+        category: 'Macro helper',
         summary: 'Invokes a procedure using cdecl-style argument setup through a helper macro package.',
-        syntax: 'cinvoke Procedure,arg1,arg2,...',
-        referenceSource: 'FASM 1.73 Manual, Extended Macros — flatassembler.net/docs.php?article=manual#2.4.3'
+        syntax: 'cinvoke Procedure,arg1,arg2,...'
     },
     {
         symbol: 'library',
-        category: 'Format Helper Directive',
+        category: 'Macro helper',
         summary: 'Declares imported libraries through macro helpers used by packaged include files.',
         syntax: "library kernel32,'KERNEL32.DLL'",
         notes: [
             'This is typically provided by PE include packages rather than the minimal core syntax.'
         ],
         example: "library kernel32,'KERNEL32.DLL',\\ user32,'USER32.DLL'",
-        referenceSource: 'FASM 1.73 Manual, Section 2.4 — flatassembler.net/docs.php?article=manual#2.4',
         platformNotes: {
             pe: ['Common in Win32 PE sources that use import-helper macros to build the .idata section.']
         }
     },
     {
         symbol: 'import',
-        category: 'Format Helper Directive',
+        category: 'Format',
         summary: 'Declares imported symbols using helper macros from include packages.',
         syntax: "import kernel32, ExitProcess,'ExitProcess'",
         notes: [
             'This is often macro-driven syntax layered on top of the target format.'
         ],
-        referenceSource: 'FASM 1.73 Manual, Section 2.4 — flatassembler.net/docs.php?article=manual#2.4',
+        section: '2.4.2',
         platformNotes: {
-            pe: ['Used in PE/Win32 sources to populate import tables through helper includes.'],
-            elf32: ['The local ELF dynamic examples also define import macros, but the generated format and relocation model differ.'],
-            elf64: ['ELF64 dynamic examples in the local reference also use import helper macros.']
+            pe: ['Used in PE/Win32 sources to populate import tables through helper includes.']
         }
     },
     {
         symbol: 'export',
-        category: 'Format Helper Directive',
+        category: 'Format',
         summary: 'Declares exported symbols through format-specific support.',
         syntax: "export MyLibrary,'ExportedName', symbol",
-        referenceSource: 'FASM 1.73 Manual, Section 2.4 — flatassembler.net/docs.php?article=manual#2.4',
+        section: '2.4.2',
         platformNotes: {
             pe: ['Commonly used when building DLL-style PE outputs.']
         }
     },
     {
         symbol: 'heap',
-        category: 'PE Directive',
+        category: 'Format',
         summary: 'Sets the heap size information for Portable Executable output.',
         syntax: 'heap reserve[, commit]',
-        referenceSource: 'FASM 1.73 Manual, Section 2.4 — flatassembler.net/docs.php?article=manual#2.4',
+        section: '2.4.2',
         platformNotes: {
             pe: ['Applies to PE output only.']
         }
     },
     {
         symbol: 'stack',
-        category: 'PE Directive',
+        category: 'Format',
         summary: 'Sets the stack size information for Portable Executable output.',
         syntax: 'stack reserve[, commit]',
-        referenceSource: 'FASM 1.73 Manual, Section 2.4 — flatassembler.net/docs.php?article=manual#2.4',
+        section: '2.4.2',
         platformNotes: {
             pe: ['Applies to PE output only.']
         }
     },
     {
         symbol: 'db',
-        category: 'Data Directive',
+        category: 'Data',
         summary: 'Defines one or more bytes in the output.',
         syntax: 'db value[, value ...]',
         notes: [
             'Accepts numeric expressions and string literals.'
         ],
         example: "message db 'Hello',0",
-        referenceSource: 'FASM 1.73 Manual, Section 1.2.2 — flatassembler.net/docs.php?article=manual#1.2.2'
+        section: '1.2.2'
     },
     {
         symbol: 'dw',
-        category: 'Data Directive',
+        category: 'Data',
         summary: 'Defines 16-bit words in the output.',
         syntax: 'dw value[, value ...]',
-        referenceSource: 'FASM 1.73 Manual, Section 1.2.2 — flatassembler.net/docs.php?article=manual#1.2.2'
+        section: '1.2.2'
     },
     {
         symbol: 'dd',
-        category: 'Data Directive',
+        category: 'Data',
         summary: 'Defines 32-bit doublewords in the output.',
         syntax: 'dd value[, value ...]',
-        referenceSource: 'FASM 1.73 Manual, Section 1.2.2 — flatassembler.net/docs.php?article=manual#1.2.2'
+        section: '1.2.2'
     },
     {
         symbol: 'dq',
-        category: 'Data Directive',
+        category: 'Data',
         summary: 'Defines 64-bit quadwords in the output.',
         syntax: 'dq value[, value ...]',
-        referenceSource: 'FASM 1.73 Manual, Section 1.2.2 — flatassembler.net/docs.php?article=manual#1.2.2'
+        section: '1.2.2'
     },
     {
         symbol: 'rb',
-        category: 'Reserve Directive',
+        category: 'Data',
         summary: 'Reserves a number of bytes without defining explicit contents.',
         syntax: 'rb count',
-        referenceSource: 'FASM 1.73 Manual, Section 1.2.2 — flatassembler.net/docs.php?article=manual#1.2.2'
+        section: '1.2.2'
     },
     {
         symbol: 'rw',
-        category: 'Reserve Directive',
+        category: 'Data',
         summary: 'Reserves 16-bit words.',
         syntax: 'rw count',
-        referenceSource: 'FASM 1.73 Manual, Section 1.2.2 — flatassembler.net/docs.php?article=manual#1.2.2'
+        section: '1.2.2'
     },
     {
         symbol: 'rd',
-        category: 'Reserve Directive',
+        category: 'Data',
         summary: 'Reserves 32-bit doublewords.',
         syntax: 'rd count',
-        referenceSource: 'FASM 1.73 Manual, Section 1.2.2 — flatassembler.net/docs.php?article=manual#1.2.2'
+        section: '1.2.2'
     },
     {
         symbol: 'rq',
-        category: 'Reserve Directive',
+        category: 'Data',
         summary: 'Reserves 64-bit quadwords.',
         syntax: 'rq count',
-        referenceSource: 'FASM 1.73 Manual, Section 1.2.2 — flatassembler.net/docs.php?article=manual#1.2.2'
+        section: '1.2.2'
     },
     {
         symbol: 'equ',
-        category: 'Preprocessor Directive',
+        category: 'Preprocessor',
         summary: 'Defines a symbolic constant whose value is substituted as text during preprocessing.',
         syntax: 'name equ value',
         notes: [
             'This performs text substitution, not numeric evaluation. For numeric constants, use the = operator.',
             'The value can be any sequence of symbols and is substituted literally before assembly.'
         ],
-        referenceSource: 'FASM 1.73 Manual, Section 2.3.2 — flatassembler.net/docs.php?article=manual#2.3.2'
+        section: '2.3.2'
     },
     {
         symbol: 'if',
-        category: 'Conditional Directive',
+        category: 'Directive',
         summary: 'Assembles the following block only when the expression is non-zero.',
         syntax: 'if condition ... else ... end if',
-        referenceSource: 'FASM 1.73 Manual, Section 2.3 — flatassembler.net/docs.php?article=manual#2.3'
+        section: '2.2.2'
     },
     {
         symbol: 'repeat',
-        category: 'Repeating Directive',
+        category: 'Directive',
         summary: 'Repeats a block of source a specified number of times.',
         syntax: 'repeat count ... end repeat',
-        referenceSource: 'FASM 1.73 Manual, Section 2.2.3 — flatassembler.net/docs.php?article=manual#2.2.3'
+        section: '2.2.3'
     },
     {
         symbol: 'virtual',
         category: 'Directive',
         summary: 'Creates a virtual addressing space for layout calculations without writing bytes directly to the current output stream.',
         syntax: 'virtual [at address] ... end virtual',
-        referenceSource: 'FASM 1.73 Manual, Section 2.2.4 — flatassembler.net/docs.php?article=manual#2.2.4'
+        section: '2.2.4'
     },
     {
         symbol: 'org',
         category: 'Directive',
         summary: 'Sets the origin address used for address calculations in flat binary style output.',
         syntax: 'org address',
-        referenceSource: 'FASM 1.73 Manual, Section 1.2.3 — flatassembler.net/docs.php?article=manual#1.2.3',
+        section: '2.2.4',
         platformNotes: {
             mz: ['Often seen in flat-binary and DOS-oriented layouts.']
         }
     },
     {
         symbol: 'use16',
-        category: 'Mode Directive',
+        category: 'Directive',
         summary: 'Assembles subsequent instructions in 16-bit mode.',
         syntax: 'use16',
-        referenceSource: 'FASM 1.73 Manual, Section 2.1 — flatassembler.net/docs.php?article=manual#2.1'
+        section: '2.4'
     },
     {
         symbol: 'use32',
-        category: 'Mode Directive',
+        category: 'Directive',
         summary: 'Assembles subsequent instructions in 32-bit mode.',
         syntax: 'use32',
-        referenceSource: 'FASM 1.73 Manual, Section 2.1 — flatassembler.net/docs.php?article=manual#2.1'
+        section: '2.4'
     },
     {
         symbol: 'use64',
-        category: 'Mode Directive',
+        category: 'Directive',
         summary: 'Assembles subsequent instructions in 64-bit mode.',
         syntax: 'use64',
-        referenceSource: 'FASM 1.73 Manual, Section 2.1 — flatassembler.net/docs.php?article=manual#2.1'
+        section: '2.4'
     },
     {
         symbol: 'byte',
-        category: 'Size Specifier',
+        category: 'Data',
         summary: 'Treats a memory operand or data expression as 8-bit.',
         syntax: 'byte [address]'
     },
     {
         symbol: 'word',
-        category: 'Size Specifier',
+        category: 'Data',
         summary: 'Treats a memory operand or data expression as 16-bit.',
         syntax: 'word [address]'
     },
     {
         symbol: 'dword',
-        category: 'Size Specifier',
+        category: 'Data',
         summary: 'Treats a memory operand or data expression as 32-bit.',
         syntax: 'dword [address]'
     },
     {
         symbol: 'qword',
-        category: 'Size Specifier',
+        category: 'Data',
         summary: 'Treats a memory operand or data expression as 64-bit.',
         syntax: 'qword [address]'
     },
@@ -360,90 +356,84 @@ const entries: HoverEntry[] = [
         notes: [
             'Memory-to-memory mov is not allowed directly in x86.'
         ],
-        referenceSource: 'FASM 1.73 Manual, Section 1.2.2 — flatassembler.net/docs.php?article=manual#1.2.2'
+        section: '2.1.1'
     },
     {
         symbol: 'lea',
         category: 'Instruction',
         summary: 'Loads the effective address of a memory expression into a register.',
         syntax: 'lea register, [address_expression]',
-        referenceSource: 'FASM 1.73 Manual, Section 2.1 — flatassembler.net/docs.php?article=manual#2.1'
+        section: '2.1.11'
     },
     {
         symbol: 'add',
         category: 'Instruction',
         summary: 'Adds the source operand to the destination operand.',
         syntax: 'add destination, source',
-        referenceSource: 'FASM 1.73 Manual, Section 2.1 — flatassembler.net/docs.php?article=manual#2.1'
+        section: '2.1.3'
     },
     {
         symbol: 'sub',
         category: 'Instruction',
         summary: 'Subtracts the source operand from the destination operand.',
         syntax: 'sub destination, source',
-        referenceSource: 'FASM 1.73 Manual, Section 2.1 — flatassembler.net/docs.php?article=manual#2.1'
+        section: '2.1.3'
     },
     {
         symbol: 'cmp',
         category: 'Instruction',
         summary: 'Compares two operands by subtracting source from destination and updating flags.',
         syntax: 'cmp left, right',
-        referenceSource: 'FASM 1.73 Manual, Section 2.1 — flatassembler.net/docs.php?article=manual#2.1'
+        section: '2.1.3'
     },
     {
         symbol: 'call',
         category: 'Instruction',
         summary: 'Transfers control to a procedure and stores a return address.',
         syntax: 'call target',
-        referenceSource: 'FASM 1.73 Manual, Section 2.1 — flatassembler.net/docs.php?article=manual#2.1'
+        section: '2.1.6'
     },
     {
         symbol: 'ret',
         category: 'Instruction',
         summary: 'Returns from a procedure using the address on the stack.',
         syntax: 'ret',
-        referenceSource: 'FASM 1.73 Manual, Section 2.1 — flatassembler.net/docs.php?article=manual#2.1'
+        section: '2.1.6'
     },
     {
         symbol: 'jmp',
         category: 'Instruction',
         summary: 'Unconditionally jumps to another code location.',
         syntax: 'jmp target',
-        referenceSource: 'FASM 1.73 Manual, Section 2.1 — flatassembler.net/docs.php?article=manual#2.1'
+        section: '2.1.6'
     },
     {
         symbol: 'push',
         category: 'Instruction',
         summary: 'Pushes an operand onto the stack.',
         syntax: 'push value',
-        referenceSource: 'FASM 1.73 Manual, Section 2.1 — flatassembler.net/docs.php?article=manual#2.1'
+        section: '2.1.1'
     },
     {
         symbol: 'pop',
         category: 'Instruction',
         summary: 'Pops the top stack value into the destination operand.',
         syntax: 'pop destination',
-        referenceSource: 'FASM 1.73 Manual, Section 2.1 — flatassembler.net/docs.php?article=manual#2.1'
+        section: '2.1.1'
     },
     {
         symbol: 'syscall',
         category: 'Instruction',
         summary: 'Invokes the operating system through the x86-64 syscall mechanism.',
         syntax: 'syscall',
-        referenceSource: 'FASM 1.73 Manual, Section 2.1 — flatassembler.net/docs.php?article=manual#2.1',
-        platformNotes: {
-            elf64: ['The local ELF64 example uses syscall with Linux x86-64 register calling conventions.']
-        }
+        section: '2.1.19'
     },
     {
         symbol: 'int',
         category: 'Instruction',
         summary: 'Triggers a software interrupt.',
         syntax: 'int imm8',
-        referenceSource: 'FASM 1.73 Manual, Section 2.1 — flatassembler.net/docs.php?article=manual#2.1',
-        platformNotes: {
-            elf32: ['The local 32-bit ELF hello example uses int 0x80 for Linux system calls.']
-        }
+        section: '2.1.6'
     },
     {
         symbol: 'eax',
@@ -528,10 +518,7 @@ const entries: HoverEntry[] = [
     {
         symbol: 'rdi',
         category: 'Register',
-        summary: '64-bit destination index register.',
-        platformNotes: {
-            elf64: ['In the local Linux x86-64 example, RDI holds the first syscall/user-space argument in comments and setup.']
-        }
+        summary: '64-bit destination index register.'
     },
     {
         symbol: 'rsp',
@@ -587,11 +574,11 @@ const entries: HoverEntry[] = [
             'Can define a label at a register-based address for structure access patterns.'
         ],
         example: 'label myaddr at ebp+4',
-        referenceSource: 'FASM 1.73 Manual, Section 1.2.3 — flatassembler.net/docs.php?article=manual#1.2.3'
+        section: '1.2.3'
     },
     {
         symbol: 'times',
-        category: 'Repeating Directive',
+        category: 'Directive',
         summary: 'Repeats a single instruction a specified number of times.',
         syntax: 'times count instruction',
         notes: [
@@ -599,25 +586,25 @@ const entries: HoverEntry[] = [
             'Can be nested: times 3 times % db % generates six bytes.'
         ],
         example: 'times 5 db %',
-        referenceSource: 'FASM 1.73 Manual, Section 2.2.3 — flatassembler.net/docs.php?article=manual#2.2.3'
+        section: '2.2.3'
     },
     {
         symbol: 'while',
-        category: 'Control Directive',
+        category: 'Directive',
         summary: 'Repeats a block as long as the condition is true.',
         syntax: 'while condition ... end while',
         notes: [
             'The % symbol holds the current iteration number.',
             'Use break to exit the loop early.'
         ],
-        referenceSource: 'FASM 1.73 Manual, Section 2.2.3 — flatassembler.net/docs.php?article=manual#2.2.3'
+        section: '2.2.3'
     },
     {
         symbol: 'break',
-        category: 'Control Directive',
+        category: 'Directive',
         summary: 'Stops the current repeat or while loop and continues after end repeat/end while.',
         syntax: 'break',
-        referenceSource: 'FASM 1.73 Manual, Section 2.2.3 — flatassembler.net/docs.php?article=manual#2.2.3'
+        section: '2.2.3'
     },
     {
         symbol: 'load',
@@ -628,7 +615,7 @@ const entries: HoverEntry[] = [
             'The size operator specifies how many bytes (up to 8) to load.',
             'Can only load from addresses already assembled in the current addressing space.'
         ],
-        referenceSource: 'FASM 1.73 Manual, Section 2.2.4 — flatassembler.net/docs.php?article=manual#2.2.4'
+        section: '2.2.4'
     },
     {
         symbol: 'store',
@@ -639,7 +626,7 @@ const entries: HoverEntry[] = [
             'This is an advanced directive — use carefully.',
             'Can only modify addresses in the current addressing space that have already been assembled.'
         ],
-        referenceSource: 'FASM 1.73 Manual, Section 2.2.4 — flatassembler.net/docs.php?article=manual#2.2.4'
+        section: '2.2.4'
     },
     {
         symbol: 'display',
@@ -651,7 +638,7 @@ const entries: HoverEntry[] = [
             'Accepts quoted strings and byte values separated by commas.'
         ],
         example: "display 'Assembly complete',13,10",
-        referenceSource: 'FASM 1.73 Manual, Section 2.2.5 — flatassembler.net/docs.php?article=manual#2.2.5'
+        section: '2.2.5'
     },
     {
         symbol: 'align',
@@ -663,7 +650,7 @@ const entries: HoverEntry[] = [
             'Skipped bytes are filled with NOP instructions and marked as uninitialized.'
         ],
         example: 'align 16',
-        referenceSource: 'FASM 1.73 Manual, Section 2.2.5 — flatassembler.net/docs.php?article=manual#2.2.5'
+        section: '2.2.5'
     },
     {
         symbol: 'assert',
@@ -674,7 +661,7 @@ const entries: HoverEntry[] = [
             'Unlike err, assert does not stop assembly during intermediate passes.',
             'Use assert 0 in place of err when you want deferred error reporting.'
         ],
-        referenceSource: 'FASM 1.73 Manual, Section 2.2.5 — flatassembler.net/docs.php?article=manual#2.2.5'
+        section: '2.2.5'
     },
     {
         symbol: 'err',
@@ -685,36 +672,36 @@ const entries: HoverEntry[] = [
             'Stops assembly immediately, even during intermediate passes.',
             'Often used with if to halt on detected misconfigurations.'
         ],
-        referenceSource: 'FASM 1.73 Manual, Section 2.2.5 — flatassembler.net/docs.php?article=manual#2.2.5'
+        section: '2.2.5'
     },
     {
         symbol: 'data',
-        category: 'PE Directive',
+        category: 'Format',
         summary: 'Begins definition of special PE data (export, import, resource, fixups).',
         syntax: 'data identifier ... end data',
         notes: [
             'The identifier can be export, import, resource, fixups, or a numeric PE data directory index.',
             'Fixups data is generated automatically when this identifier is used.'
         ],
-        referenceSource: 'FASM 1.73 Manual, Section 2.4.2 — flatassembler.net/docs.php?article=manual#2.4.2',
+        section: '2.4.2',
         platformNotes: {
             pe: ['Used in PE executables to define special data directories.']
         }
     },
     {
         symbol: 'define',
-        category: 'Preprocessor Directive',
+        category: 'Preprocessor',
         summary: 'Defines a symbolic constant without expanding other constants in the value.',
         syntax: 'define name value',
         notes: [
             'Unlike equ, define assigns the value as-is without substituting symbolic constants within it.',
             'Useful in advanced macro constructions where literal text preservation is needed.'
         ],
-        referenceSource: 'FASM 1.73 Manual, Section 2.3.2 — flatassembler.net/docs.php?article=manual#2.3.2'
+        section: '2.3.2'
     },
     {
         symbol: 'fix',
-        category: 'Preprocessor Directive',
+        category: 'Preprocessor',
         summary: 'Defines a high-priority symbolic constant that is replaced before all other preprocessing.',
         syntax: 'name fix value',
         notes: [
@@ -722,11 +709,11 @@ const entries: HoverEntry[] = [
             'Can be used to create aliases for preprocessor directives themselves.'
         ],
         example: 'incl fix include',
-        referenceSource: 'FASM 1.73 Manual, Section 2.3.2 — flatassembler.net/docs.php?article=manual#2.3.2'
+        section: '2.3.2'
     },
     {
         symbol: 'rept',
-        category: 'Preprocessor Directive',
+        category: 'Preprocessor',
         summary: 'Repeats a block of source as a macroinstruction a specified number of times.',
         syntax: 'rept count [counter[:base]] { ... }',
         notes: [
@@ -735,19 +722,19 @@ const entries: HoverEntry[] = [
             'Unlike repeat, this is processed at preprocessing time, not assembly time.'
         ],
         example: 'rept 3 n { byte#n db n }',
-        referenceSource: 'FASM 1.73 Manual, Section 2.3.5 — flatassembler.net/docs.php?article=manual#2.3.5'
+        section: '2.3.5'
     },
     {
         symbol: 'irp',
-        category: 'Preprocessor Directive',
+        category: 'Preprocessor',
         summary: 'Iterates a single argument through a comma-separated list of parameters.',
         syntax: 'irp arg, param1, param2, ... { ... }',
         example: 'irp value, 2,3,5 { db value }',
-        referenceSource: 'FASM 1.73 Manual, Section 2.3.5 — flatassembler.net/docs.php?article=manual#2.3.5'
+        section: '2.3.5'
     },
     {
         symbol: 'irps',
-        category: 'Preprocessor Directive',
+        category: 'Preprocessor',
         summary: 'Iterates through a sequence of individual symbols.',
         syntax: 'irps arg, symbol1 symbol2 ... { ... }',
         notes: [
@@ -755,22 +742,22 @@ const entries: HoverEntry[] = [
             'Symbols are space-separated, not comma-separated.'
         ],
         example: 'irps reg, al bx ecx { xor reg,reg }',
-        referenceSource: 'FASM 1.73 Manual, Section 2.3.5 — flatassembler.net/docs.php?article=manual#2.3.5'
+        section: '2.3.5'
     },
     {
         symbol: 'irpv',
-        category: 'Preprocessor Directive',
+        category: 'Preprocessor',
         summary: 'Iterates through all values that were assigned to a symbolic variable.',
         syntax: 'irpv arg, variable { ... }',
         notes: [
             'Iterates the history of values assigned to the named symbolic constant.',
             'Added in FASM 1.72.'
         ],
-        referenceSource: 'FASM 1.73 Manual, Section 2.3.5 — flatassembler.net/docs.php?article=manual#2.3.5'
+        section: '2.3.5'
     },
     {
         symbol: 'match',
-        category: 'Preprocessor Directive',
+        category: 'Preprocessor',
         summary: 'Conditionally preprocesses a block when a symbol sequence matches a pattern.',
         syntax: 'match pattern, symbols { ... }',
         notes: [
@@ -778,70 +765,70 @@ const entries: HoverEntry[] = [
             'Name symbols in the pattern match any sequence and become parameters inside the block.'
         ],
         example: "match =TRUE, DEBUG { include 'debug.inc' }",
-        referenceSource: 'FASM 1.73 Manual, Section 2.3.6 — flatassembler.net/docs.php?article=manual#2.3.6'
+        section: '2.3.6'
     },
     {
         symbol: 'postpone',
-        category: 'Preprocessor Directive',
+        category: 'Preprocessor',
         summary: 'Defines a nameless macroinstruction that executes when the preprocessor reaches end of source.',
         syntax: 'postpone { ... }',
         notes: [
             'Delegates a block of instructions to be processed at the end of preprocessing.',
             'Added in FASM 1.72.'
         ],
-        referenceSource: 'FASM 1.73 Manual, Section 2.3.3 — flatassembler.net/docs.php?article=manual#2.3.3'
+        section: '2.3.3'
     },
     {
         symbol: 'purge',
-        category: 'Preprocessor Directive',
+        category: 'Preprocessor',
         summary: 'Removes the last definition of a macroinstruction.',
         syntax: 'purge name[, name ...]',
         notes: [
             'Successive purge calls remove successive layers of macro redefinition.',
             'No error if the named macro does not exist.'
         ],
-        referenceSource: 'FASM 1.73 Manual, Section 2.3.3 — flatassembler.net/docs.php?article=manual#2.3.3'
+        section: '2.3.3'
     },
     {
         symbol: 'restore',
-        category: 'Preprocessor Directive',
+        category: 'Preprocessor',
         summary: 'Reverts a symbolic constant to its previous value.',
         syntax: 'restore name[, name ...]',
         notes: [
             'Each restore undoes one layer of equ/define redefinition.',
             'If no such constant exists, restore is silently ignored.'
         ],
-        referenceSource: 'FASM 1.73 Manual, Section 2.3.2 — flatassembler.net/docs.php?article=manual#2.3.2'
+        section: '2.3.2'
     },
     {
         symbol: 'restruc',
-        category: 'Preprocessor Directive',
+        category: 'Preprocessor',
         summary: 'Removes the last definition of a structure macroinstruction.',
         syntax: 'restruc name[, name ...]',
         notes: [
             'Works like purge but for structure macroinstructions defined with struc.'
         ],
-        referenceSource: 'FASM 1.73 Manual, Section 2.3.4 — flatassembler.net/docs.php?article=manual#2.3.4'
+        section: '2.3.4'
     },
     {
         symbol: 'extrn',
-        category: 'Linkage Directive',
+        category: 'Format',
         summary: 'Declares an external symbol for COFF or ELF object output.',
         syntax: "extrn [name_string as] symbol[:size]",
         example: "extrn '__imp__MessageBoxA@16' as MessageBox:dword",
-        referenceSource: 'FASM 1.73 Manual, Section 2.4.3 — flatassembler.net/docs.php?article=manual#2.4.3'
+        section: '2.4.3'
     },
     {
         symbol: 'public',
-        category: 'Linkage Directive',
+        category: 'Format',
         summary: 'Declares an existing symbol as public for COFF or ELF object output.',
         syntax: "public symbol [as 'export_name']",
         example: "public start as '_start'",
-        referenceSource: 'FASM 1.73 Manual, Section 2.4.3 — flatassembler.net/docs.php?article=manual#2.4.3'
+        section: '2.4.3'
     },
     {
         symbol: 'file',
-        category: 'Data Directive',
+        category: 'Data',
         summary: 'Includes binary data from an external file.',
         syntax: "file 'filename'[:offset][,count]",
         notes: [
@@ -849,71 +836,71 @@ const entries: HoverEntry[] = [
             'File paths can contain environment variables enclosed in % characters.'
         ],
         example: "file 'data.bin':10h,4",
-        referenceSource: 'FASM 1.73 Manual, Section 1.2.2 — flatassembler.net/docs.php?article=manual#1.2.2'
+        section: '1.2.2'
     },
 
     // ── Missing Data Directives ─────────────────────────────────────────
 
     {
         symbol: 'dt',
-        category: 'Data Directive',
+        category: 'Data',
         summary: 'Defines 10-byte (tbyte) data, used for FPU extended precision values.',
         syntax: 'dt value[, value ...]',
         notes: [
             'With a single expression, accepts only floating point values in FPU double extended precision format.',
             'With colon syntax (word:qword), defines a far pointer.'
         ],
-        referenceSource: 'FASM 1.73 Manual, Section 1.2.2 — flatassembler.net/docs.php?article=manual#1.2.2'
+        section: '1.2.2'
     },
     {
         symbol: 'rt',
-        category: 'Reserve Directive',
+        category: 'Data',
         summary: 'Reserves 10-byte (tbyte) units of uninitialized space.',
         syntax: 'rt count',
-        referenceSource: 'FASM 1.73 Manual, Section 1.2.2 — flatassembler.net/docs.php?article=manual#1.2.2'
+        section: '1.2.2'
     },
     {
         symbol: 'du',
-        category: 'Data Directive',
+        category: 'Data',
         summary: 'Defines word-sized data, converting string characters to 16-bit with zeroed high byte.',
         syntax: 'du value[, value ...]',
         notes: [
             'Commonly used for wide (Unicode) character strings in FASM.'
         ],
         example: "du 'Hello',0",
-        referenceSource: 'FASM 1.73 Manual, Section 1.2.2 — flatassembler.net/docs.php?article=manual#1.2.2'
+        section: '1.2.2'
     },
     {
         symbol: 'dp',
-        category: 'Data Directive',
+        category: 'Data',
         summary: 'Defines 6-byte (pword/fword) far pointer data.',
         syntax: 'dp value | dp high_word:low_dword',
         notes: [
             'dp and df are synonyms.',
             'Accepts two values separated by colon: high word and low dword.'
         ],
-        referenceSource: 'FASM 1.73 Manual, Section 1.2.2 — flatassembler.net/docs.php?article=manual#1.2.2'
+        section: '1.2.2'
     },
     {
         symbol: 'df',
-        category: 'Data Directive',
+        category: 'Data',
         summary: 'Defines 6-byte (fword/pword) data. Synonym for dp.',
         syntax: 'df value | df high_word:low_dword',
-        referenceSource: 'FASM 1.73 Manual, Section 1.2.2 — flatassembler.net/docs.php?article=manual#1.2.2'
+        section: '1.2.2'
     },
     {
         symbol: 'rp',
-        category: 'Reserve Directive',
+        category: 'Data',
         summary: 'Reserves 6-byte (pword) units of uninitialized space.',
         syntax: 'rp count',
-        referenceSource: 'FASM 1.73 Manual, Section 1.2.2 — flatassembler.net/docs.php?article=manual#1.2.2'
+        section: '1.2.2'
     },
     {
         symbol: 'rf',
-        category: 'Reserve Directive',
+        category: 'Data',
         summary: 'Reserves 6-byte (fword) units of uninitialized space. Synonym for rp.',
         syntax: 'rf count',
-        referenceSource: 'FASM 1.73 Manual, Section 1.2.2 — flatassembler.net/docs.php?article=manual#1.2.2'
+        section: '1.2.2'
     },
 
     // ── Missing Registers ───────────────────────────────────────────────
@@ -1036,12 +1023,12 @@ const entries: HoverEntry[] = [
     {
         symbol: 'fs',
         category: 'Register',
-        summary: 'General-purpose segment register. On Windows, points to the TEB.'
+        summary: 'General-purpose segment register. On 32-bit Windows it points to the TEB, and on x86-64 Linux it is used for thread-local storage.'
     },
     {
         symbol: 'gs',
         category: 'Register',
-        summary: 'General-purpose segment register. On x86-64 Linux, used for thread-local storage.'
+        summary: 'General-purpose segment register. On 64-bit Windows it points to the TEB.'
     },
     {
         symbol: 'ss',
@@ -1057,7 +1044,90 @@ const entries: HoverEntry[] = [
         symbol: 'mm0',
         category: 'Register',
         summary: '64-bit MMX register. Aliases the low 64 bits of the corresponding FPU register.'
-    }
+    },
+
+    ...instructionRows([
+        ['mul', '2.1.3', 'Unsigned multiply of the accumulator by the operand.', 'mul operand'],
+        ['imul', '2.1.3', 'Signed multiply, with one, two or three operands.', 'imul operand | imul destination, source[, immediate]'],
+        ['div', '2.1.3', 'Unsigned divide of the accumulator by the operand.', 'div operand'],
+        ['idiv', '2.1.3', 'Signed divide of the accumulator by the operand.', 'idiv operand'],
+        ['adc', '2.1.3', 'Adds the source and the carry flag to the destination.', 'adc destination, source'],
+        ['sbb', '2.1.3', 'Subtracts the source and the carry flag from the destination.', 'sbb destination, source'],
+        ['inc', '2.1.3', 'Adds one to the operand without changing the carry flag.', 'inc operand'],
+        ['dec', '2.1.3', 'Subtracts one from the operand without changing the carry flag.', 'dec operand'],
+        ['neg', '2.1.3', 'Replaces the operand with its two\'s complement.', 'neg operand'],
+        ['xadd', '2.1.3', 'Exchanges the operands and stores their sum in the destination.', 'xadd destination, source'],
+        ['xchg', '2.1.1', 'Swaps the contents of two operands.', 'xchg first, second'],
+        ['movzx', '2.1.2', 'Copies a smaller value into a larger register, filling with zeros.', 'movzx register, source'],
+        ['movsx', '2.1.2', 'Copies a smaller value into a larger register, extending the sign.', 'movsx register, source'],
+        ['cbw', '2.1.2', 'Sign-extends AL into AX.', 'cbw'],
+        ['cwd', '2.1.2', 'Sign-extends AX into DX:AX.', 'cwd'],
+        ['and', '2.1.5', 'Bitwise AND. Inside an expression, this word is the AND operator.', 'and destination, source'],
+        ['or', '2.1.5', 'Bitwise OR. Inside an expression, this word is the OR operator.', 'or destination, source'],
+        ['xor', '2.1.5', 'Bitwise exclusive OR. Inside an expression, this word is the XOR operator.', 'xor destination, source'],
+        ['not', '2.1.5', 'Inverts every bit of the operand. Inside an expression, this word is the NOT operator.', 'not operand'],
+        ['test', '2.1.5', 'Sets flags from a bitwise AND without storing the result.', 'test first, second'],
+        ['shl', '2.1.5', 'Shifts left. Inside an expression, this word is the shift operator.', 'shl destination, count'],
+        ['shr', '2.1.5', 'Shifts right, filling with zeros. Inside an expression, this word is the shift operator.', 'shr destination, count'],
+        ['sal', '2.1.5', 'Arithmetic shift left. Same operation as shl.', 'sal destination, count'],
+        ['sar', '2.1.5', 'Arithmetic shift right, keeping the sign bit.', 'sar destination, count'],
+        ['rol', '2.1.5', 'Rotates bits left.', 'rol destination, count'],
+        ['ror', '2.1.5', 'Rotates bits right.', 'ror destination, count'],
+        ['rcl', '2.1.5', 'Rotates bits left through the carry flag.', 'rcl destination, count'],
+        ['rcr', '2.1.5', 'Rotates bits right through the carry flag.', 'rcr destination, count'],
+        ['bt', '2.1.5', 'Copies the selected bit into the carry flag.', 'bt operand, bit'],
+        ['bsf', '2.1.5', 'Finds the lowest set bit of the source.', 'bsf destination, source'],
+        ['bsr', '2.1.5', 'Finds the highest set bit of the source.', 'bsr destination, source'],
+        ['bswap', '2.1.5', 'Reverses the byte order of a register.', 'bswap register'],
+        ['cpuid', '2.1.11', 'Returns processor identification and feature information.', 'cpuid'],
+        ['nop', '2.1.11', 'Does nothing except take up space and time.', 'nop'],
+        ['enter', '2.1.11', 'Creates a stack frame for a procedure.', 'enter size, nesting'],
+        ['leave', '2.1.11', 'Releases the stack frame created for a procedure.', 'leave'],
+        ['loop', '2.1.6', 'Decrements the count register and jumps while it is not zero.', 'loop target'],
+        ['lock', '2.1.12', 'Prefix that makes the next read-modify-write instruction atomic.', 'lock instruction'],
+        ['rep', '2.1.8', 'Prefix that repeats a string instruction by the count register.', 'rep instruction'],
+        ['stc', '2.1.9', 'Sets the carry flag.', 'stc'],
+        ['clc', '2.1.9', 'Clears the carry flag.', 'clc'],
+        ['popcnt', '2.1.20', 'Counts the set bits of the source.', 'popcnt destination, source'],
+        ['lzcnt', '2.1.20', 'Counts the leading zero bits of the source.', 'lzcnt destination, source'],
+        ['tzcnt', '2.1.23', 'Counts the trailing zero bits of the source.', 'tzcnt destination, source']
+    ])
 ];
 
 export const hoverEntries = new Map(entries.map((entry) => [entry.symbol.toLowerCase(), entry]));
+
+function instructionRows(rows: readonly (readonly [string, ManualSection, string, string])[]): HoverEntry[] {
+    return rows.map(([symbol, section, summary, syntax]) => ({ symbol, category: 'Instruction', section, summary, syntax }));
+}
+
+function conditionalFamilyEntry(symbol: string): HoverEntry | undefined {
+    if (/^cmov/.test(symbol)) {
+        return { symbol, category: 'Instruction', section: '2.1.10', summary: 'Moves the source to the destination when the condition in its name is true.', syntax: `${symbol} destination, source` };
+    }
+    if (/^set/.test(symbol)) {
+        return { symbol, category: 'Instruction', section: '2.1.10', summary: 'Sets a byte to one when the condition in its name is true, and to zero otherwise.', syntax: `${symbol} destination` };
+    }
+    if (/^j/.test(symbol)) {
+        return { symbol, category: 'Instruction', section: '2.1.6', summary: 'Jumps when the condition in its name is true.', syntax: `${symbol} target` };
+    }
+    return undefined;
+}
+
+export function findHoverEntry(token: string): HoverEntry | undefined {
+    const symbol = token.toLowerCase();
+    const entry = hoverEntries.get(symbol);
+    if (entry) {
+        return entry;
+    }
+
+    const group = findSymbolGroup(symbol);
+    if (group?.kind === 'instruction') {
+        const isConditional = group.id === 'mnemonic.conditional' || group.id === 'mnemonic.control-flow';
+        return (isConditional ? conditionalFamilyEntry(symbol) : undefined)
+            ?? { symbol, category: 'Instruction', summary: `x86 ${group.label} instruction.` };
+    }
+    if (group?.kind === 'register') {
+        return { symbol, category: 'Register', summary: `${group.label} register.` };
+    }
+    return undefined;
+}
