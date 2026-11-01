@@ -2,7 +2,7 @@
 
 All notable changes to the `fasm-highlight` extension are documented in this file.
 
-## [Unreleased]
+## [0.2.2] - Unreleased
 
 The same extension, upgraded. The identifier is still `kumar-047.fasm-highlight`, and your settings, commands, shortcuts and snippet prefixes all carry over.
 

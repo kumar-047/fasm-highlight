@@ -32,5 +32,5 @@ Run and Stop, compiler detection and install, the compiler list, FASMARM, projec
 - [ ] Test on Linux and macOS
 - [ ] Run tests on every push with GitHub Actions
 - [ ] Open VSX access token (the namespace and listing already exist)
-- [ ] Decide the release version: 0.2.1 is already published on Open VSX
+- [x] Release version: 0.2.2, because 0.2.1 is already published on Open VSX
 - [ ] Publish to Open VSX

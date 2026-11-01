@@ -51,7 +51,8 @@ describe('settings', () => {
         expect(contributes.configuration.properties[setting]).toBeDefined();
     });
 
-    test('the version stays 0.2.1 until release is decided', () => {
-        expect(manifest.version).toBe('0.2.1');
+    test('the version is newer than the published 0.2.1', () => {
+        const [major, minor, patch] = manifest.version.split('.').map(Number);
+        expect(major * 10000 + minor * 100 + patch).toBeGreaterThan(201);
     });
 });

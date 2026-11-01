@@ -2,7 +2,7 @@
   "name": "fasm-highlight",
   "displayName": "FASM Highlight",
   "description": "The same FASM Highlight, upgraded: syntax highlighting, formatting, hover cards, snippets and a number check for fasm, fasm 2 and fasmg. Unofficial.",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "publisher": "kumar-047",
   "icon": "icon.png",
   "engines": {
