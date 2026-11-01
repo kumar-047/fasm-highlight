@@ -1,4 +1,7 @@
+import * as path from 'path';
 import * as vscode from 'vscode';
+import { SourceAnalysis } from '../architecture/analysis';
+import { analyzeDocument } from '../architecture/documentAnalysis';
 import { HoverEntry, PlatformContext, findHoverEntry } from '../data/hoverEntries';
 import { manualUrl } from '../data/manual';
 
@@ -9,13 +12,17 @@ export class FasmHoverProvider implements vscode.HoverProvider {
             return undefined;
         }
 
+        if (isInCommentOrString(document.lineAt(position.line).text, range.start.character)) {
+            return undefined;
+        }
+
         const rawToken = document.getText(range);
         const lookupToken = normalizeHoverToken(rawToken);
         if (!lookupToken) {
             return undefined;
         }
 
-        const entry = findHoverEntry(lookupToken);
+        const entry = findEntryForArchitecture(lookupToken, analyzeDocument(document));
         if (!entry) {
             return undefined;
         }
@@ -25,13 +32,52 @@ export class FasmHoverProvider implements vscode.HoverProvider {
     }
 }
 
+// x86 text must not appear on another architecture's instruction, even when the name is the same.
+export function findEntryForArchitecture(token: string, analysis: SourceAnalysis): HoverEntry | undefined {
+    const { architecture, scanned } = analysis;
+    if (architecture.id !== 'x86') {
+        if (architecture.instructions.has(token)) {
+            return { symbol: token, category: 'Instruction', summary: `${architecture.label} instruction.` };
+        }
+        if (architecture.registers.has(token)) {
+            return { symbol: token, category: 'Register', summary: `${architecture.label} register.` };
+        }
+    }
+
+    const macro = scanned.get(token);
+    if (macro) {
+        return { symbol: macro.name, category: 'Macro helper', summary: `Defined in ${path.basename(macro.file)}, line ${macro.line}.` };
+    }
+
+    const entry = findHoverEntry(token);
+    if (architecture.id !== 'x86' && (entry?.category === 'Instruction' || entry?.category === 'Register')) {
+        return undefined;
+    }
+    return entry;
+}
+
 export function normalizeHoverToken(token: string): string | undefined {
-    if (token === '@@' || /^@[bfr]$/i.test(token)) {
+    // Tokens starting with a dot are local labels, even when named like an instruction.
+    if (token === '@@' || /^@[bfr]$/i.test(token) || token.startsWith('.')) {
         return undefined;
     }
 
-    const trimmed = token.startsWith('.') ? token.slice(1) : token;
-    return trimmed.toLowerCase();
+    return token.toLowerCase();
+}
+
+export function isInCommentOrString(line: string, character: number): boolean {
+    let quote: string | undefined;
+    for (let index = 0; index < character && index < line.length; index += 1) {
+        const current = line[index];
+        if (quote) {
+            quote = current === quote ? undefined : quote;
+        } else if (current === ';') {
+            return true;
+        } else if (current === "'" || current === '"') {
+            quote = current;
+        }
+    }
+    return quote !== undefined;
 }
 
 export function buildHoverMarkdown(entry: HoverEntry, platformContext: PlatformContext): vscode.MarkdownString {

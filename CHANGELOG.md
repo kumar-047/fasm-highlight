@@ -11,12 +11,23 @@ All notable changes to the `fasm-highlight` extension are documented in this fil
 - format keywords on `format`, `section`, `segment` and `data` lines
 - hover cards for 44 more instructions, and basic hover cards for all other instructions and registers
 - Jest, ESLint and typecheck scripts
+- `FASM: Turn On FASM Colors` and `FASM: Turn Off FASM Colors`, which colour FASM text only, for this workspace or all windows
+- build errors in the Problems panel, with links to where a failing macro was used
+- `FASM: Stop Running Program`
+- a side panel with a Control Panel, Settings and Project tab, opened from a gear icon on FASM files
+- detection of fasm, fasm 2, fasmg and FASMARM, with build support for each
+- install on request for fasm, fasm 2 and fasmg, from the official site only, always asking first
+- 8051, AVR, JVM bytecode, WebAssembly, AArch64 and ARM instruction colours, detected from include lines and source
+- colours and hover cards for unknown fasmg packages, read from the file's includes
+- a formatter that only changes whitespace
+- a number converter
+- snippets ranked for the target system, a `program` starter and `FASM: Insert Starter Program`
 
 ### Changed
 
 - grammar word lists are now generated from one data table
 - renamed the `keyword.mnemonic` scopes to `keyword.other.mnemonic`
-- renamed the theme to `FASM Colors`
+- programs now run in a terminal, so they can read input and use the Windows console API
 - hover categories reduced to 7, with manual links built in one place
 - split the build commands into their own module
 
@@ -28,6 +39,13 @@ All notable changes to the `fasm-highlight` extension are documented in this fil
 - corrected wrong manual sections, the `macro` and `struc` hover syntax, and the `fs` and `gs` hover text
 - PE platform notes now appear for plain `format PE`
 - the compiler path no longer defaults to a Windows path on Linux and macOS
+- output names now match fasm: `.dll`, `.sys`, `.efi`, `.o`, `.obj`, `.bin`, `.com` and `as` extensions
+- no more hover cards inside comments and strings, or on local labels like `.add`
+- folding now works for `virtual`, `while`, `repeat`, `data` and brace blocks, and no longer pairs `macro` with the wrong line
+
+### Removed
+
+- the `FASM Workshop Dark` theme, which took over the whole window and left other languages without syntax colours
 
 ## [0.2.1] - 2026-04-24
 

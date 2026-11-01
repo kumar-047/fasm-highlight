@@ -23,6 +23,10 @@ export class Hover {
     constructor(public readonly contents: MarkdownString, public readonly range?: unknown) {}
 }
 
+export class SemanticTokensLegend {
+    constructor(public readonly tokenTypes: string[]) {}
+}
+
 export const workspace = {
     getConfiguration: () => ({
         get: <T>(_key: string, fallback: T): T => fallback

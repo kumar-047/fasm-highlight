@@ -5,20 +5,6 @@ import { INSTRUCTION_OR_OPERATOR_WORDS, SYMBOL_GROUPS, findSymbolGroup } from '.
 
 const ROOT = path.join(__dirname, '..');
 
-function collectScopes(value: unknown, scopes: Set<string>): void {
-    if (Array.isArray(value)) {
-        value.forEach((item) => collectScopes(item, scopes));
-    } else if (value && typeof value === 'object') {
-        for (const [key, child] of Object.entries(value)) {
-            if (key === 'name' && typeof child === 'string') {
-                scopes.add(child);
-            } else {
-                collectScopes(child, scopes);
-            }
-        }
-    }
-}
-
 describe('symbol table', () => {
     test('no word belongs to two groups', () => {
         const seen = new Map<string, string>();
@@ -72,21 +58,6 @@ describe('symbol table', () => {
     });
 });
 
-describe('theme', () => {
-    const grammarScopes = new Set<string>();
-    collectScopes(JSON.parse(fs.readFileSync(path.join(ROOT, 'syntaxes', 'fasm.tmLanguage.json'), 'utf8')).repository, grammarScopes);
-    const theme = JSON.parse(fs.readFileSync(path.join(ROOT, 'themes', 'fasm-colors-color-theme.json'), 'utf8'));
-    const themeScopes: string[] = theme.tokenColors.flatMap((rule: { scope: string[] }) => rule.scope);
-
-    test('it has no rules for scopes the grammar never produces', () => {
-        expect(themeScopes.filter((scope) => !grammarScopes.has(scope))).toEqual([]);
-    });
-
-    test('it colours every scope the grammar produces', () => {
-        expect([...grammarScopes].filter((scope) => !themeScopes.includes(scope))).toEqual([]);
-    });
-});
-
 describe('package manifest', () => {
     const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
 
@@ -98,14 +69,17 @@ describe('package manifest', () => {
 
     test('contributed files exist', () => {
         const files = [
-            manifest.contributes.themes[0].path,
             manifest.contributes.grammars[0].path,
-            manifest.contributes.snippets[0].path,
             manifest.contributes.languages[0].configuration
         ];
         for (const file of files) {
             expect(fs.existsSync(path.join(ROOT, file))).toBe(true);
         }
+    });
+
+    test('it no longer ships a colour theme', () => {
+        expect(manifest.contributes.themes).toBeUndefined();
+        expect(manifest.categories).not.toContain('Themes');
     });
 
     test('it has what Open VSX needs', () => {

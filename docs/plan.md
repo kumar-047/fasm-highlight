@@ -221,7 +221,7 @@ The panel only edits normal VS Code settings, so everything also works from `set
 
 ## Work order
 
-Decided: one complete release, with nothing published until all the work is done. The order is cleanup first, then the side panel, then everything else. [TASK_LIST.md](TASK_LIST.md) has the stages and is the list to follow.
+Decided: one complete release, with nothing published until the release checks are done. The order is stages 1, 2, 5, 6, then 3. Stage 4 was dropped to keep things simple, so there is one language mode instead of two, and semantic tokens add fasmg and architecture colours. [TASK_LIST.md](TASK_LIST.md) is the list to follow.
 
 ## Risks
 

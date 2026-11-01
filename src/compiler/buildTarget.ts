@@ -1,5 +1,6 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { Dialect, SourceAnalysis } from '../architecture/analysis';
 
 export interface BuildPlan {
     readonly sourcePath: string;
@@ -10,10 +11,90 @@ export interface BuildPlan {
     readonly runReason?: string;
 }
 
-export function createBuildPlan(document: vscode.TextDocument): BuildPlan {
+export type OutputFormat = 'pe' | 'elf' | 'macho' | 'mz' | 'coff' | 'binary';
+
+export interface OutputInfo {
+    readonly format: OutputFormat;
+    readonly extension: string;
+}
+
+const FORMAT_LINE = /^[ \t]*format[ \t]+([^;\r\n]*)/im;
+const CUSTOM_EXTENSION = /\bas\s+(['"])(.*?)\1/i;
+const COM_ORIGIN = /^[ \t]*org[ \t]+(?:100h|0x100|\$100|256)\b/im;
+
+// Output names follow what fasm 1.73.35 writes when no output file is given.
+export function inferOutput(sourceText: string, dialect: Dialect = 'fasm'): OutputInfo {
+    const formatLine = FORMAT_LINE.exec(sourceText)?.[1] ?? '';
+    const words = formatLine.toLowerCase().split(/\s+/).filter(Boolean);
+    const format = outputFormat(words[0]);
+    const customExtension = CUSTOM_EXTENSION.exec(formatLine);
+
+    if (customExtension) {
+        return { format, extension: customExtension[2] ? `.${customExtension[2]}` : '' };
+    }
+
+    switch (format) {
+        case 'pe':
+            return { format, extension: peExtension(words) };
+        case 'mz':
+            return { format, extension: '.exe' };
+        case 'coff':
+            return { format, extension: '.obj' };
+        case 'elf':
+            return { format, extension: words.includes('executable') || words.includes('dynamic') ? '' : '.o' };
+        case 'macho':
+            return { format, extension: words.includes('executable') ? '' : '.o' };
+        case 'binary':
+            // fasmg adds no extension of its own.
+            if (dialect === 'fasmg') {
+                return { format, extension: '' };
+            }
+            return { format, extension: COM_ORIGIN.test(sourceText) ? '.com' : '.bin' };
+    }
+}
+
+function outputFormat(word: string | undefined): OutputFormat {
+    switch (word) {
+        case 'pe':
+        case 'pe64':
+            return 'pe';
+        case 'mz':
+            return 'mz';
+        case 'elf':
+        case 'elf64':
+            return 'elf';
+        case 'macho':
+        case 'macho64':
+            return 'macho';
+        case 'coff':
+        case 'ms':
+        case 'ms64':
+            return 'coff';
+        default:
+            return 'binary';
+    }
+}
+
+function peExtension(words: readonly string[]): string {
+    if (words.includes('dll')) {
+        return '.dll';
+    }
+    if (words.includes('native')) {
+        return '.sys';
+    }
+    if (words.some((word) => word === 'efi' || word === 'efiboot' || word === 'efiruntime')) {
+        return '.efi';
+    }
+    return '.exe';
+}
+
+export function createBuildPlan(
+    document: vscode.TextDocument,
+    platform: NodeJS.Platform = process.platform,
+    analysis?: SourceAnalysis
+): BuildPlan {
     const sourcePath = document.fileName;
-    const extension = path.extname(sourcePath).toLowerCase();
-    const outputPath = inferOutputPath(sourcePath, document.getText());
+    const sourceText = analysis?.combinedText ?? document.getText();
 
     if (document.languageId !== 'fasm') {
         return {
@@ -25,107 +106,52 @@ export function createBuildPlan(document: vscode.TextDocument): BuildPlan {
         };
     }
 
-    if (extension === '.inc') {
+    if (path.extname(sourcePath).toLowerCase() === '.inc') {
         return {
             sourcePath,
             canBuild: false,
             buildReason: 'Include files (.inc) are not standalone build targets.',
-            outputPath,
             canRun: false,
             runReason: 'Include files are support files, not runnable programs.'
         };
     }
 
-    if (!outputPath) {
-        return {
-            sourcePath,
-            canBuild: true,
-            canRun: false,
-            runReason: 'Build succeeded, but the extension could not infer a runnable output path from the source format.'
-        };
-    }
+    const output = inferOutput(sourceText, analysis?.dialect);
+    const outputPath = `${sourcePath.replace(/\.[^.\\/]+$/, '')}${output.extension}`;
+    const architecture = analysis?.architecture.id ?? 'x86';
 
-    if (!isRunnableOnCurrentPlatform(outputPath)) {
+    if (architecture !== 'x86') {
         return {
             sourcePath,
             canBuild: true,
             outputPath,
             canRun: false,
-            runReason: `Build succeeded, but ${path.basename(outputPath)} is not a runnable format on ${process.platform}.`
+            runReason: `Build succeeded. ${analysis?.architecture.label} output needs its own device, simulator or runtime.`
         };
     }
 
-    return {
-        sourcePath,
-        canBuild: true,
-        outputPath,
-        canRun: true
-    };
+    if (!isRunnable(output, platform)) {
+        return {
+            sourcePath,
+            canBuild: true,
+            outputPath,
+            canRun: false,
+            runReason: `Build succeeded, but ${path.basename(outputPath)} can't be run directly on ${platform}.`
+        };
+    }
+
+    return { sourcePath, canBuild: true, outputPath, canRun: true };
 }
 
-type OutputFormat = 'pe' | 'elf' | 'macho' | 'mz' | 'coff' | 'binary' | 'unknown';
-
-function inferOutputPath(sourcePath: string, sourceText: string): string | undefined {
-    const basePath = sourcePath.replace(/\.[^.]+$/, '');
-    const format = detectFormat(sourceText);
-
-    switch (format) {
-        case 'pe':
-        case 'mz':
-            return `${basePath}.exe`;
-        case 'elf':
-        case 'macho':
-            return basePath;
-        case 'coff':
-            return process.platform === 'win32' ? `${basePath}.obj` : `${basePath}.o`;
-        case 'binary':
-        case 'unknown':
-            return undefined;
+function isRunnable(output: OutputInfo, platform: NodeJS.Platform): boolean {
+    switch (platform) {
+        case 'win32':
+            return output.extension === '.exe';
+        case 'linux':
+            return output.format === 'elf' && output.extension === '';
+        case 'darwin':
+            return output.format === 'macho' && output.extension === '';
+        default:
+            return false;
     }
-}
-
-function detectFormat(sourceText: string): OutputFormat {
-    if (hasFormatDirective(sourceText, 'PE') || hasFormatDirective(sourceText, 'PE64')) {
-        return 'pe';
-    }
-    if (hasFormatDirective(sourceText, 'MZ')) {
-        return 'mz';
-    }
-    if (hasFormatDirective(sourceText, 'ELF') || hasFormatDirective(sourceText, 'ELF32') || hasFormatDirective(sourceText, 'ELF64')) {
-        return 'elf';
-    }
-    if (hasFormatDirective(sourceText, 'MACHO') || hasFormatDirective(sourceText, 'MACHO64')) {
-        return 'macho';
-    }
-    if (hasFormatDirective(sourceText, 'COFF') || hasFormatDirective(sourceText, 'MS COFF') || hasFormatDirective(sourceText, 'MS64 COFF')) {
-        return 'coff';
-    }
-    if (hasFormatDirective(sourceText, 'binary')) {
-        return 'binary';
-    }
-    return 'unknown';
-}
-
-function hasFormatDirective(sourceText: string, formatName: string): boolean {
-    const escaped = formatName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    return new RegExp(`^\\s*format\\s+${escaped}\\b`, 'im').test(sourceText);
-}
-
-function isRunnableOnCurrentPlatform(outputPath: string): boolean {
-    const extension = path.extname(outputPath).toLowerCase();
-
-    // Object files are never directly runnable
-    if (extension === '.obj' || extension === '.o') {
-        return false;
-    }
-
-    if (process.platform === 'win32') {
-        return extension === '.exe';
-    }
-
-    if (process.platform === 'linux' || process.platform === 'darwin') {
-        return extension === '';
-    }
-
-    return false;
 }

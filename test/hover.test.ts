@@ -1,6 +1,6 @@
 import { HoverEntry, findHoverEntry, hoverEntries } from '../src/data/hoverEntries';
 import { MANUAL_SECTIONS, manualUrl } from '../src/data/manual';
-import { buildHoverMarkdown, detectPlatformContext, normalizeHoverToken } from '../src/language/hoverProvider';
+import { buildHoverMarkdown, detectPlatformContext, isInCommentOrString, normalizeHoverToken } from '../src/language/hoverProvider';
 import { MarkdownString } from './mocks/vscode';
 
 const entries = [...hoverEntries.values()];
@@ -101,6 +101,24 @@ describe('tokens and platform', () => {
     test('anonymous label references have no hover', () => {
         expect(normalizeHoverToken('@@')).toBeUndefined();
         expect(normalizeHoverToken('@b')).toBeUndefined();
+    });
+
+    test('local labels have no hover, even when named like an instruction', () => {
+        expect(normalizeHoverToken('.add')).toBeUndefined();
+        expect(normalizeHoverToken('.loop')).toBeUndefined();
+    });
+
+    test.each([
+        ['mov eax,1 ; mov this', 26, true],
+        ['mov eax,1 ; mov this', 0, false],
+        ["db 'add',0", 4, true],
+        ["db 'add',0", 9, false],
+        ['db "a;b",1', 5, true],
+        ['db "a;b",1 ; c', 9, false],
+        ["db 'it''s mov'", 10, true],
+        ["bad db 'unterminated mov", 21, true]
+    ])('%s at %i: inside is %s', (line, character, inside) => {
+        expect(isInCommentOrString(line, character)).toBe(inside);
     });
 
     test('tokens are lowercased', () => {

@@ -1,7 +1,7 @@
 {
   "name": "fasm-highlight",
   "displayName": "FASM Highlight",
-  "description": "Syntax highlighting, hover cards, snippets and build commands for flat assembler (fasm). Unofficial.",
+  "description": "Syntax highlighting, hover cards, snippets, a control panel and build commands for flat assembler (fasm). Unofficial.",
   "version": "0.2.1",
   "publisher": "kumar-047",
   "icon": "icon.png",
@@ -10,8 +10,7 @@
   },
   "categories": [
     "Programming Languages",
-    "Snippets",
-    "Themes"
+    "Snippets"
   ],
   "keywords": [
     "fasm",
@@ -53,20 +52,13 @@
         "path": "./syntaxes/fasm.tmLanguage.json"
       }
     ],
-    "themes": [
-      {
-        "label": "FASM Colors",
-        "uiTheme": "vs-dark",
-        "path": "./themes/fasm-colors-color-theme.json"
-      }
-    ],
-    "snippets": [
-      {
-        "language": "fasm",
-        "path": "./snippets/fasm.json"
-      }
-    ],
     "commands": [
+      {
+        "command": "fasm.openPanel",
+        "title": "Open Control Panel",
+        "category": "FASM",
+        "icon": "$(settings-gear)"
+      },
       {
         "command": "fasm.build",
         "title": "Build",
@@ -75,6 +67,26 @@
       {
         "command": "fasm.buildAndRun",
         "title": "Build and Run",
+        "category": "FASM"
+      },
+      {
+        "command": "fasm.stop",
+        "title": "Stop Running Program",
+        "category": "FASM"
+      },
+      {
+        "command": "fasm.turnOnColors",
+        "title": "Turn On FASM Colors",
+        "category": "FASM"
+      },
+      {
+        "command": "fasm.turnOffColors",
+        "title": "Turn Off FASM Colors",
+        "category": "FASM"
+      },
+      {
+        "command": "fasm.insertStarter",
+        "title": "Insert Starter Program",
         "category": "FASM"
       }
     ],
@@ -112,9 +124,146 @@
           "type": "boolean",
           "default": false,
           "description": "Generate symbolic information for debugging with the -s flag"
+        },
+        "fasm.fasm2Path": {
+          "type": "string",
+          "default": "",
+          "description": "Path to fasm2.cmd or fasm2. Leave empty to search for it."
+        },
+        "fasm.fasmgPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the fasmg executable. Leave empty to search for it."
+        },
+        "fasm.fasmarmPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the FASMARM executable. Leave empty to search for it."
+        },
+        "fasm.assembler": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "fasm",
+            "fasm2",
+            "fasmg",
+            "fasmarm"
+          ],
+          "default": "auto",
+          "description": "Which compiler builds FASM files. Automatic picks one from the file."
+        },
+        "fasm.architecture": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "x86",
+            "8051",
+            "avr",
+            "jvm",
+            "wasm",
+            "aarch64",
+            "arm"
+          ],
+          "default": "auto",
+          "description": "The architecture of FASM files. Automatic reads the file's include lines."
+        },
+        "fasm.targetSystem": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "windows",
+            "linux",
+            "macos"
+          ],
+          "default": "auto",
+          "description": "The system to suggest snippets for. A format line in the file always wins."
+        },
+        "fasm.panelSide": {
+          "type": "string",
+          "enum": [
+            "right",
+            "left"
+          ],
+          "default": "right",
+          "description": "Which side the FASM panel opens on. Editors without a right-side area use the left."
+        },
+        "fasm.format.commentColumn": {
+          "type": "number",
+          "default": 0,
+          "minimum": 0,
+          "description": "The column to align trailing comments to when formatting. 0 keeps your spacing."
+        },
+        "fasm.colors.overrides": {
+          "type": "object",
+          "default": {},
+          "description": "Custom FASM Colors, by role. The Settings tab of the FASM panel edits this."
         }
       }
-    }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "fasmPanelLeft",
+          "title": "FASM",
+          "icon": "media/panel-icon.svg"
+        }
+      ],
+      "secondarySidebar": [
+        {
+          "id": "fasmPanelRight",
+          "title": "FASM",
+          "icon": "media/panel-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "fasmPanelLeft": [
+        {
+          "type": "webview",
+          "id": "fasm.panelLeft",
+          "name": "FASM",
+          "when": "fasm.panelReady && !fasm.panelOnRight"
+        }
+      ],
+      "fasmPanelRight": [
+        {
+          "type": "webview",
+          "id": "fasm.panelRight",
+          "name": "FASM",
+          "when": "fasm.panelReady && fasm.panelOnRight"
+        }
+      ]
+    },
+    "menus": {
+      "editor/title": [
+        {
+          "command": "fasm.openPanel",
+          "when": "editorLangId == fasm",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configurationDefaults": {
+      "[fasm]": {
+        "editor.semanticHighlighting.enabled": true
+      }
+    },
+    "semanticTokenScopes": [
+      {
+        "language": "fasm",
+        "scopes": {
+          "keyword": [
+            "keyword.other.mnemonic.arch.fasm"
+          ],
+          "variable": [
+            "variable.language.register.arch.fasm"
+          ],
+          "macro": [
+            "keyword.control.directive.fasmg.fasm"
+          ]
+        }
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

@@ -1,25 +1,40 @@
 # FASM Highlight
 
-FASM Highlight is an unofficial Flat Assembler language support extension for VS Code compatible editors and Antigravity IDE.
+FASM Highlight is an unofficial flat assembler extension for VS Code compatible editors and Antigravity IDE, including Open VSX.
 
 ## Current Features
 
 - FASM language registration for `.asm` and `.inc`
 - syntax highlighting for instructions, directives, registers, and preprocessor keywords
-- hover for instructions, registers, directives, data directives, and size specifiers
-- bundled optional theme: `FASM Colors`
-- snippets for Windows (PE32/PE64), Linux (ELF32/ELF64), macOS (Mach-O64), and object file templates
+- hover cards for instructions, registers, directives, data directives, and size specifiers
+- optional FASM Colors, which colour FASM text only and leave your theme alone
+- a side panel with a Control Panel, Settings and Project tab, opened from the gear icon on FASM files
+- automatic detection of fasm, fasm 2, fasmg and FASMARM, with install on request for the official ones
+- a formatter that only changes whitespace
+- a number converter and starter programs for the current system
+- instruction colours and build support for 8051, AVR, JVM bytecode, WebAssembly, AArch64 and ARM
+- colours for other fasmg packages, by reading the file's include lines
+- build errors in the Problems panel
+- snippets for Windows (PE32/PE64), Linux (ELF32/ELF64), macOS (Mach-O64), and object file templates, with the ones for your target system first, and a `program` starter
 - language configuration for comments, brackets, and folding
 - `FASM: Build`
 - `FASM: Build and Run`
+- `FASM: Stop Running Program`
+- `FASM: Open Control Panel`
+- `FASM: Insert Starter Program`
+- `FASM: Turn On FASM Colors` and `FASM: Turn Off FASM Colors`
 
 ## Current Behavior
 
 - build commands are intended for standalone source files, not include files
 - build-and-run only auto-runs when the extension can infer a runnable output for the current platform
-- compiler output is written to the `FASM` output channel
+- compiler output is written to the `FASM` output channel, and errors also appear in the Problems panel
+- programs run in the `FASM Run` terminal, so they can read input
+- flat assembler 1 stops at its first error, so a build shows one problem at a time
 - compiler path and limits are configurable in settings
-- output format detection covers PE, PE64, ELF, ELF64, MZ, Mach-O, COFF, MS COFF, MS64 COFF, and binary
+- output names follow what the assemblers write, including extensions set with `as` and formats set in include files
+- the target system comes from the `format` line, then the `fasm.targetSystem` setting, then your computer
+- other architectures can be built but not run, because they need a device, simulator or runtime
 
 ## Requirements
 
@@ -42,39 +57,42 @@ On Linux and macOS, the compiler path defaults to `fasm` (looked up from PATH).
 
 - **Windows**: Full support. Default compiler path, PE build/run, Win32/Win64 snippets.
 - **Linux**: Build and run support for ELF executables. Snippets for ELF32, ELF64, and ELF object files.
-- **macOS**: Build target detection for Mach-O format. Snippet template provided (requires fasmg or fasm2 include packages for Mach-O output).
+- **macOS**: flat assembler 1 and 2 have no macOS package, so use fasmg. Snippet template provided.
 
-## Theme
+## Current Limits
 
-The extension includes an optional dark theme tuned for assembly-heavy editing:
+- fasm 2 and fasmg files use the fasm 1 grammar, plus extra colours for fasmg directives and other architectures
+- the hover cards for other architectures name the instruction, without a description
+- only a partial ARM instruction list is built in, because the FASMARM documentation has no full list
 
-- restrained dark background
-- higher contrast for mnemonics, directives, registers, labels, and numbers
-- colors chosen to make data flow and control flow easier to scan in FASM source
-- rich typography (bold instructions/constants, italic directives/data types)
+## Colors
 
-You can enable it from the editor theme picker as `FASM Colors`.
+FASM uses standard scope names, so your current theme colours FASM files with no setup.
+
+For stronger assembly colours, run `FASM: Turn On FASM Colors` and choose this workspace or all windows. It only changes FASM text, and picks light or dark colours from your theme at that moment. Run it again after switching between light and dark themes. Background and window colours aren't changed. Choosing this workspace saves the colours in `.vscode/settings.json`.
+
+`FASM: Turn Off FASM Colors` removes them and keeps your own rules.
 
 ### Customizing Styles & Fonts
 
-If you want to add your own personal style, override fonts, or adjust the richness, you can add custom rules to your VS Code `settings.json`:
+You can add your own rules to `settings.json`:
 
 ```json
 {
-  "editor.fontFamily": "'Fira Code', Consolas, monospace",
-  "editor.fontLigatures": true,
+  "[fasm]": {
+    "editor.fontFamily": "'Fira Code', Consolas, monospace",
+    "editor.fontLigatures": true
+  },
   "editor.tokenColorCustomizations": {
-    "[FASM Colors]": {
-      "textMateRules": [
-        {
-          "scope": "keyword.other.mnemonic",
-          "settings": {
-            "foreground": "#ffaa00",
-            "fontStyle": "bold underline"
-          }
+    "textMateRules": [
+      {
+        "scope": "keyword.other.mnemonic",
+        "settings": {
+          "foreground": "#ffaa00",
+          "fontStyle": "bold underline"
         }
-      ]
-    }
+      }
+    ]
   }
 }
 ```

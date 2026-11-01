@@ -1,69 +1,66 @@
 import * as cp from 'child_process';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { COMPILER_LABELS, CompilerKind, buildCompilerCommand } from './compilerKinds';
+import { CompilerManager } from './compilerManager';
+import { FasmError, parseFasmErrors } from './fasmErrors';
+
+export interface CompileResult {
+    readonly success: boolean;
+    readonly errors: readonly FasmError[];
+}
 
 export function defaultCompilerPath(platform: NodeJS.Platform): string {
     return platform === 'win32' ? 'C:\\fasmw17335\\fasm.exe' : 'fasm';
 }
 
 export class FasmCompiler {
-    private outputChannel: vscode.OutputChannel;
+    constructor(
+        private readonly outputChannel: vscode.OutputChannel,
+        private readonly manager: CompilerManager
+    ) {}
 
-    constructor(outputChannel: vscode.OutputChannel) {
-        this.outputChannel = outputChannel;
-    }
-
-    async compile(sourcePath: string, outputPath?: string): Promise<boolean> {
+    async compile(sourcePath: string, kind: CompilerKind): Promise<CompileResult> {
         const config = vscode.workspace.getConfiguration('fasm');
-        const compilerPath = config.get<string>('compilerPath', '') || defaultCompilerPath(process.platform);
-        const memoryLimit = config.get<number>('memoryLimit', 65536);
-        const passesLimit = config.get<number>('passesLimit', 100);
-        const generateSymbols = config.get<boolean>('generateSymbols', false);
-
-        const args: string[] = [sourcePath];
-        if (outputPath) {
-            args.push(outputPath);
+        await this.manager.refresh();
+        const compilerPath = this.manager.pathFor(kind) ?? (kind === 'fasm' ? defaultCompilerPath(process.platform) : undefined);
+        if (!compilerPath) {
+            this.outputChannel.appendLine(`${COMPILER_LABELS[kind]} wasn't found. Choose it in the FASM Control Panel.`);
+            return { success: false, errors: [] };
         }
 
-        args.push('-m', memoryLimit.toString());
-        args.push('-p', passesLimit.toString());
+        const command = buildCompilerCommand(kind, compilerPath, sourcePath, {
+            memoryLimit: config.get<number>('memoryLimit', 65536),
+            passesLimit: config.get<number>('passesLimit', 100),
+            symbolsPath: config.get<boolean>('generateSymbols', false) ? sourcePath.replace(/\.(asm|inc)$/i, '.fas') : undefined
+        }, process.platform);
 
-        if (generateSymbols) {
-            const symbolsPath = outputPath
-                ? outputPath.replace(/\.exe$/i, '.fas')
-                : sourcePath.replace(/\.(asm|inc)$/i, '.fas');
-            args.push('-s', symbolsPath);
+        const workingDirectory = path.dirname(sourcePath);
+        const env = { ...process.env };
+        if (command.includePaths.length > 0) {
+            env.INCLUDE = [...command.includePaths, env.INCLUDE].filter(Boolean).join(path.delimiter);
         }
 
-        return new Promise<boolean>((resolve) => {
-            this.outputChannel.appendLine(`Command: "${compilerPath}" ${args.join(' ')}`);
+        return new Promise<CompileResult>((resolve) => {
+            this.outputChannel.appendLine(`Command: "${command.command}" ${command.args.join(' ')}`);
             this.outputChannel.appendLine('');
 
-            const child = cp.spawn(compilerPath, args, {
-                cwd: path.dirname(sourcePath)
-            });
+            const child = cp.spawn(command.command, [...command.args], { cwd: workingDirectory, env });
+            let output = '';
 
-            let stdout = '';
-            let stderr = '';
-
-            child.stdout.on('data', (data) => {
+            const collect = (data: Buffer) => {
                 const text = data.toString();
-                stdout += text;
+                output += text;
                 this.outputChannel.append(text);
-            });
-
-            child.stderr.on('data', (data) => {
-                const text = data.toString();
-                stderr += text;
-                this.outputChannel.append(text);
-            });
+            };
+            child.stdout.on('data', collect);
+            child.stderr.on('data', collect);
 
             child.on('error', (error) => {
                 this.outputChannel.appendLine(`Error: ${error.message}`);
                 this.outputChannel.appendLine('');
-                this.outputChannel.appendLine('Make sure FASM is installed and the compiler path is correct.');
-                this.outputChannel.appendLine('You can configure the path in settings: fasm.compilerPath');
-                resolve(false);
+                this.outputChannel.appendLine('Make sure the compiler is installed and its path is correct in the FASM Control Panel.');
+                resolve({ success: false, errors: [] });
             });
 
             child.on('close', (code) => {
@@ -71,76 +68,13 @@ export class FasmCompiler {
 
                 if (code === 0) {
                     this.outputChannel.appendLine('Build succeeded');
-                    resolve(true);
+                    resolve({ success: true, errors: [] });
                     return;
                 }
 
                 this.outputChannel.appendLine(`Build failed with exit code ${code}`);
-                this.parseErrors(stdout + stderr);
-                resolve(false);
+                resolve({ success: false, errors: parseFasmErrors(output, workingDirectory) });
             });
         });
-    }
-
-    async run(exePath: string): Promise<void> {
-        return new Promise<void>((resolve) => {
-            const child = cp.spawn(exePath, [], {
-                cwd: path.dirname(exePath)
-            });
-
-            child.stdout.on('data', (data) => {
-                this.outputChannel.append(data.toString());
-            });
-
-            child.stderr.on('data', (data) => {
-                this.outputChannel.append(data.toString());
-            });
-
-            child.on('error', (error) => {
-                this.outputChannel.appendLine(`Error running program: ${error.message}`);
-                resolve();
-            });
-
-            child.on('close', (code) => {
-                this.outputChannel.appendLine('');
-                this.outputChannel.appendLine(`Program exited with code ${code}`);
-                resolve();
-            });
-        });
-    }
-
-    private parseErrors(output: string) {
-        this.outputChannel.appendLine('');
-        this.outputChannel.appendLine('Errors:');
-
-        // FASM error format is multi-line:
-        //   file [line]:
-        //           instruction
-        //   error: message.
-        const locationRegex = /^(.+?)\s+\[(\d+)\]/gm;
-        const errorRegex = /error:\s*(.+)/gi;
-
-        // Collect all file:line references
-        const locations: Array<{ file: string; line: string }> = [];
-        let match: RegExpExecArray | null;
-        while ((match = locationRegex.exec(output)) !== null) {
-            locations.push({ file: match[1].trim(), line: match[2] });
-        }
-
-        // Collect all error messages
-        const errors: string[] = [];
-        while ((match = errorRegex.exec(output)) !== null) {
-            errors.push(match[1].trim());
-        }
-
-        // Pair the last location with the error message
-        if (locations.length > 0 && errors.length > 0) {
-            const loc = locations[locations.length - 1];
-            this.outputChannel.appendLine(`  ${loc.file}:${loc.line} ${errors[0]}`);
-        } else {
-            for (const err of errors) {
-                this.outputChannel.appendLine(`  ${err}`);
-            }
-        }
     }
 }

@@ -1,10 +1,55 @@
 import type { TextDocument } from 'vscode';
-import { createBuildPlan } from '../src/compiler/buildTarget';
+import { createBuildPlan, inferOutput } from '../src/compiler/buildTarget';
 import { defaultCompilerPath } from '../src/compiler/fasmCompiler';
 
 function document(fileName: string, text: string, languageId = 'fasm'): TextDocument {
     return { fileName, languageId, getText: () => text } as unknown as TextDocument;
 }
+
+describe('inferOutput', () => {
+    // Each pair was recorded from fasm 1.73.35.
+    test.each([
+        ['format PE', '.exe'],
+        ['format PE console', '.exe'],
+        ['format PE64 GUI', '.exe'],
+        ['format PE WDM', '.exe'],
+        ['FORMAT pe', '.exe'],
+        ['format PE DLL', '.dll'],
+        ['format PE64 DLL', '.dll'],
+        ['format PE GUI 4.0 DLL', '.dll'],
+        ['format PE native', '.sys'],
+        ['format PE EFI', '.efi'],
+        ['format PE64 EFI', '.efi'],
+        ['format PE efiboot', '.efi'],
+        ['format PE efiruntime', '.efi'],
+        ['format MZ', '.exe'],
+        ['format COFF', '.obj'],
+        ['format MS COFF', '.obj'],
+        ['format MS64 COFF', '.obj'],
+        ['format ELF', '.o'],
+        ['format ELF64', '.o'],
+        ['format ELF executable', ''],
+        ['format ELF executable 3', ''],
+        ['format ELF64 executable', ''],
+        ['format ELF64 executable 3 at 400000h', ''],
+        ['format ELF dynamic', ''],
+        ['format binary', '.bin'],
+        ['use32', '.bin'],
+        ['org 100h', '.com'],
+        ["format binary as 'com'", '.com'],
+        ["format binary as ''", ''],
+        ["format PE as 'scr'", '.scr'],
+        ["format PE DLL as 'cpl'", '.cpl'],
+        ["format MZ as 'x'", '.x'],
+        ["format ELF as 'obj'", '.obj']
+    ])('%s writes "%s"', (source, extension) => {
+        expect(inferOutput(`${source}\nnop\n`).extension).toBe(extension);
+    });
+
+    test('comments are ignored', () => {
+        expect(inferOutput('; format ELF\nformat PE ; not DLL\n').extension).toBe('.exe');
+    });
+});
 
 describe('createBuildPlan', () => {
     test('files in another language cannot be built', () => {
@@ -15,32 +60,29 @@ describe('createBuildPlan', () => {
         expect(createBuildPlan(document('a.inc', 'format PE')).canBuild).toBe(false);
     });
 
-    test('PE output is an exe', () => {
-        expect(createBuildPlan(document('a.asm', 'format PE console')).outputPath).toBe('a.exe');
-        expect(createBuildPlan(document('a.asm', 'format PE64 GUI')).outputPath).toBe('a.exe');
-    });
-
-    test('MZ output is an exe', () => {
-        expect(createBuildPlan(document('a.asm', 'format MZ')).outputPath).toBe('a.exe');
-    });
-
-    test('ELF executables have no extension', () => {
+    test('the output path sits beside the source', () => {
+        expect(createBuildPlan(document('a.asm', 'format PE DLL')).outputPath).toBe('a.dll');
         expect(createBuildPlan(document('a.asm', 'format ELF64 executable')).outputPath).toBe('a');
     });
 
-    test('a file with no format can be built but not run', () => {
-        const plan = createBuildPlan(document('a.asm', 'use32'));
-        expect(plan.canBuild).toBe(true);
-        expect(plan.canRun).toBe(false);
+    test('dots in folder names are kept', () => {
+        expect(createBuildPlan(document('my.dir/prog', 'format PE')).outputPath).toBe('my.dir/prog.exe');
     });
 
-    // fasm 1.73.35 writes these names. The extension still expects something else; see docs/CHANGE_LIST.md.
-    test.todo('format PE DLL should expect a.dll');
-    test.todo('format PE native should expect a.sys');
-    test.todo('format PE EFI should expect a.efi');
-    test.todo('format ELF and ELF64 objects should expect a.o');
-    test.todo('format COFF should expect a.obj on every system');
-    test.todo('format binary should expect a.bin, or the extension given with as');
+    test.each([
+        ['format PE console', 'win32', true],
+        ['format PE DLL', 'win32', false],
+        ['format PE native', 'win32', false],
+        ['format ELF executable', 'win32', false],
+        ['format PE console', 'linux', false],
+        ['format ELF executable', 'linux', true],
+        ['format ELF', 'linux', false],
+        ["format binary as ''", 'linux', false],
+        ['format ELF executable', 'darwin', false],
+        ['use32', 'win32', false]
+    ] as const)('%s on %s: run is %s', (source, platform, canRun) => {
+        expect(createBuildPlan(document('a.asm', source), platform).canRun).toBe(canRun);
+    });
 });
 
 describe('defaultCompilerPath', () => {

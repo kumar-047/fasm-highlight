@@ -71,8 +71,8 @@
     ],
     "folding": {
         "markers": {
-            "start": "^\\s*(macro|struc|proc|if|rept|irp|irpc)\\b",
-            "end": "^\\s*(endm|ends|endp|endif|end)\\b"
+            "start": "^\\s*(?:[\\w.?$@]+:\\s*)?(?:(?:if|while|repeat|virtual|proc|struct)\\b|data\\b(?!\\s*(?::|=|d[bwdqtpfu]\\b|r[bwdqtpf]\\b|equ\\b))|[^;]*\\{\\s*(?:;.*)?$)",
+            "end": "^\\s*(?:end\\s+\\w+|endp\\b|ends\\b|\\})"
         }
     },
     "wordPattern": "(-?\\d*\\.\\d\\w*)|([^\\`\\~\\!\\@\\#\\%\\^\\&\\*\\(\\)\\-\\=\\+\\[\\{\\]\\}\\\\\\|\\;\\:\\'\\\"\\,\\.\\<\\>\\/\\?\\s]+)"
