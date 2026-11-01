@@ -192,8 +192,11 @@
           "variable": [
             "variable.language.register.arch.fasm"
           ],
-          "macro": [
-            "keyword.control.directive.fasmg.fasm"
+          "operator": [
+            "keyword.operator.word.fasm"
+          ],
+          "function": [
+            "entity.name.function.fasm"
           ]
         }
       }

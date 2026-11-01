@@ -5,5 +5,6 @@ export interface GrammarRule {
     readonly end?: string;
     readonly captures?: Record<string, { readonly name: string }>;
     readonly beginCaptures?: Record<string, { readonly name: string }>;
+    readonly endCaptures?: Record<string, { readonly name: string }>;
     readonly patterns?: readonly (GrammarRule | { readonly include: string })[];
 }

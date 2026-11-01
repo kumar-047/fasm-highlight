@@ -1,4 +1,4 @@
-export type SemanticType = 'keyword' | 'variable' | 'macro';
+export type SemanticType = 'keyword' | 'variable' | 'operator' | 'function';
 
 export interface SemanticToken {
     readonly line: number;

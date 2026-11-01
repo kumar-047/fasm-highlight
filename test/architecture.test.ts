@@ -107,14 +107,21 @@ describe('semantic tokens', () => {
         expect(tokensOf('format PE\nmov eax,1\n')).toEqual([]);
     });
 
-    test('fasmg directives are coloured', () => {
-        expect(tokensOf('iterate x, 1,2\nend iterate\n')).toContainEqual({ word: 'iterate', type: 'macro' });
+    test('macros defined in the file are coloured where they are used', () => {
+        expect(tokensOf('macro clear reg { xor reg,reg }\nclear eax\nfoo: clear ebx\n')).toEqual([
+            { word: 'clear', type: 'function' },
+            { word: 'clear', type: 'function' }
+        ]);
     });
 
-    test('CALM commands are only coloured inside CALM blocks', () => {
-        const words = tokensOf('iterate x, 1\narrange a,b\ncalminstruction y\narrange a,b\nend calminstruction\narrange a,b\n')
-            .filter((token) => token.word === 'arrange');
-        expect(words).toHaveLength(1);
+    test('structures defined in the file are coloured on the second word', () => {
+        expect(tokensOf('struc POINT { .x dd ? }\norigin POINT\n')).toEqual([{ word: 'POINT', type: 'function' }]);
+    });
+
+    test('fasmg expression words are operators only in fasmg files', () => {
+        const fasmg = tokensOf('macro x\nend macro\nname = string 1\n');
+        expect(fasmg).toContainEqual({ word: 'string', type: 'operator' });
+        expect(tokensOf('format PE\nname = string 1\n')).toEqual([]);
     });
 
     test('scanned macros are coloured', () => {

@@ -3,7 +3,7 @@ import type { SymbolGroup } from './types';
 
 const symbolIndex = new Map<string, SymbolGroup>();
 for (const group of SYMBOL_GROUPS) {
-    if (group.context === 'format-line') {
+    if (group.context === 'format-line' || group.context === 'calm-block') {
         continue;
     }
     for (const word of group.words) {

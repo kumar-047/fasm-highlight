@@ -21,7 +21,7 @@ Run and Stop, compiler detection and install, the compiler list, FASMARM, projec
 
 ## Next: highlighting and formatting
 
-- [ ] Proper fasmg and fasm 2 highlighting, using their manuals
+- [x] fasmg and fasm 2 highlighting from their manuals and instruction sets
 - [ ] Improve the formatter from real use
 - [ ] Improve FASM Colors from real use
 

@@ -11,7 +11,9 @@ The same extension, upgraded. The identifier is still `kumar-047.fasm-highlight`
 - all 1,931 instructions in fasm 1.73.35, and the registers that were missing, such as `rip`, `eip`, `xmm16-31` and `ymm16-31`
 - float, `$FF`, `10d`, `17q` and `1_000` number highlighting, `@b`, `@f` and `@r` references, and section names
 - format keywords on `format`, `section`, `segment` and `data` lines
-- colours for fasmg keywords, and for 8051, AVR, JVM bytecode, WebAssembly and AArch64 instructions, detected from include lines
+- fasmg and fasm 2 highlighting: `iterate`, `namespace`, `rawmatch`, `end` blocks, `:=` and `=:`, CALM commands inside `calminstruction`, and names in `macro`, `struc`, `namespace` and `label`
+- colours for macros and structures defined in the same file, operators such as `>=` and `&`, `?`, `__file__`, AVX-512 decorators such as `{z}`, line continuations, and `1'000` numbers
+- colours for 8051, AVR, JVM bytecode, WebAssembly and AArch64 instructions, detected from include lines
 - colours and hover cards for other fasmg packages, read from the file's includes
 - a formatter that only changes whitespace
 - FASM Colors, which colour FASM text only, for this workspace or all windows

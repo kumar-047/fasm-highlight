@@ -9,7 +9,7 @@ describe('symbol table', () => {
     test('no word belongs to two groups', () => {
         const seen = new Map<string, string>();
         const duplicates: string[] = [];
-        for (const group of SYMBOL_GROUPS.filter((candidate) => candidate.context !== 'format-line')) {
+        for (const group of SYMBOL_GROUPS.filter((candidate) => candidate.context !== 'format-line' && candidate.context !== 'calm-block')) {
             for (const word of group.words) {
                 const earlier = seen.get(word);
                 if (earlier) {
@@ -26,8 +26,8 @@ describe('symbol table', () => {
         expect(bad).toEqual([]);
     });
 
-    test('it holds all 1,931 instructions in fasm 1.73.35', () => {
-        expect(Object.values(MNEMONIC_GROUPS).flat()).toHaveLength(1931);
+    test('it holds all instructions in fasm 1.73.35 and the 3 extra in fasm 2', () => {
+        expect(Object.values(MNEMONIC_GROUPS).flat()).toHaveLength(1934);
     });
 
     test('directive words are not listed as instructions', () => {
@@ -37,7 +37,7 @@ describe('symbol table', () => {
     });
 
     test('words outside fasm 1 are gone', () => {
-        for (const word of ['endif', 'ifdef', 'ifndef', 'elseif', 'irpc', 'endm', 'cwtl', 'cltd', 'cqto', 'offset', 'lengthof', 'length', 'size', 'ip']) {
+        for (const word of ['endif', 'ifdef', 'ifndef', 'elseif', 'irpc', 'endm', 'cwtl', 'cltd', 'cqto', 'offset', 'length', 'size', 'ip']) {
             expect(findSymbolGroup(word)).toBeUndefined();
         }
     });

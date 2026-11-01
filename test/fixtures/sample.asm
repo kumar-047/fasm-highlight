@@ -74,5 +74,38 @@ data import
 end data
 
 stack dd 0
+
+dw 1'000
+dd ?
+x := 5
+y =: 6
+if x >= 1 & y <> 2
+end if
+macro greet? name*
+end macro
+greet 'hi'
+struc (instance) point x
+end struc
+namespace maths
+end namespace
+iterate reg, eax,ebx
+end iterate
+rawmatch a, b
+end rawmatch
+label start2 at 0
+calminstruction shout? text
+    arrange text, =display text
+    jyes done
+    done:
+    assemble text
+end calminstruction
+arrange a, b
+vaddps zmm0{k1}{z},zmm1,zmm2{sae}
+ibts eax,ebx
+element x86.reg
+cominvk obj,Run
+db __file__
+db 1,2,\
+db $%,$%%
 bad db 'unterminated
 ; this comment must stay a comment

@@ -37,7 +37,10 @@ describe('folding', () => {
         ['macro m\n{\nnop\n}', '{ ... }'],
         ['rept 3 {\nnop\n}', 'rept 3 { ... }'],
         ['irp x, 1,2 { ; loop\nnop\n}', 'irp x, 1,2 { ; loop ... }'],
-        ['label: if x\nnop\nend if', 'label: if x ... end if']
+        ['label: if x\nnop\nend if', 'label: if x ... end if'],
+        ['iterate a, 1,2\nnop\nend iterate', 'iterate a, 1,2 ... end iterate'],
+        ['namespace x\nnop\nend namespace', 'namespace x ... end namespace'],
+        ['calminstruction x\nnop\nend calminstruction', 'calminstruction x ... end calminstruction']
     ])('%s', (source, expected) => {
         expect(foldedLines(source)).toEqual([expected]);
     });

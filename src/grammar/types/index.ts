@@ -27,7 +27,8 @@ export type SymbolKind =
 export type SymbolContext =
     | 'anywhere'
     | 'statement'
-    | 'format-line';    // Only on format, section, segment and data lines.
+    | 'format-line'
+    | 'calm-block';
 
 export interface SymbolGroup {
     readonly id: string;

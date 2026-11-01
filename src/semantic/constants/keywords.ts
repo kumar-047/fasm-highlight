@@ -1,11 +1,7 @@
 import type { SemanticType } from '../types';
 
-export const TOKEN_TYPES: readonly SemanticType[] = ['keyword', 'variable', 'macro'];
+export const TOKEN_TYPES: readonly SemanticType[] = ['keyword', 'variable', 'operator', 'function'];
 
-export const FASMG_DIRECTIVES = new Set((
-    'iterate indx calminstruction namespace rawmatch rmatch reequ redefine mvmacro mvstruc emit dbx '
-    + 'restartout outscope esc retaincomments removecomments isolatelines combinelines'
-).split(' '));
-export const CALM_COMMANDS = new Set((
-    'arrange assemble call check compute exit jno jump jyes local match publish rawmatch rmatch stringify take taketext transform'
-).split(' '));
+export const FASMG_OPERATORS = new Set(['element', 'float', 'metadata', 'scale', 'string', 'trunc']);
+
+export const MACRO_DEFINITION = /^\s*(?:macro|struc)\s+(?:\([^)]*\)\s*)?([A-Za-z_][\w.]*)/gim;

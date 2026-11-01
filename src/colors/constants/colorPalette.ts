@@ -20,8 +20,7 @@ export const ROLE_LABELS: Readonly<Record<ColorRole, string>> = {
 
 export const SEMANTIC_SCOPES = {
     keyword: 'keyword.other.mnemonic.arch.fasm',
-    variable: 'variable.language.register.arch.fasm',
-    macro: 'keyword.control.directive.fasmg.fasm'
+    variable: 'variable.language.register.arch.fasm'
 } as const;
 
 export const SCOPES: Readonly<Record<ColorRole, readonly string[]>> = {
@@ -29,7 +28,7 @@ export const SCOPES: Readonly<Record<ColorRole, readonly string[]>> = {
     string: ['string.quoted.single.fasm', 'string.quoted.double.fasm'],
     label: ['entity.name.label.fasm', 'entity.name.label.local.fasm', 'entity.name.label.anonymous.fasm', 'keyword.control.label-reference.fasm'],
     section: ['entity.name.section.fasm'],
-    data: ['storage.type.data.fasm', 'storage.type.size.fasm'],
+    data: ['storage.type.data.fasm', 'storage.type.size.fasm', 'storage.modifier.fasm'],
     directive: [
         'keyword.control.directive.structure.fasm',
         'keyword.control.directive.macro.fasm',
@@ -45,9 +44,10 @@ export const SCOPES: Readonly<Record<ColorRole, readonly string[]>> = {
         'keyword.control.directive.other.fasm',
         'keyword.control.directive.statement.fasm',
         'keyword.other.format.fasm',
-        SEMANTIC_SCOPES.macro
+        'keyword.control.directive.fasmg.fasm',
+        'keyword.control.directive.calm.fasm'
     ],
-    helper: ['support.function.macro-helper.fasm'],
+    helper: ['support.function.macro-helper.fasm', 'entity.name.function.fasm', 'entity.name.namespace.fasm'],
     instruction: [
         'keyword.other.mnemonic.data-movement.fasm',
         'keyword.other.mnemonic.arithmetic.fasm',
@@ -90,9 +90,18 @@ export const SCOPES: Readonly<Record<ColorRole, readonly string[]>> = {
         'constant.numeric.float.fasm',
         'constant.numeric.binary.fasm',
         'constant.numeric.octal.fasm',
-        'constant.numeric.decimal.fasm'
+        'constant.numeric.decimal.fasm',
+        'constant.language.fasm'
     ],
-    operator: ['keyword.operator.special.fasm', 'keyword.operator.word.fasm', 'keyword.operator.arithmetic.fasm']
+    operator: [
+        'keyword.operator.special.fasm',
+        'keyword.operator.word.fasm',
+        'keyword.operator.arithmetic.fasm',
+        'keyword.operator.assignment.fasm',
+        'keyword.operator.comparison.fasm',
+        'keyword.operator.logical.fasm',
+        'constant.character.escape.line-continuation.fasm'
+    ]
 };
 
 export const FONT_STYLES: Partial<Record<ColorRole, string>> = {

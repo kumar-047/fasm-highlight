@@ -16,6 +16,12 @@
       "include": "#labels"
     },
     {
+      "include": "#calm-blocks"
+    },
+    {
+      "include": "#definitions"
+    },
+    {
       "include": "#statement-words"
     },
     {
@@ -28,7 +34,13 @@
       "include": "#instructions"
     },
     {
+      "include": "#decorators"
+    },
+    {
       "include": "#registers"
+    },
+    {
+      "include": "#language-constants"
     },
     {
       "include": "#numbers"
@@ -153,7 +165,7 @@
       "patterns": [
         {
           "name": "keyword.other.format.fasm",
-          "match": "(?i)(?<![\\w.@$?])(?:binary|code|coff|console|data|discardable|dll|dynamic|efi|efiboot|efiruntime|elf|elf64|executable|export|fixups|gnuehframe|gnurelro|gnustack|gui|import|interpreter|large|linkinfo|linkremove|ms|ms64|mz|native|note|notpageable|nx|pe|pe64|readable|resource|shareable|static|wdm|writable|writeable)(?![\\w.@$?])"
+          "match": "(?i)(?<![\\w.@$?])(?:binary|code|coff|console|data|discardable|dll|dynamic|efi|efiboot|efiruntime|elf|elf64|executable|export|fixups|gnuehframe|gnurelro|gnustack|gui|import|interpreter|large|linkinfo|linkremove|macho|macho64|ms|ms64|mz|native|note|notpageable|nx|pe|pe64|readable|resource|shareable|static|wdm|writable|writeable)(?![\\w.@$?])"
         }
       ]
     },
@@ -177,10 +189,104 @@
         }
       ]
     },
+    "calm-blocks": {
+      "patterns": [
+        {
+          "begin": "(?i)(?:^\\s*|(?<=[:{])\\s*)(calminstruction)\\s+(?:\\([^)]*\\)\\s*)?([A-Za-z_.?][\\w.?!$@]*)",
+          "end": "(?i)^\\s*(end)\\s+(calminstruction)\\b",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.control.directive.macro.fasm"
+            },
+            "2": {
+              "name": "entity.name.function.fasm"
+            }
+          },
+          "endCaptures": {
+            "1": {
+              "name": "keyword.control.directive.macro.fasm"
+            },
+            "2": {
+              "name": "keyword.control.directive.macro.fasm"
+            }
+          },
+          "patterns": [
+            {
+              "match": "(?i)(?:^\\s*|(?<=[:{])\\s*)(arrange|assemble|call|check|compute|exit|jno|jump|jyes|local|match|publish|rawmatch|rmatch|stringify|take|taketext|transform)(?![\\w.@$?])",
+              "captures": {
+                "1": {
+                  "name": "keyword.control.directive.calm.fasm"
+                }
+              }
+            },
+            {
+              "include": "$self"
+            }
+          ]
+        }
+      ]
+    },
+    "definitions": {
+      "patterns": [
+        {
+          "match": "(?i)(?:^\\s*|(?<=[:{])\\s*)(macro|struc)\\s+(?:\\([^)]*\\)\\s*)?([A-Za-z_.?][\\w.?!$@]*)",
+          "captures": {
+            "1": {
+              "name": "keyword.control.directive.macro.fasm"
+            },
+            "2": {
+              "name": "entity.name.function.fasm"
+            }
+          }
+        },
+        {
+          "match": "(?i)(?:^\\s*|(?<=[:{])\\s*)(namespace)\\s+(?:\\([^)]*\\)\\s*)?([A-Za-z_.?][\\w.?!$@]*)",
+          "captures": {
+            "1": {
+              "name": "keyword.control.directive.fasmg.fasm"
+            },
+            "2": {
+              "name": "entity.name.namespace.fasm"
+            }
+          }
+        },
+        {
+          "match": "(?i)(?:^\\s*|(?<=[:{])\\s*)(label)\\s+(?:\\([^)]*\\)\\s*)?([A-Za-z_.?][\\w.?!$@]*)",
+          "captures": {
+            "1": {
+              "name": "keyword.control.directive.other.fasm"
+            },
+            "2": {
+              "name": "entity.name.label.fasm"
+            }
+          }
+        }
+      ]
+    },
+    "decorators": {
+      "patterns": [
+        {
+          "name": "storage.modifier.fasm",
+          "match": "(?i)(?<=\\{)(?:1to(?:2|4|8|16|32)|z|sae|(?:rn|rd|ru|rz)-sae)(?=\\})"
+        }
+      ]
+    },
+    "language-constants": {
+      "patterns": [
+        {
+          "name": "constant.language.fasm",
+          "match": "(?i)(?<![\\w.@$?])(?:__file__|__line__|__source__|__time__)(?![\\w.@$?])"
+        },
+        {
+          "name": "constant.language.fasm",
+          "match": "(?<=[\\s,(])\\?(?=\\s*(?:[,;)]|$))"
+        }
+      ]
+    },
     "statement-words": {
       "patterns": [
         {
-          "match": "(?i)(?:^\\s*|(?<=[:{])\\s*)(end)\\s+(data)(?![\\w.@$?])",
+          "match": "(?i)(?:^\\s*|(?<=[:{])\\s*)(end)\\s+(data|iterate|irpv|namespace|rawmatch|rmatch|postpone)(?![\\w.@$?])",
           "captures": {
             "1": {
               "name": "keyword.control.directive.statement.fasm"
@@ -195,6 +301,14 @@
           "captures": {
             "1": {
               "name": "keyword.control.directive.statement.fasm"
+            }
+          }
+        },
+        {
+          "match": "(?i)(?:^\\s*|(?<=[:{])\\s*)(combinelines|element|esc|eval|indx|isolatelines|iterate|mvmacro|mvstruc|namespace|outscope|rawmatch|removecomments|restartout|retaincomments|rmatch|use)(?![\\w.@$?])(?!\\s*[:=]|\\s+(?:d[bwdqtpfu]|r[bwdqtpf]|equ|fix|label)\\b)",
+          "captures": {
+            "1": {
+              "name": "keyword.control.directive.fasmg.fasm"
             }
           }
         },
@@ -235,7 +349,7 @@
         },
         {
           "name": "keyword.control.directive.constant.fasm",
-          "match": "(?i)(?<![\\w.@$?])(?:define|equ|fix|restore)(?![\\w.@$?])"
+          "match": "(?i)(?<![\\w.@$?])(?:define|equ|fix|redefine|reequ|restore)(?![\\w.@$?])"
         },
         {
           "name": "keyword.control.directive.entry.fasm",
@@ -267,7 +381,7 @@
       "patterns": [
         {
           "name": "support.function.macro-helper.fasm",
-          "match": "(?i)(?<![\\w.@$?])(?:ccall|cinvoke|endp|ends|fastcall|invoke|library|proc|sizeof|stdcall|struct|union)(?![\\w.@$?])"
+          "match": "(?i)(?<![\\w.@$?])(?:api|ccall|cinvoke|comcall|cominvk|endp|ends|fastcall|interface|invoke|library|proc|sizeof|stdcall|struct|union)(?![\\w.@$?])"
         }
       ]
     },
@@ -327,7 +441,7 @@
         },
         {
           "name": "keyword.other.mnemonic.extension.fasm",
-          "match": "(?i)(?<![\\w.@$?])(?:adcx|adox|aesdec|aesdeclast|aesenc|aesenclast|aesimc|aeskeygenassist|andn|bextr|blcfill|blci|blcic|blcmsk|blcs|blsfill|blsi|blsic|blsmsk|blsr|bndcl|bndcn|bndcu|bndldx|bndmk|bndmov|bndstx|bzhi|cldemote|clflushopt|clrssbsy|clui|clwb|clzero|encls|enclu|endbr32|endbr64|enqcmd|enqcmds|extrq|getsec|gf2p8affineinvqb|gf2p8affineqb|gf2p8mulb|hreset|incsspd|incsspq|insertq|invept|invpcid|invvpid|ldtilecfg|llwpcb|lwpins|lwpval|lzcnt|movbe|movdir64b|movdiri|movntsd|movntss|mulx|pclmulhqhdq|pclmulhqhqdq|pclmulhqlqdq|pclmullqhdq|pclmullqhqdq|pclmullqlqdq|pclmulqdq|pconfig|pdep|pext|popcnt|prefetch|prefetchnta|prefetcht0|prefetcht1|prefetcht2|prefetchw|prefetchwt1|ptwrite|rdfsbase|rdgsbase|rdpid|rdpkru|rdrand|rdseed|rdsspd|rdsspq|rorx|rstorssp|sarx|saveprevssp|senduipi|serialize|setssbsy|sha1msg1|sha1msg2|sha1nexte|sha1rnds4|sha256msg1|sha256msg2|sha256rnds2|shlx|shrx|slwpcb|sttilecfg|stui|t1mskc|tdpbf16ps|tdpbssd|tdpbsud|tdpbusd|tdpbuud|testui|tileloadd|tileloaddt1|tilerelease|tilestored|tilezero|tpause|tzcnt|tzmsk|uiret|umonitor|umwait|wbnoinvd|wrfsbase|wrgsbase|wrpkru|wrssd|wrssq|wrussd|wrussq|xabort|xacquire|xbegin|xend|xgetbv|xrelease|xresldtrk|xrstor|xrstor64|xsave|xsave64|xsavec|xsavec64|xsaveopt|xsaveopt64|xsetbv|xsusldtrk|xtest)(?![\\w.@$?])"
+          "match": "(?i)(?<![\\w.@$?])(?:adcx|adox|aesdec|aesdeclast|aesenc|aesenclast|aesimc|aeskeygenassist|andn|bextr|blcfill|blci|blcic|blcmsk|blcs|blsfill|blsi|blsic|blsmsk|blsr|bndcl|bndcn|bndcu|bndldx|bndmk|bndmov|bndstx|bzhi|cldemote|clflushopt|clrssbsy|clui|clwb|clzero|encls|enclu|endbr32|endbr64|enqcmd|enqcmds|extrq|getsec|gf2p8affineinvqb|gf2p8affineqb|gf2p8mulb|hreset|ibts|incsspd|incsspq|insertq|invept|invpcid|invvpid|ldtilecfg|llwpcb|loadiwkey|lwpins|lwpval|lzcnt|movbe|movdir64b|movdiri|movntsd|movntss|mulx|pclmulhqhdq|pclmulhqhqdq|pclmulhqlqdq|pclmullqhdq|pclmullqhqdq|pclmullqlqdq|pclmulqdq|pconfig|pdep|pext|popcnt|prefetch|prefetchnta|prefetcht0|prefetcht1|prefetcht2|prefetchw|prefetchwt1|ptwrite|rdfsbase|rdgsbase|rdpid|rdpkru|rdrand|rdseed|rdsspd|rdsspq|rorx|rstorssp|sarx|saveprevssp|senduipi|serialize|setssbsy|sha1msg1|sha1msg2|sha1nexte|sha1rnds4|sha256msg1|sha256msg2|sha256rnds2|shlx|shrx|slwpcb|sttilecfg|stui|t1mskc|tdpbf16ps|tdpbssd|tdpbsud|tdpbusd|tdpbuud|testui|tileloadd|tileloaddt1|tilerelease|tilestored|tilezero|tpause|tzcnt|tzmsk|uiret|umonitor|umwait|wbnoinvd|wrfsbase|wrgsbase|wrpkru|wrssd|wrssq|wrussd|wrussq|xabort|xacquire|xbegin|xbts|xend|xgetbv|xrelease|xresldtrk|xrstor|xrstor64|xsave|xsave64|xsavec|xsavec64|xsaveopt|xsaveopt64|xsetbv|xsusldtrk|xtest)(?![\\w.@$?])"
         }
       ]
     },
@@ -407,7 +521,7 @@
       "patterns": [
         {
           "name": "constant.numeric.hex.fasm",
-          "match": "(?<![\\w.@$?])(?:0[xX][0-9a-fA-F_]+|[0-9][0-9a-fA-F_]*[hH]|\\$[0-9a-fA-F][0-9a-fA-F_]*)(?![\\w.@$?])"
+          "match": "(?<![\\w.@$?])(?:0[xX][0-9a-fA-F_']+|[0-9][0-9a-fA-F_']*[hH]|\\$[0-9a-fA-F][0-9a-fA-F_']*)(?![\\w.@$?])"
         },
         {
           "name": "constant.numeric.float.fasm",
@@ -415,27 +529,43 @@
         },
         {
           "name": "constant.numeric.binary.fasm",
-          "match": "(?<![\\w.@$?])(?:0[bB][01_]+|[01][01_]*[bB])(?![\\w.@$?])"
+          "match": "(?<![\\w.@$?])(?:0[bB][01_']+|[01][01_']*[bB])(?![\\w.@$?])"
         },
         {
           "name": "constant.numeric.octal.fasm",
-          "match": "(?<![\\w.@$?])(?:0[oO][0-7_]+|[0-7][0-7_]*[oOqQ])(?![\\w.@$?])"
+          "match": "(?<![\\w.@$?])(?:0[oO][0-7_']+|[0-7][0-7_']*[oOqQ])(?![\\w.@$?])"
         },
         {
           "name": "constant.numeric.decimal.fasm",
-          "match": "(?<![\\w.@$?])[0-9][0-9_]*[dD]?(?![\\w.@$?])"
+          "match": "(?<![\\w.@$?])[0-9][0-9_']*[dD]?(?![\\w.@$?])"
         }
       ]
     },
     "operators": {
       "patterns": [
         {
+          "name": "constant.character.escape.line-continuation.fasm",
+          "match": "\\\\(?=\\s*(?:;|$))"
+        },
+        {
           "name": "keyword.operator.special.fasm",
-          "match": "\\$|#|`|%"
+          "match": "\\$%%|\\$%|\\$@|\\$\\$|\\$|%%|%t\\b|%|#|`"
+        },
+        {
+          "name": "keyword.operator.comparison.fasm",
+          "match": "<=|>=|<>|<|>"
+        },
+        {
+          "name": "keyword.operator.assignment.fasm",
+          "match": ":=|=:|="
+        },
+        {
+          "name": "keyword.operator.logical.fasm",
+          "match": "&|\\||~"
         },
         {
           "name": "keyword.operator.word.fasm",
-          "match": "(?i)(?<![\\w.@$?])(?:and|as|at|defined|definite|dup|eq|eqtype|far|from|mod|near|not|on|or|plt|ptr|relativeto|rva|shl|short|shr|used|xor)(?![\\w.@$?])"
+          "match": "(?i)(?<![\\w.@$?])(?:and|as|at|bappend|defined|definite|dup|elementof|elementsof|eq|eqtype|far|from|lengthof|metadataof|mod|near|not|on|or|plt|ptr|relativeto|rva|scaleof|shl|short|shr|used|xor)(?![\\w.@$?])"
         },
         {
           "name": "keyword.operator.arithmetic.fasm",
@@ -447,11 +577,11 @@
       "patterns": [
         {
           "name": "storage.type.data.fasm",
-          "match": "(?i)(?<![\\w.@$?])(?:db|dd|df|dp|dq|dt|du|dw|file)(?![\\w.@$?])"
+          "match": "(?i)(?<![\\w.@$?])(?:db|dbx|dd|ddq|ddqq|df|dp|dq|dqq|dt|du|dw|emit|file)(?![\\w.@$?])"
         },
         {
           "name": "storage.type.data.fasm",
-          "match": "(?i)(?<![\\w.@$?])(?:rb|rd|rf|rp|rq|rt|rw)(?![\\w.@$?])"
+          "match": "(?i)(?<![\\w.@$?])(?:rb|rd|rdq|rdqq|rf|rp|rq|rqq|rt|rw)(?![\\w.@$?])"
         },
         {
           "name": "storage.type.size.fasm",

@@ -91,7 +91,7 @@ const otherGroups: SymbolGroup[] = [
     directiveGroup('structure', 'structure', 'preprocessor', 'struc restruc'),
     directiveGroup('macro', 'macro', 'preprocessor', 'macro local purge rept irp irps irpv match forward reverse common postpone'),
     directiveGroup('include', 'include', 'preprocessor', 'include'),
-    directiveGroup('constant', 'symbolic constant', 'preprocessor', 'equ fix define restore'),
+    directiveGroup('constant', 'symbolic constant', 'preprocessor', 'equ reequ fix define redefine restore'),
     directiveGroup('entry', 'entry point', 'format', 'entry'),
     directiveGroup('addressing', 'addressing mode', 'directive', 'use16 use32 use64 useavx256 useavx512'),
     directiveGroup('conditional', 'conditional assembly', 'directive', 'if else'),
@@ -99,13 +99,15 @@ const otherGroups: SymbolGroup[] = [
     directiveGroup('linkage', 'linkage', 'format', 'export import public extrn'),
     directiveGroup('other', 'control', 'directive', 'align virtual display org load store label assert err'),
     directiveGroup('statement', 'control', 'format', 'end stack heap', 'statement'),
+    directiveGroup('fasmg', 'fasmg', 'directive', 'iterate indx element namespace rawmatch rmatch mvmacro mvstruc restartout outscope esc eval retaincomments removecomments isolatelines combinelines use', 'statement'),
+    directiveGroup('calm', 'CALM', 'preprocessor', 'arrange assemble call check compute exit jno jump jyes local match publish rawmatch rmatch stringify take taketext transform', 'calm-block'),
     {
         id: 'macro-helper',
         label: 'include package macro',
         kind: 'macro-helper',
         scope: 'support.function.macro-helper.fasm',
         context: 'anywhere',
-        words: list('invoke stdcall cinvoke ccall fastcall proc endp library struct ends union sizeof')
+        words: list('invoke stdcall cinvoke ccall fastcall proc endp library struct ends union sizeof cominvk comcall interface api')
     },
     {
         id: 'data.define',
@@ -113,7 +115,7 @@ const otherGroups: SymbolGroup[] = [
         kind: 'data',
         scope: 'storage.type.data.fasm',
         context: 'anywhere',
-        words: list('db dw dd dq dt df dp du file')
+        words: list('db dw dd dq dt df dp du file emit dbx ddq ddqq dqq')
     },
     {
         id: 'data.reserve',
@@ -121,7 +123,7 @@ const otherGroups: SymbolGroup[] = [
         kind: 'data',
         scope: 'storage.type.data.fasm',
         context: 'anywhere',
-        words: list('rb rw rd rq rt rf rp')
+        words: list('rb rw rd rq rt rf rp rdq rdqq rqq')
     },
     {
         id: 'data.size',
@@ -137,7 +139,7 @@ const otherGroups: SymbolGroup[] = [
         kind: 'operator',
         scope: 'keyword.operator.word.fasm',
         context: 'anywhere',
-        words: list('mod dup ptr rva plt short near far as at from on eq eqtype relativeto defined definite used')
+        words: list('mod dup ptr rva plt short near far as at from on eq eqtype relativeto defined definite used elementof scaleof metadataof elementsof lengthof bappend')
     },
     {
         id: 'format.keyword',
@@ -146,7 +148,7 @@ const otherGroups: SymbolGroup[] = [
         scope: 'keyword.other.format.fasm',
         context: 'format-line',
         words: list(
-            'binary mz pe pe64 coff ms ms64 elf elf64 gui console dll native efi efiboot efiruntime wdm nx large '
+            'binary mz pe pe64 coff ms ms64 elf elf64 macho macho64 gui console dll native efi efiboot efiruntime wdm nx large '
             + 'code data readable writable writeable executable shareable discardable notpageable linkinfo linkremove '
             + 'static dynamic interpreter note gnuehframe gnurelro gnustack export import resource fixups'
         )

@@ -82,7 +82,7 @@ describe('numbers', () => {
 
     test('$ stays the current address', () => {
         expect(scopeOf('mov eax,$-msg', '$')).toBe('keyword.operator.special.fasm');
-        expect(scopeOf('mov eax,$$', '$')).toBe('keyword.operator.special.fasm');
+        expect(scopeOf('mov eax,$$', '$$')).toBe('keyword.operator.special.fasm');
     });
 });
 
@@ -187,6 +187,61 @@ describe('format lines', () => {
 
     test('section names are coloured as sections', () => {
         expect(scopeOf("section '.text' code readable executable", "'.text'")).toBe('entity.name.section.fasm');
+    });
+});
+
+describe('fasmg and fasm 2', () => {
+    test.each([
+        ['iterate reg, eax,ebx', 'iterate', 'keyword.control.directive.fasmg.fasm'],
+        ['end iterate', 'iterate', 'keyword.control.directive.statement.fasm'],
+        ['end iterate', 'end', 'keyword.control.directive.statement.fasm'],
+        ['end macro', 'macro', 'keyword.control.directive.macro.fasm'],
+        ['end struc', 'struc', 'keyword.control.directive.structure.fasm'],
+        ['end namespace', 'namespace', 'keyword.control.directive.statement.fasm'],
+        ['end rawmatch', 'rawmatch', 'keyword.control.directive.statement.fasm'],
+        ['rawmatch a, b', 'rawmatch', 'keyword.control.directive.fasmg.fasm'],
+        ['macro greet? name*', 'greet?', 'entity.name.function.fasm'],
+        ['struc (instance) point x', 'point', 'entity.name.function.fasm'],
+        ['namespace maths', 'maths', 'entity.name.namespace.fasm'],
+        ['label start2 at 0', 'start2', 'entity.name.label.fasm'],
+        ['calminstruction shout? text', 'calminstruction', 'keyword.control.directive.macro.fasm'],
+        ['calminstruction shout? text', 'shout?', 'entity.name.function.fasm'],
+        ['end calminstruction', 'calminstruction', 'keyword.control.directive.macro.fasm'],
+        ['ibts eax,ebx', 'ibts', 'keyword.other.mnemonic.extension.fasm'],
+        ['element x86.reg', 'element', 'keyword.control.directive.fasmg.fasm'],
+        ['cominvk obj,Run', 'cominvk', 'support.function.macro-helper.fasm']
+    ])('%s: %s', (line, text, scope) => {
+        expect(scopeOf(line, text)).toBe(scope);
+    });
+
+    test('CALM commands are only coloured inside a CALM block', () => {
+        expect(scopeOf('arrange text, =display text', 'arrange')).toBe('keyword.control.directive.calm.fasm');
+        expect(scopeOf('jyes done', 'jyes')).toBe('keyword.control.directive.calm.fasm');
+        expect(scopeOf('arrange a, b', 'arrange a, b')).toBe('source.fasm');
+    });
+
+    test('a label inside a CALM block stays a label', () => {
+        expect(scopeOf('done:', 'done:')).toBe('entity.name.label.fasm');
+    });
+});
+
+describe('operators and constants', () => {
+    test.each([
+        ['x := 5', ':=', 'keyword.operator.assignment.fasm'],
+        ['y =: 6', '=:', 'keyword.operator.assignment.fasm'],
+        ['if x >= 1 & y <> 2', '>=', 'keyword.operator.comparison.fasm'],
+        ['if x >= 1 & y <> 2', '<>', 'keyword.operator.comparison.fasm'],
+        ['if x >= 1 & y <> 2', '&', 'keyword.operator.logical.fasm'],
+        ['dd ?', '?', 'constant.language.fasm'],
+        ['db __file__', '__file__', 'constant.language.fasm'],
+        ['db 1,2,\\', '\\', 'constant.character.escape.line-continuation.fasm'],
+        ['db $%,$%%', '$%', 'keyword.operator.special.fasm'],
+        ['db $%,$%%', '$%%', 'keyword.operator.special.fasm'],
+        ["dw 1'000", "1'000", 'constant.numeric.decimal.fasm'],
+        ['vaddps zmm0{k1}{z},zmm1,zmm2{sae}', 'z', 'storage.modifier.fasm'],
+        ['vaddps zmm0{k1}{z},zmm1,zmm2{sae}', 'sae', 'storage.modifier.fasm']
+    ])('%s: %s', (line, text, scope) => {
+        expect(scopeOf(line, text)).toBe(scope);
     });
 });
 
