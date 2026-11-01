@@ -72,7 +72,7 @@ Checked on 2026-11-01 with VS Code's tokenizer (`vscode-textmate`, `vscode-onigu
 - [x] Add instruction hovers (only 12 of 130 entries are instructions today)
 
 ### 5. Cleanup
-- [ ] Mach-O: **changed by plan.md.** Keep it for fasmg and fasm 2, and limit it to those in 0.4.0 (fasm 1.73.35 rejects `format MachO` with "invalid argument")
+- [ ] Mach-O: **changed by plan.md.** Keep it for fasmg and fasm 2, and limit it to those in stage 4 (fasm 1.73.35 rejects `format MachO` with "invalid argument")
 - [x] Reword the macOS mentions at `package.json:4` and `package.json:99`
 - [x] Remove both old `.vsix` files. `FASM.pdf` and `fasm and where it is.txt` stay tracked, by choice
 - [x] Merge `fasm.build` and `fasm.buildAndRun` in `src/extension.ts` into one helper

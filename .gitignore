@@ -9,12 +9,11 @@ FASM.pdf
 
 # Local IDE and AI documentation folders
 .vscode/
-.docs/*
-!docs/CHANGE_LIST.md
-!docs/plan.md
+.docs/
 .examples/
 docs/*
 !docs/CHANGE_LIST.md
 !docs/plan.md
+!docs/TASK_LIST.md
 examples/
 AI_INSTRUCTIONS.md

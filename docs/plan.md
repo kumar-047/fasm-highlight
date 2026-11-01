@@ -219,17 +219,9 @@ The panel only edits normal VS Code settings, so everything also works from `set
 - [ ] **Donate:** a link and the Marketplace sponsor field (decision 3), kept clearly separate from donating to fasm's author, Tomasz Grysztar, who has a donation link on the official download page
 - [ ] **About:** version, changelog, license, and a clear note that this is an unofficial project
 
-## Release stages
+## Work order
 
-| Version | Contents |
-|---|---|
-| **0.3.0** | CHANGE_LIST fixes, naming, new colours, system detection |
-| **0.4.0** | fasm 2 and fasmg languages, grammars, hovers, snippets, builds, for x86 |
-| **0.5.0** | Architectures: levels B and E, then FASMARM |
-| **0.6.0** | Side panel with all three tabs, using settings and tools that already exist |
-| **0.7.0** | Formatter, compiler install, extra editor tools |
-
-Each stage is useful alone. The panel comes after the rest so it has real features to control.
+Decided: one complete release, with nothing published until all the work is done. The order is cleanup first, then the side panel, then everything else. [TASK_LIST.md](TASK_LIST.md) has the stages and is the list to follow.
 
 ## Risks
 
@@ -248,8 +240,8 @@ Each stage is useful alone. The panel comes after the rest so it has real featur
 2. **Colour theme:** recommended removing it completely rather than keeping it as an extra.
 3. **Donate link:** which service and URL? This can only come from you.
 4. **Panel default side:** recommended **right**, so it sits beside the code.
-5. **Compiler install:** recommended detect-and-link first, with download in 0.7.0.
-6. **Release:** recommended the stages above rather than one large release.
+5. **Compiler install:** recommended detect-and-link first, with download in stage 6.
+6. **Release:** decided: one complete release, in the order in TASK_LIST.md.
 7. **Architecture support:** recommended the levels in section 5, rather than hand-written support for every community package.
 8. **FASMARM:** recommended including it, after level B, since it's a separate third-party tool last updated in 2023.
 
