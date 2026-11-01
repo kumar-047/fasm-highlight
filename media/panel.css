@@ -114,6 +114,7 @@ select {
 
 button.value {
     justify-content: flex-start;
+    border-color: transparent;
     width: 100%;
     padding: 3px 6px;
     color: var(--vscode-foreground);
@@ -148,6 +149,7 @@ button.palette {
     padding: 6px 2px;
     color: var(--vscode-foreground);
     background: none;
+    border-color: transparent;
 }
 
 button.palette:hover:not(:disabled) { background: var(--vscode-list-hoverBackground); }
