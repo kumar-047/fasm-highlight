@@ -1,8 +1,8 @@
 {
   "name": "fasm-highlight",
   "displayName": "FASM Highlight",
-  "description": "Unofficial Flat Assembler (FASM) language support with syntax highlighting, hover intelligence, snippets, and build commands for Windows, Linux, and macOS",
-  "version": "0.2.1",
+  "description": "Highlights your fasm code, with hover cards, simple snippets, light formatting, and font and color styling. Works with fasm, fasm 2 and fasmg on Windows, Linux and macOS.",
+  "version": "0.2.2",
   "publisher": "kumar-047",
   "icon": "icon.png",
   "engines": {
@@ -11,7 +11,7 @@
   "categories": [
     "Programming Languages",
     "Snippets",
-    "Themes"
+    "Formatters"
   ],
   "keywords": [
     "fasm",
@@ -19,9 +19,9 @@
     "assembler",
     "x86",
     "x86-64",
-    "asm"
+    "asm",
+    "flat assembler"
   ],
-
   "activationEvents": [
     "onLanguage:fasm"
   ],
@@ -53,28 +53,20 @@
         "path": "./syntaxes/fasm.tmLanguage.json"
       }
     ],
-    "themes": [
-      {
-        "label": "FASM Workshop Dark",
-        "uiTheme": "vs-dark",
-        "path": "./themes/fasm-workshop-dark-color-theme.json"
-      }
-    ],
-    "snippets": [
-      {
-        "language": "fasm",
-        "path": "./snippets/fasm.json"
-      }
-    ],
     "commands": [
       {
         "command": "fasm.build",
-        "title": "FASM: Build",
+        "title": "Build",
         "category": "FASM"
       },
       {
-        "command": "fasm.buildAndRun",
-        "title": "FASM: Build and Run",
+        "command": "fasm.formatFile",
+        "title": "Format File",
+        "category": "FASM"
+      },
+      {
+        "command": "fasm.openMenu",
+        "title": "FASM Menu",
         "category": "FASM"
       }
     ],
@@ -83,11 +75,6 @@
         "command": "fasm.build",
         "key": "ctrl+shift+b",
         "when": "editorLangId == fasm"
-      },
-      {
-        "command": "fasm.buildAndRun",
-        "key": "ctrl+shift+r",
-        "when": "editorLangId == fasm"
       }
     ],
     "configuration": {
@@ -95,8 +82,8 @@
       "properties": {
         "fasm.compilerPath": {
           "type": "string",
-          "default": "C:\\fasmw17335\\fasm.exe",
-          "description": "Path to the FASM compiler executable. On Windows, defaults to C:\\fasmw17335\\fasm.exe. On Linux/macOS, defaults to 'fasm' from PATH."
+          "default": "",
+          "description": "Path to your fasm, fasm 2 or fasmg compiler, used by FASM: Build. Leave empty to use C:\\fasmw17335\\fasm.exe on Windows and fasm from PATH on other systems."
         },
         "fasm.memoryLimit": {
           "type": "number",
@@ -112,26 +99,130 @@
           "type": "boolean",
           "default": false,
           "description": "Generate symbolic information for debugging with the -s flag"
+        },
+        "fasm.targetSystem": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "windows",
+            "linux",
+            "macos"
+          ],
+          "default": "auto",
+          "description": "The system to suggest snippets for. A format line in the file always wins."
+        },
+        "fasm.format.commentColumn": {
+          "type": "number",
+          "default": 0,
+          "minimum": 0,
+          "description": "The column to align trailing comments to when formatting. 0 keeps your spacing."
+        },
+        "fasm.colors.overrides": {
+          "type": "object",
+          "default": {},
+          "description": "Custom FASM Colors, by role. The Settings tab of the FASM panel edits this."
+        },
+        "fasm.format.operandColumn": {
+          "type": "number",
+          "default": 0,
+          "minimum": 0,
+          "description": "The column to align instruction operands to when formatting. 0 uses one space."
+        },
+        "fasm.format.spaceAfterComma": {
+          "type": "boolean",
+          "default": false,
+          "description": "Add a space after commas when formatting. Text inside strings is never changed."
+        },
+        "fasm.format.maxBlankLines": {
+          "type": "number",
+          "default": 0,
+          "minimum": 0,
+          "description": "The most blank lines to keep in a row when formatting. 0 keeps them all."
+        },
+        "fasm.colors.palette": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "fasm-dark",
+            "ember",
+            "ocean",
+            "forest",
+            "mono",
+            "fasm-light",
+            "paper",
+            "sky"
+          ],
+          "default": "auto",
+          "description": "The FASM Colors palette. Automatic picks FASM Dark or FASM Light to match your theme."
         }
       }
+    },
+    "configurationDefaults": {
+      "[fasm]": {
+        "editor.semanticHighlighting.enabled": true
+      }
+    },
+    "semanticTokenScopes": [
+      {
+        "language": "fasm",
+        "scopes": {
+          "keyword": [
+            "keyword.other.mnemonic.arch.fasm"
+          ],
+          "variable": [
+            "variable.language.register.arch.fasm"
+          ],
+          "operator": [
+            "keyword.operator.word.fasm"
+          ],
+          "function": [
+            "entity.name.function.fasm"
+          ]
+        }
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "fasm.openMenu",
+          "when": "editorLangId == fasm",
+          "group": "1_modification@9"
+        }
+      ]
     }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "lint": "tsc --noEmit -p ./",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "package": "vsce package"
+    "compile": "tsc -p tsconfig.build.json && node scripts/generate-grammar.js",
+    "watch": "tsc -watch -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "lint": "eslint src test scripts",
+    "test": "jest",
+    "check": "npm run typecheck && npm run lint && npm test",
+    "package": "vsce package",
+    "publish:openvsx": "node scripts/publish-openvsx.js"
   },
   "devDependencies": {
-    "@types/node": "^18.0.0",
+    "@eslint/js": "^10.0.1",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^26.6.6",
     "@types/vscode": "^1.75.0",
-    "@vscode/vsce": "^2.22.0",
-    "typescript": "^5.0.0"
+    "@vscode/vsce": "^4.1.0",
+    "eslint": "^10.14.0",
+    "jest": "^30.5.2",
+    "ts-jest": "^29.4.15",
+    "typescript": "~6.0",
+    "typescript-eslint": "^8.72.1",
+    "vscode-oniguruma": "^2.0.1",
+    "vscode-textmate": "^9.3.2"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/kumar-047/fasm-highlight"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "homepage": "https://github.com/kumar-047/fasm-highlight#readme",
+  "bugs": {
+    "url": "https://github.com/kumar-047/fasm-highlight/issues"
+  }
 }

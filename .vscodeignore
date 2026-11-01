@@ -10,8 +10,17 @@ vsc-extension-quickstart.md
 **/*.ts
 node_modules/**
 docs/**
-AI_INSTRUCTIONS.md
 FASM.pdf
 fasm and where it is.txt
 *.vsix
 examples/*.exe
+test/**
+scripts/**
+coverage/**
+out/grammar/buildGrammar.js
+out/grammar/constants/grammarPatterns.js
+jest.config.js
+eslint.config.mjs
+**/tsconfig.*.json
+.env
+.env.*

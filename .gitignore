@@ -1,6 +1,12 @@
 node_modules/
 out/
+coverage/
 *.vsix
+
+# Secrets
+.env
+.env.*
+!.env.example
 
 # Local/reference artifacts that do not need normal source control updates
 fasm and where it is.txt
@@ -10,6 +16,9 @@ FASM.pdf
 .vscode/
 .docs/
 .examples/
-docs/
+docs/*
+!docs/CHANGE_LIST.md
+!docs/plan.md
+!docs/TASK_LIST.md
 examples/
 AI_INSTRUCTIONS.md

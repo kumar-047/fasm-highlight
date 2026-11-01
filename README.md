@@ -1,112 +1,82 @@
 # FASM Highlight
 
-FASM Highlight is an unofficial Flat Assembler language support extension for VS Code compatible editors and Antigravity IDE.
+Highlights your fasm code in `.asm` and `.inc` files, on Windows, Linux and macOS. It works with fasm, fasm 2 and fasmg.
 
-## Current Features
+## What it does
 
-- FASM language registration for `.asm` and `.inc`
-- syntax highlighting for instructions, directives, registers, and preprocessor keywords
-- hover for instructions, registers, directives, data directives, and size specifiers
-- bundled optional theme: `FASM Workshop Dark`
-- snippets for Windows (PE32/PE64), Linux (ELF32/ELF64), macOS (Mach-O64), and object file templates
-- language configuration for comments, brackets, and folding
-- `FASM: Build`
-- `FASM: Build and Run`
+- Syntax highlighting
+- Hover cards
+- Simple code snippets
+- Light code formatting
+- Font and color styling
+- Number values in decimal, hex, binary and octal
 
-## Current Behavior
+## How to use it
 
-- build commands are intended for standalone source files, not include files
-- build-and-run only auto-runs when the extension can infer a runnable output for the current platform
-- compiler output is written to the `FASM` output channel
-- compiler path and limits are configurable in settings
-- output format detection covers PE, PE64, ELF, ELF64, MZ, Mach-O, COFF, MS COFF, MS64 COFF, and binary
+Install **FASM Highlight** and open any `.asm` or `.inc` file. Highlighting starts on its own.
 
-## Requirements
+### FASM Menu
 
-To use the build commands (`FASM: Build` and `FASM: Build and Run`), the Flat Assembler (`fasm` or `fasm.exe`) must be installed. Ensure it is accessible via your system `PATH` or configure the exact path using the `fasm.compilerPath` setting.
+Right-click in a FASM file and choose **FASM Menu**. A small card opens at your cursor:
 
-## Configuration
+| In the card | What to do |
+|---|---|
+| **Format File** | Click to tidy the spacing of the whole file |
+| **Number** | Right-click a number to see its values, then click one to copy it |
+| **Colors** | Click a palette's dots to switch. **Customize** sets a color for each kind of word |
+| **Fonts** | Click a font or size to switch. **Customize** opens the font settings |
 
-```json
-{
-  "fasm.compilerPath": "C:\\fasmw17335\\fasm.exe",
-  "fasm.memoryLimit": 65536,
-  "fasm.passesLimit": 100,
-  "fasm.generateSymbols": false
-}
-```
+**Reset** goes back to your normal colors or font.
 
-On Linux and macOS, the compiler path defaults to `fasm` (looked up from PATH).
+### Hover cards
 
-## Platform Support
+Hover over an instruction, register or directive to see what it does. Hover over a number to see its values.
 
-- **Windows**: Full support. Default compiler path, PE build/run, Win32/Win64 snippets.
-- **Linux**: Build and run support for ELF executables. Snippets for ELF32, ELF64, and ELF object files.
-- **macOS**: Build target detection for Mach-O format. Snippet template provided (requires fasmg or fasm2 include packages for Mach-O output).
+### Snippets
 
-## Theme
+Start typing a prefix, then choose it from the suggestions:
 
-The extension includes an optional dark theme tuned for assembly-heavy editing:
+| Prefix | Inserts |
+|---|---|
+| `program` | A starter program for your system |
+| `win32`, `win64` | Windows console program |
+| `linux`, `linux32` | Linux program |
+| `macos64` | macOS program (needs fasmg) |
+| `elfobj`, `coffobj` | Object file |
+| `proc`, `proc64` | Procedure |
+| `macro`, `struct` | Macro or structure |
+| `if`, `repeat`, `loop` | Conditional block, repeat block or loop |
+| `include`, `datasec` | Include line or data section |
+| `msgbox32`, `msgbox64` | Windows message box |
 
-- restrained dark background
-- higher contrast for mnemonics, directives, registers, labels, and numbers
-- colors chosen to make data flow and control flow easier to scan in FASM source
-- rich typography (bold instructions/constants, italic directives/data types)
+### Build
 
-You can enable it from the editor theme picker as `FASM Workshop Dark`.
+**FASM: Build** (`Ctrl+Shift+B`) assembles the current file and shows errors in the Problems panel.
 
-### Customizing Styles & Fonts
+Get a compiler from [flatassembler.net](https://flatassembler.net/download.php), then set its path in `fasm.compilerPath`.
 
-If you want to add your own personal style, override fonts, or adjust the richness, you can add custom rules to your VS Code `settings.json`:
+## Settings
 
-```json
-{
-  "editor.fontFamily": "'Fira Code', Consolas, monospace",
-  "editor.fontLigatures": true,
-  "editor.tokenColorCustomizations": {
-    "[FASM Workshop Dark]": {
-      "textMateRules": [
-        {
-          "scope": "keyword.mnemonic",
-          "settings": {
-            "foreground": "#ffaa00",
-            "fontStyle": "bold underline"
-          }
-        }
-      ]
-    }
-  }
-}
-```
+| Setting | What it does | Default |
+|---|---|---|
+| `fasm.compilerPath` | Path to fasm, fasm 2 or fasmg | Empty |
+| `fasm.memoryLimit` | Memory limit in KB (fasm 1) | `65536` |
+| `fasm.passesLimit` | Maximum assembly passes | `100` |
+| `fasm.generateSymbols` | Writes a symbol file (fasm 1) | `false` |
+| `fasm.targetSystem` | System to suggest snippets for: `auto`, `windows`, `linux` or `macos` | `auto` |
+| `fasm.colors.palette` | The color palette | `auto` |
+| `fasm.format.operandColumn` | Lines up operands at a column | `0` (one space) |
+| `fasm.format.commentColumn` | Lines up trailing comments at a column | `0` (keeps your spacing) |
+| `fasm.format.spaceAfterComma` | Adds a space after commas | `false` |
+| `fasm.format.maxBlankLines` | Limits blank lines in a row | `0` (keeps them all) |
 
-## Development
+## Updating from 0.2.1
 
-```powershell
-cd fasm-highlight
-npm install
-npm run compile
-```
+Your settings, snippets, `FASM: Build` and `Ctrl+Shift+B` carry over. **FASM: Build and Run** and the **FASM Workshop Dark** theme were removed. Use the colors in the **FASM Menu** instead of the theme.
 
-Press `F5` in a VS Code compatible editor to launch an Extension Development Host for manual testing.
+## Problems and requests
 
-## Reference Material
-
-This extension targets FASM 1.73 (covers versions 1.73.32 through 1.73.35).
-
-- Official FASM Manual: [flatassembler.net/docs.php?article=manual](http://flatassembler.net/docs.php?article=manual)
-
-## Notes
-
-- `src/` is the editable TypeScript source
-- hover data references the FASM 1.73 Programmer's Manual with specific section citations
-
-## Known Issues
-
-Please report any bugs, missing instructions, or feature requests on the repository's Issues page.
-
-## Release Notes
-
-See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
+Please report them on the [issues page](https://github.com/kumar-047/fasm-highlight/issues). Version history is in the [changelog](CHANGELOG.md).
 
 ## License
 
