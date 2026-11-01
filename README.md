@@ -17,14 +17,14 @@ Install **FASM Highlight** and open any `.asm` or `.inc` file. Highlighting star
 
 ### FASM Menu
 
-Right-click in a FASM file and choose **FASM Menu**. A small card opens at your cursor:
+Right-click in a FASM file and choose **FASM Menu**. A small side panel opens and stays open while you try things:
 
-| In the card | What to do |
+| In the panel | What to do |
 |---|---|
 | **Format File** | Click to tidy the spacing of the whole file |
-| **Number** | Right-click a number to see its values, then click one to copy it |
-| **Colors** | Click a palette's dots to switch. **Customize** sets a color for each kind of word |
-| **Fonts** | Click a font or size to switch. **Customize** opens the font settings |
+| **Number** | Click a number in your code, or type one, to see its values. Click a value to copy it |
+| **Colors** | Click a palette's circle to switch. **Customize** sets a color for each kind of word |
+| **Fonts** | Pick a font or size to switch. **Customize** opens the font settings |
 
 **Reset** goes back to your normal colors or font.
 
@@ -60,6 +60,7 @@ Get a compiler from [flatassembler.net](https://flatassembler.net/download.php),
 | Setting | What it does | Default |
 |---|---|---|
 | `fasm.compilerPath` | Path to fasm, fasm 2 or fasmg | Empty |
+| `fasm.panelSide` | The side the FASM panel opens on | `right` |
 | `fasm.memoryLimit` | Memory limit in KB (fasm 1) | `65536` |
 | `fasm.passesLimit` | Maximum assembly passes | `100` |
 | `fasm.generateSymbols` | Writes a symbol file (fasm 1) | `false` |

@@ -10,7 +10,8 @@ describe('right-click menu', () => {
         expect(contributes.menus['editor/context']).toEqual([{ command: 'fasm.openMenu', when: 'editorLangId == fasm', group: '1_modification@9' }]);
     });
 
-    test('it opens a card at the cursor, with nothing in the top bar', () => {
+    test('it opens the panel, with nothing in the top bar', () => {
+        expect(contributes.menus['editor/title']).toBeUndefined();
         const walk = (dir: string): string[] => fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) =>
             entry.isDirectory() ? walk(path.join(dir, entry.name)) : [path.join(dir, entry.name)]);
         for (const file of walk(path.join(ROOT, 'src'))) {
@@ -20,14 +21,6 @@ describe('right-click menu', () => {
 });
 
 describe('what was removed', () => {
-    test('there is no panel', () => {
-        expect(contributes.viewsContainers).toBeUndefined();
-        expect(contributes.views).toBeUndefined();
-        expect(contributes.menus['editor/title']).toBeUndefined();
-        expect(fs.existsSync(path.join(ROOT, 'src', 'panel'))).toBe(false);
-        expect(fs.existsSync(path.join(ROOT, 'media'))).toBe(false);
-    });
-
     test('there is no run command', () => {
         const commands = contributes.commands.map((item: { command: string }) => item.command);
         expect(commands).not.toContain('fasm.buildAndRun');
@@ -58,10 +51,6 @@ describe('documentation', () => {
             expect(readme).toContain(option);
             expect(changelog).toContain(option);
         }
-    });
-
-    test('neither one mentions the removed panel', () => {
-        expect(readme).not.toMatch(/side panel|FASM panel|control panel/i);
     });
 });
 
