@@ -18,10 +18,6 @@ describe('existing users keep what they have', () => {
         expect(manifest.repository.url).toBe('https://github.com/kumar-047/fasm-highlight');
     });
 
-    test('the description says it is the same extension', () => {
-        expect(manifest.description).toContain('same FASM Highlight');
-    });
-
     test.each(['fasm.build'])('command %s still exists', (command) => {
         expect(manifest.contributes.commands.map((item: { command: string }) => item.command)).toContain(command);
     });
@@ -54,11 +50,6 @@ describe('existing users keep what they have', () => {
 
 describe('the upgrade is explained', () => {
     const readme = fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8');
-
-    test('the README says it is the same extension', () => {
-        expect(readme).toContain('same FASM Highlight, upgraded');
-        expect(readme).toContain('kumar-047.fasm-highlight');
-    });
 
     test('the README explains the removed theme', () => {
         expect(readme).toContain(OLD_THEME_NAME);

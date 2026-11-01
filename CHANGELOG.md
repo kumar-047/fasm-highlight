@@ -4,52 +4,42 @@ All notable changes to the `fasm-highlight` extension are documented in this fil
 
 ## [0.2.2] - Unreleased
 
-The same extension, upgraded. The identifier is still `kumar-047.fasm-highlight`, and your settings, commands, shortcuts and snippet prefixes all carry over.
-
 ### Added
 
-- all 1,931 instructions in fasm 1.73.35, and the registers that were missing, such as `rip`, `eip`, `xmm16-31` and `ymm16-31`
-- float, `$FF`, `10d`, `17q` and `1_000` number highlighting, `@b`, `@f` and `@r` references, and section names
-- format keywords on `format`, `section`, `segment` and `data` lines
-- fasmg and fasm 2 highlighting: `iterate`, `namespace`, `rawmatch`, `end` blocks, `:=` and `=:`, CALM commands inside `calminstruction`, and names in `macro`, `struc`, `namespace` and `label`
-- colours for macros and structures defined in the same file, operators such as `>=` and `&`, `?`, `__file__`, AVX-512 decorators such as `{z}`, line continuations, and `1'000` numbers
-- colours for 8051, AVR, JVM bytecode, WebAssembly and AArch64 instructions, detected from include lines
-- colours and hover cards for other fasmg packages, read from the file's includes
-- a formatter that only changes whitespace, with fasmg block support and settings for operand column, comment column, commas and blank lines
-- FASM Colors, which colour FASM text only, for this workspace or all windows
-- a right-click FASM menu with Format File, Check Number Value, Font Palette and Color Palette
-- 8 color palettes: FASM Dark, Ember, Ocean, Forest, Mono, FASM Light, Paper and Sky
-- a font palette with 12 coding fonts and preset sizes, for FASM files only
-- hover cards for 44 more instructions, and basic hover cards for all other instructions and registers
-- snippets ranked for the target system, and a `program` starter
-- build errors in the Problems panel, with links to where a failing macro was used
-- fasm 2 and fasmg support in `FASM: Build`, chosen from the compiler path
-- Jest, ESLint and typecheck scripts
+- Right-click **FASM** menu with Format File, Check Number Value, Font Palette and Color Palette.
+- Formatter that only changes spaces and blank lines, with settings for operand column, comment column, commas and blank lines.
+- 8 color palettes that only change FASM text: FASM Dark, Ember, Ocean, Forest, Mono, FASM Light, Paper and Sky.
+- Font palette with 12 coding fonts and preset sizes, for FASM files only.
+- Number check that shows a value in decimal, hex, binary and octal.
+- Highlighting for fasm 2 and fasmg, including `end` blocks and CALM commands.
+- Highlighting for 8051, AVR, AArch64, JVM bytecode and WebAssembly, detected from `include` lines.
+- Colors for macros and structures defined in the file, and for macros from included files in fasmg code.
+- All 1,931 fasm 1.73.35 instructions and the missing registers, such as `rip` and `xmm16` to `xmm31`.
+- More number forms, operators, section names and `@b`, `@f` and `@r` references.
+- More hover cards, for every instruction and register.
+- `program` snippet that inserts a starter program for your system, and snippets ranked for your system.
+- Build errors in the Problems panel.
+- `FASM: Build` support for fasm 2 and fasmg, chosen from `fasm.compilerPath`.
 
 ### Changed
 
-- grammar word lists are now generated from one data table
-- renamed the `keyword.mnemonic` scopes to `keyword.other.mnemonic`
-- hover categories reduced to 7, with manual links built in one place
-- reorganised the source into module folders with their own types and constants
-- updated the development tools, including TypeScript 6, ESLint 10, Jest 30 and vsce 4
+- `fasm.compilerPath` is now empty by default, and uses `fasm` from PATH on Linux and macOS.
 
 ### Fixed
 
-- strings now end at the end of the line, so a missing quote no longer colours the following lines
-- removed words that aren't fasm 1 keywords, such as `endif`, `ifdef` and `offset`, and the rule that coloured every all-caps word
-- `and`, `or`, `xor`, `not`, `shl` and `shr` are now coloured as operators inside expressions
-- corrected wrong manual sections, the `macro` and `struc` hover syntax, and the `fs` and `gs` hover text
-- PE platform notes now appear for plain `format PE`
-- the compiler path no longer defaults to a Windows path on Linux and macOS
-- output names now match fasm: `.dll`, `.sys`, `.efi`, `.o`, `.obj`, `.bin`, `.com` and `as` extensions
-- no more hover cards inside comments and strings, or on local labels like `.add`
-- folding now works for `virtual`, `while`, `repeat`, `data` and brace blocks, and no longer pairs `macro` with the wrong line
+- A missing closing quote no longer colors the following lines as a string.
+- `and`, `or`, `xor`, `not`, `shl` and `shr` are colored as operators inside expressions.
+- All-caps words are no longer all colored as constants.
+- Words that aren't fasm keywords, such as `endif` and `ifdef`, are no longer colored.
+- The success message now names the right output file, such as `.dll`, `.sys`, `.efi`, `.o` and `.obj`.
+- Hover cards no longer appear inside comments and strings, or on local labels like `.add`.
+- Corrected wrong manual links and hover text.
+- Folding now works for `virtual`, `while`, `repeat`, `data` and brace blocks.
 
 ### Removed
 
-- `FASM: Build and Run` and its `Ctrl+Shift+R` shortcut, because this extension is a highlighter, not a toolchain
-- the `FASM Workshop Dark` theme, which took over the whole window and left other languages without syntax colours
+- `FASM: Build and Run` and `Ctrl+Shift+R`.
+- The `FASM Workshop Dark` theme. Use the Color Palette instead.
 
 ## [0.2.1] - 2026-04-24
 

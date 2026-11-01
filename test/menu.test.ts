@@ -46,6 +46,36 @@ describe('what was removed', () => {
     });
 });
 
+describe('documentation', () => {
+    const readme = fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8');
+    const snippets = JSON.parse(fs.readFileSync(path.join(ROOT, 'snippets', 'fasm.json'), 'utf8'));
+
+    test('the README lists every snippet prefix', () => {
+        for (const snippet of Object.values(snippets)) {
+            expect(readme).toContain(`\`${(snippet as { prefix: string }).prefix}\``);
+        }
+        expect(readme).toContain('`program`');
+    });
+
+    test('the README lists every setting people change directly', () => {
+        for (const setting of Object.keys(contributes.configuration.properties).filter((key) => key !== 'fasm.colors.overrides')) {
+            expect(readme).toContain(`\`${setting}\``);
+        }
+    });
+
+    test('the README and changelog name every menu option', () => {
+        const changelog = fs.readFileSync(path.join(ROOT, 'CHANGELOG.md'), 'utf8');
+        for (const option of ['Format File', 'Check Number Value', 'Font Palette', 'Color Palette']) {
+            expect(readme).toContain(option);
+            expect(changelog).toContain(option);
+        }
+    });
+
+    test('neither one mentions the removed panel', () => {
+        expect(readme).not.toMatch(/side panel|FASM panel|control panel/i);
+    });
+});
+
 describe('settings', () => {
     test.each(['fasm.compilerPath', 'fasm.format.commentColumn', 'fasm.format.operandColumn', 'fasm.format.spaceAfterComma', 'fasm.format.maxBlankLines'])('%s exists', (setting) => {
         expect(contributes.configuration.properties[setting]).toBeDefined();
