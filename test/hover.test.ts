@@ -1,7 +1,9 @@
-import { HoverEntry, findHoverEntry, hoverEntries } from '../src/data/hoverEntries';
-import { MANUAL_SECTIONS, manualUrl } from '../src/data/manual';
-import { buildHoverMarkdown, detectPlatformContext, isInCommentOrString, normalizeHoverToken } from '../src/language/hoverProvider';
-import { MarkdownString } from './mocks/vscode';
+import { findHoverEntry, hoverEntries } from '../src/hover/hoverLookup';
+import { buildHoverMarkdown, detectPlatformContext, isInCommentOrString, normalizeHoverToken } from '../src/hover/hoverProvider';
+import type { HoverEntry } from '../src/hover/types';
+import { MANUAL_SECTIONS } from '../src/manual/constants/sections';
+import { manualUrl } from '../src/manual/manual';
+import type { MarkdownString } from './mocks/vscode';
 
 const entries = [...hoverEntries.values()];
 

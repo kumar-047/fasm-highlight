@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
-import { COLOR_ROLES, ColorOverrides, ColorRole, TokenColorCustomizations, addFasmRules, defaultRoleColor, hasFasmRules, removeFasmRules, roleLabel } from './colorRules';
+import { addFasmRules, defaultRoleColor, hasFasmRules, removeFasmRules, roleLabel } from './colorRules';
+import { COLOR_ROLES } from './constants/colorPalette';
+import type { ColorOverrides, ColorRole, TokenColorCustomizations } from './types';
 
 const SETTING = 'tokenColorCustomizations';
 

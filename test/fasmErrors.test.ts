@@ -1,4 +1,4 @@
-import * as path from 'path';
+import * as path from 'node:path';
 import { parseFasmErrors } from '../src/compiler/fasmErrors';
 
 const DIR = path.resolve('project');

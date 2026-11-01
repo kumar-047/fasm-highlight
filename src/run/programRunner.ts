@@ -1,11 +1,11 @@
-import * as cp from 'child_process';
-import * as path from 'path';
+import * as cp from 'node:child_process';
+import * as path from 'node:path';
+import process from 'node:process';
 import * as vscode from 'vscode';
 import { formatRunCommand } from './runCommand';
 
 const TERMINAL_NAME = 'FASM Run';
 
-// Programs run in a real terminal, so they can read input and use the Windows console API.
 export class ProgramRunner implements vscode.Disposable {
     private terminal: vscode.Terminal | undefined;
     private readonly closeListener: vscode.Disposable;
@@ -31,7 +31,6 @@ export class ProgramRunner implements vscode.Disposable {
             return false;
         }
 
-        // Windows GUI programs outlive their terminal, so end the whole process tree there.
         const processId = await terminal.processId;
         if (process.platform === 'win32' && processId) {
             cp.spawn('taskkill', ['/PID', String(processId), '/T', '/F'], { stdio: 'ignore' }).on('error', () => undefined);

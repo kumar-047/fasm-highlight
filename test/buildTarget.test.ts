@@ -1,5 +1,5 @@
 import type { TextDocument } from 'vscode';
-import { createBuildPlan, inferOutput } from '../src/compiler/buildTarget';
+import { createBuildPlan, inferOutput } from '../src/build/buildTarget';
 import { defaultCompilerPath } from '../src/compiler/fasmCompiler';
 
 function document(fileName: string, text: string, languageId = 'fasm'): TextDocument {

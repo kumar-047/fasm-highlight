@@ -1,6 +1,7 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import { SEMANTIC_SCOPES, addFasmRules, fasmColorRules, hasFasmRules, removeFasmRules } from '../src/colors/colorRules';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { addFasmRules, fasmColorRules, hasFasmRules, removeFasmRules } from '../src/colors/colorRules';
+import { SEMANTIC_SCOPES } from '../src/colors/constants/colorPalette';
 
 const userRule = { scope: 'comment', settings: { foreground: '#111111' } };
 

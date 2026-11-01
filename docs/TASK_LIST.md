@@ -23,7 +23,7 @@ Details and reasons are in [plan.md](plan.md). Finished cleanup work is in [CHAN
 - [x] Three-tab layout
 
 **Control Panel tab**
-- [x] Compiler management: find fasm, fasm 2, fasmg and FASMARM, show path and version, choose one, browse to one, open the download page
+- [x] Compiler management: find fasm, fasm 2, fasmg and FASMARM, show path and version, choose one, browse to one
 - [x] Editor tools: Build, Build and Run, Stop, output format and file
 
 **Settings tab**
@@ -52,7 +52,7 @@ The panel grows as later stages add features. Each later stage includes adding i
 ## Stage 6: Extra tools
 
 - [x] Formatter, and its full section in the Settings tab
-- [x] Compiler install on request
+- Removed: compiler install. The Downloads link in the Project tab replaces it.
 - [x] Number converter and other editor tools
 
 ## Stage 3: Automatic system detection

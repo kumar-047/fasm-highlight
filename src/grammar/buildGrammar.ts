@@ -1,22 +1,8 @@
-import { INSTRUCTION_OR_OPERATOR_WORDS, SYMBOL_GROUPS, SymbolGroup, symbolGroupById } from '../data/symbols';
-
-// Builds syntaxes/fasm.tmLanguage.json. Word lists come from src/data/symbols.ts; run `npm run compile` after changing them.
-
-const WORD_START = '(?<![\\w.@$?])';
-const WORD_END = '(?![\\w.@$?])';
-const STATEMENT_START = '(?:^\\s*|(?<=[:{])\\s*)';
-// A word followed by one of these is being used as a name, such as "stack dd 0".
-const NOT_A_DEFINITION = '(?!\\s*[:=]|\\s+(?:d[bwdqtpfu]|r[bwdqtpf]|equ|fix|label)\\b)';
-
-interface GrammarRule {
-    readonly name?: string;
-    readonly match?: string;
-    readonly begin?: string;
-    readonly end?: string;
-    readonly captures?: Record<string, { readonly name: string }>;
-    readonly beginCaptures?: Record<string, { readonly name: string }>;
-    readonly patterns?: readonly (GrammarRule | { readonly include: string })[];
-}
+import { NOT_A_DEFINITION, STATEMENT_START, WORD_END, WORD_START } from './constants/grammarPatterns';
+import { INSTRUCTION_OR_OPERATOR_WORDS, SYMBOL_GROUPS } from './constants/symbolGroups';
+import { symbolGroupById } from './symbols';
+import type { SymbolGroup } from './types';
+import type { GrammarRule } from './types/grammarRule';
 
 function alternatives(words: readonly string[]): string {
     return [...words].sort().join('|');

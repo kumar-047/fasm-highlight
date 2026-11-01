@@ -16,7 +16,6 @@ All notable changes to the `fasm-highlight` extension are documented in this fil
 - `FASM: Stop Running Program`
 - a side panel with a Control Panel, Settings and Project tab, opened from a gear icon on FASM files
 - detection of fasm, fasm 2, fasmg and FASMARM, with build support for each
-- install on request for fasm, fasm 2 and fasmg, from the official site only, always asking first
 - 8051, AVR, JVM bytecode, WebAssembly, AArch64 and ARM instruction colours, detected from include lines and source
 - colours and hover cards for unknown fasmg packages, read from the file's includes
 - a formatter that only changes whitespace
@@ -29,7 +28,9 @@ All notable changes to the `fasm-highlight` extension are documented in this fil
 - renamed the `keyword.mnemonic` scopes to `keyword.other.mnemonic`
 - programs now run in a terminal, so they can read input and use the Windows console API
 - hover categories reduced to 7, with manual links built in one place
-- split the build commands into their own module
+- reorganised the source into module folders with their own types and constants
+- updated the development tools, including TypeScript 6, ESLint 10, Jest 30 and vsce 4
+- panel: rounded controls and Codicons icons (CC BY 4.0)
 
 ### Fixed
 

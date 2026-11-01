@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import * as oniguruma from 'vscode-oniguruma';
 import * as vsctm from 'vscode-textmate';
 import { buildGrammar } from '../src/grammar/buildGrammar';

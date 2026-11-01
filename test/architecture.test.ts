@@ -1,9 +1,11 @@
-import { ARCHITECTURES, ReadFile, analyzeSource } from '../src/architecture/analysis';
-import { createBuildPlan, inferOutput } from '../src/compiler/buildTarget';
-import { findEntryForArchitecture } from '../src/language/hoverProvider';
-import { computeSemanticTokens } from '../src/language/semanticTokens';
-import * as path from 'path';
+import * as path from 'node:path';
 import type { TextDocument } from 'vscode';
+import { analyzeSource } from '../src/architecture/analysis';
+import { ARCHITECTURES } from '../src/architecture/constants/architectures';
+import type { ReadFile } from '../src/architecture/types';
+import { createBuildPlan, inferOutput } from '../src/build/buildTarget';
+import { findEntryForArchitecture } from '../src/hover/hoverProvider';
+import { computeSemanticTokens } from '../src/semantic/semanticTokens';
 
 const noFiles: ReadFile = () => undefined;
 const SOURCE = path.resolve('project/a.asm');

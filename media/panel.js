@@ -1,22 +1,30 @@
 (function () {
     const vscode = acquireVsCodeApi();
     const app = document.getElementById('app');
+    const ICONS = window.FASM_ICONS;
     let state = null;
     let activeTab = (vscode.getState() || {}).tab || 'control';
     let converted = null;
 
     const send = (message) => vscode.postMessage(message);
     const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const icon = (name) => `<span class="icon" aria-hidden="true">${ICONS[name] || ''}</span>`;
 
-    const TABS = [['control', 'Control Panel'], ['settings', 'Settings'], ['project', 'Project']];
+    const TABS = [['control', 'Control', 'dashboard'], ['settings', 'Settings', 'settings-gear'], ['project', 'Project', 'info']];
+    const LINK_ICONS = {
+        fasmSite: 'globe', fasmDocs: 'book', fasmDownload: 'cloud-download', fasmForum: 'comment-discussion',
+        repository: 'code', changelog: 'history', license: 'law', donateFasm: 'heart'
+    };
     const OPTION_LABELS = {
         auto: 'Automatic', right: 'Right', left: 'Left', windows: 'Windows', linux: 'Linux', macos: 'macOS',
         fasm: 'fasm', fasm2: 'fasm 2', fasmg: 'fasmg', fasmarm: 'FASMARM', x86: 'x86 and x86-64', 8051: '8051', avr: 'AVR',
         jvm: 'JVM bytecode', wasm: 'WebAssembly', aarch64: 'AArch64', arm: 'ARM'
     };
 
-    const button = (label, attributes, secondary) => `<button class="${secondary ? 'secondary' : ''}" ${attributes}>${escapeHtml(label)}</button>`;
-    const command = (id, label, secondary, disabled) => button(label, `data-command="${id}"${disabled ? ' disabled' : ''}`, secondary);
+    const button = (label, attributes, secondary, iconName) =>
+        `<button class="${secondary ? 'secondary' : ''}" ${attributes}>${iconName ? icon(iconName) : ''}${escapeHtml(label)}</button>`;
+    const command = (id, label, secondary, iconName, disabled) => button(label, `data-command="${id}"${disabled ? ' disabled' : ''}`, secondary, iconName);
+    const heading = (label, iconName) => `<h2>${icon(iconName)}${escapeHtml(label)}</h2>`;
 
     function row(id, label, control, hint) {
         return `<div class="row"><label for="${id}">${escapeHtml(label)}</label>${control}${hint ? `<p class="hint">${escapeHtml(hint)}</p>` : ''}</div>`;
@@ -41,11 +49,11 @@
         const status = found ? `Version ${escapeHtml(compiler.version)}` : compiler.path ? 'Not found at this path' : 'Not found';
         return `<div class="compiler${compiler.active ? ' active' : ''}">
             <div class="compiler-head"><strong>${escapeHtml(compiler.label)}</strong>${compiler.active ? '<span class="badge">In use</span>' : ''}</div>
-            <p class="hint">${status}</p>
+            <div class="status${found ? ' found' : ''}">${icon(found ? 'pass-filled' : 'circle-large')}${status}</div>
             ${compiler.path ? `<p class="path" title="${escapeHtml(compiler.path)}">${escapeHtml(compiler.path)}</p>` : ''}
             <div class="actions">
-                ${button('Browse', `data-browse="${compiler.kind}"`, true)}
-                ${!found ? button(compiler.installable ? 'Install' : 'Get it', `data-install="${compiler.kind}"`, true) : ''}
+                ${button('Browse', `data-browse="${compiler.kind}"`, true, 'folder-opened')}
+                ${!found ? button('Where to get it', 'data-tab="project"', true, 'info') : ''}
             </div>
         </div>`;
     }
@@ -74,30 +82,30 @@
             const r = converted.result;
             result = `<dl><dt>Decimal</dt><dd>${escapeHtml(r.decimal)}</dd><dt>Hex</dt><dd>${escapeHtml(r.hex)}</dd><dt>Binary</dt><dd>${escapeHtml(r.binary)}</dd><dt>Octal</dt><dd>${escapeHtml(r.octal)}</dd></dl>`;
         }
-        return `<input id="converter" type="text" aria-label="Number to convert" value="${escapeHtml(value)}"><div id="converter-result">${result}</div>`;
+        return `<input id="converter" type="text" aria-label="Number to convert" value="${escapeHtml(value)}"><div id="converter-result" class="row">${result}</div>`;
     }
 
     function renderControl() {
         const file = state.file;
-        return `<section><h2>Current file</h2>${renderFile()}
+        return `<section>${heading('Editor tools', 'symbol-misc')}
+                <div class="actions">
+                    ${command('format', 'Format file', true, 'list-flat', !file)}
+                    ${command('insertStarter', 'Starter program', true, 'new-file', !file)}
+                    ${command('openOutputFolder', 'Open folder', true, 'folder-opened', !file)}
+                </div>
+                <h3>${icon('symbol-numeric')}Number converter</h3>${renderConverter()}
+            </section>
+            <section>${heading('Current file', 'file-code')}${renderFile()}
             <div class="actions">
-                ${command('build', 'Build', false, !file || !file.canBuild)}
-                ${command('buildAndRun', 'Build and Run', true, !file || !file.canRun)}
-                ${command('stop', 'Stop', true)}
+                ${command('build', 'Build', false, 'tools', !file || !file.canBuild)}
+                ${command('buildAndRun', 'Run', true, 'play', !file || !file.canRun)}
+                ${command('stop', 'Stop', true, 'debug-stop')}
             </div></section>
-            <section><h2>Compilers</h2>
+            <section>${heading('Compilers', 'chip')}
                 ${selectSetting('assembler', 'Use', 'Automatic picks the compiler from the file.')}
                 ${selectSetting('architecture', 'Architecture', 'Automatic reads the file\'s include lines.')}
                 ${state.compilers.map(renderCompiler).join('')}
-                <div class="actions">${command('refreshCompilers', 'Search again', true)}${link('fasmDownload')}</div>
-            </section>
-            <section><h2>Editor tools</h2>
-                <div class="actions">
-                    ${command('format', 'Format file', true, !file)}
-                    ${command('insertStarter', 'Insert starter program', true, !file)}
-                    ${command('openOutputFolder', 'Open folder', true, !file)}
-                </div>
-                <h3>Number converter</h3>${renderConverter()}
+                <div class="actions">${command('refreshCompilers', 'Search again', true, 'refresh')}</div>
             </section>`;
     }
 
@@ -112,7 +120,7 @@
         const roles = state.colors.roles.map((role) => `<div class="color">
             <input id="color-${role.role}" type="color" data-color="${role.role}" value="${escapeHtml(role.color)}">
             <label for="color-${role.role}">${escapeHtml(role.label)}</label>
-            ${role.custom ? button('Reset', `data-reset-color="${role.role}"`, true) : ''}
+            ${role.custom ? button('Reset', `data-reset-color="${role.role}"`, true, 'discard') : ''}
         </div>`).join('');
         return `<div class="row check"><label><input type="checkbox" data-colors${state.colors.on ? ' checked' : ''}> Use FASM Colors</label>
             <p class="hint">Only changes FASM text. Your theme and other languages stay the same.</p></div>${state.colors.on ? roles : ''}`;
@@ -120,19 +128,19 @@
 
     function renderSettings() {
         return `<section>${renderScope()}</section>
-            <section><h2>Fonts</h2>
+            <section>${heading('Fonts', 'text-size')}
                 ${inputSetting('fontFamily', 'Font family', 'text')}
                 ${inputSetting('fontSize', 'Font size', 'number')}
                 ${checkSetting('fontLigatures', 'Font ligatures')}
             </section>
-            <section><h2>Formatting</h2>
+            <section>${heading('Formatting', 'list-flat')}
                 ${inputSetting('tabSize', 'Indent size', 'number')}
                 ${checkSetting('insertSpaces', 'Indent with spaces')}
                 ${inputSetting('commentColumn', 'Comment column', 'number', '0 keeps your spacing.')}
                 ${checkSetting('formatOnSave', 'Format on save')}
             </section>
-            <section><h2>Colors</h2>${renderColors()}</section>
-            <section><h2>System</h2>
+            <section>${heading('Colors', 'symbol-color')}${renderColors()}</section>
+            <section>${heading('System', 'vm')}
                 ${selectSetting('panelSide', 'Panel side')}
                 ${selectSetting('targetSystem', 'Target system', 'A format line in the file always wins.')}
                 ${inputSetting('memoryLimit', 'Memory limit (KB)', 'number')}
@@ -142,23 +150,22 @@
     }
 
     function link(id) {
-        return `<a href="#" data-link="${id}">${escapeHtml(state.links[id])}</a>`;
+        return `<a href="#" data-link="${id}">${icon(LINK_ICONS[id])}${escapeHtml(state.links[id])}</a>`;
     }
 
     function renderProject() {
-        const list = (ids) => `<ul>${ids.map((id) => `<li>${link(id)}</li>`).join('')}</ul>`;
-        return `<section><h2>Official flat assembler</h2>${list(['fasmSite', 'fasmDocs', 'fasmDownload', 'fasmForum', 'fasmRepo', 'fasm2Repo', 'fasmgRepo'])}
-                <h3>Third-party</h3>${list(['fasmarm'])}</section>
-            <section><h2>Issues and requests</h2>
+        const list = (ids) => `<ul class="links">${ids.map((id) => `<li>${link(id)}</li>`).join('')}</ul>`;
+        return `<section>${heading('flat assembler', 'globe')}${list(['fasmSite', 'fasmDocs', 'fasmDownload', 'fasmForum'])}</section>
+            <section>${heading('Issues and requests', 'comment-discussion')}
                 <p class="hint">Opens GitHub with your extension version and system filled in. You can edit it before sending.</p>
-                <div class="actions">${button('Report a bug', 'data-issue="bug"', true)}${button('Request a feature', 'data-issue="request"', true)}</div>
+                <div class="actions">${button('Report a bug', 'data-issue="bug"', true, 'bug')}${button('Request a feature', 'data-issue="request"', true, 'lightbulb')}</div>
             </section>
-            <section><h2>Support</h2>
+            <section>${heading('Support', 'heart')}
                 <p class="hint">flat assembler is made by Tomasz Grysztar. This extension is a separate, free project.</p>
                 ${list(['donateFasm'])}
             </section>
-            <section><h2>About</h2>
-                <dl><dt>Version</dt><dd>${escapeHtml(state.version)}</dd></dl>
+            <section>${heading('About', 'info')}
+                <dl class="about"><dt>Version</dt><dd>${escapeHtml(state.version)}</dd></dl>
                 ${list(['repository', 'changelog', 'license'])}
                 <p class="hint">Unofficial. Not made by or connected to the flat assembler project.</p>
             </section>`;
@@ -169,13 +176,13 @@
             app.innerHTML = '<p class="hint">Loading</p>';
             return;
         }
-        const tabs = TABS.map(([id, label]) => `<button role="tab" id="tab-${id}" aria-selected="${activeTab === id}" aria-controls="content" data-tab="${id}" class="tab${activeTab === id ? ' selected' : ''}">${label}</button>`).join('');
+        const tabs = TABS.map(([id, label, iconName]) => `<button role="tab" id="tab-${id}" title="${label}" aria-label="${label}" aria-selected="${activeTab === id}" aria-controls="content" data-tab="${id}" class="tab${activeTab === id ? ' selected' : ''}">${icon(iconName)}<span class="tab-label">${label}</span></button>`).join('');
         const body = activeTab === 'settings' ? renderSettings() : activeTab === 'project' ? renderProject() : renderControl();
         app.innerHTML = `<div role="tablist" aria-label="FASM panel" class="tabs">${tabs}</div><div id="content" role="tabpanel">${body}</div>`;
     }
 
     app.addEventListener('click', (event) => {
-        const target = event.target.closest('[data-tab],[data-command],[data-browse],[data-install],[data-link],[data-issue],[data-reset-color]');
+        const target = event.target.closest('[data-tab],[data-command],[data-browse],[data-link],[data-issue],[data-reset-color]');
         if (!target) {
             return;
         }
@@ -188,8 +195,6 @@
             send({ type: 'command', command: data.command });
         } else if (data.browse) {
             send({ type: 'browseCompiler', kind: data.browse });
-        } else if (data.install) {
-            send({ type: 'installCompiler', kind: data.install });
         } else if (data.link) {
             event.preventDefault();
             send({ type: 'openLink', link: data.link });
@@ -228,7 +233,6 @@
     window.addEventListener('message', (event) => {
         const message = event.data;
         if (message.type === 'state') {
-            // Don't redraw over a field the person is typing in.
             const focused = document.activeElement;
             const typing = focused && (focused.tagName === 'INPUT' && focused.type !== 'checkbox' && focused.type !== 'color');
             state = message;

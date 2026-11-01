@@ -240,7 +240,7 @@ Decided: one complete release, with nothing published until the release checks a
 2. **Colour theme:** recommended removing it completely rather than keeping it as an extra.
 3. **Donate link:** which service and URL? This can only come from you.
 4. **Panel default side:** recommended **right**, so it sits beside the code.
-5. **Compiler install:** recommended detect-and-link first, with download in stage 6.
+5. **Compiler install:** decided: none. People use the Downloads link in the Project tab.
 6. **Release:** decided: one complete release, in the order in TASK_LIST.md.
 7. **Architecture support:** recommended the levels in section 5, rather than hand-written support for every community package.
 8. **FASMARM:** recommended including it, after level B, since it's a separate third-party tool last updated in 2023.

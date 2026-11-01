@@ -1,11 +1,6 @@
-export type TargetSystem = 'windows' | 'linux' | 'macos';
-
-export interface ResolvedTarget {
-    readonly system: TargetSystem;
-    readonly source: 'file' | 'setting' | 'this computer';
-}
-
-const FORMAT_WORD = /^[ \t]*format[ \t]+(?:ms64\b|ms\b)?\s*([a-z0-9]+)/im;
+import type { HostPlatform } from '../shared/types';
+import { FORMAT_WORD } from './constants/formatPatterns';
+import type { ResolvedTarget, TargetSystem } from './types';
 
 function systemFromFormat(text: string): TargetSystem | undefined {
     const word = FORMAT_WORD.exec(text)?.[1]?.toLowerCase();
@@ -21,15 +16,14 @@ function systemFromFormat(text: string): TargetSystem | undefined {
     return undefined;
 }
 
-export function systemFromPlatform(platform: NodeJS.Platform): TargetSystem {
+export function systemFromPlatform(platform: HostPlatform): TargetSystem {
     if (platform === 'win32') {
         return 'windows';
     }
     return platform === 'darwin' ? 'macos' : 'linux';
 }
 
-// The file wins, because someone on Windows may be writing a Linux program on purpose.
-export function resolveTargetSystem(text: string, setting: string, platform: NodeJS.Platform): ResolvedTarget {
+export function resolveTargetSystem(text: string, setting: string, platform: HostPlatform): ResolvedTarget {
     const fromFile = systemFromFormat(text);
     if (fromFile) {
         return { system: fromFile, source: 'file' };

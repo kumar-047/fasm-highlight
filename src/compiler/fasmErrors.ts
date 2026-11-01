@@ -1,27 +1,6 @@
-import * as path from 'path';
-
-export interface SourceLocation {
-    readonly file: string;
-    readonly line: number;
-}
-
-export interface FasmError extends SourceLocation {
-    readonly message: string;
-    // Where the failing macro was used, outermost first.
-    readonly usedFrom: readonly SourceLocation[];
-}
-
-// fasm prints one of these for each level of the stack, followed by a copy of the source line:
-//   c.asm [5]:
-//   m
-//   c.asm [2] m [1]:
-//    bad thing
-//   processed: bad thing
-//   error: illegal instruction.
-const LOCATION = /^(.+?) \[(\d+)\].*:$/;
-const ERROR = /^(?:custom )?error: (.+?)\.?$/i;
-// fasmg also lists levels that aren't files, such as "macro x [1]:".
-const NOT_A_FILE = /^(?:macro|struc|calminstruction|assemble|\?|eval) ?/i;
+import * as path from 'node:path';
+import { ERROR, LOCATION, NOT_A_FILE } from './constants/errorPatterns';
+import type { FasmError, SourceLocation } from './types/fasmError';
 
 export function parseFasmErrors(output: string, workingDirectory: string): FasmError[] {
     const errors: FasmError[] = [];

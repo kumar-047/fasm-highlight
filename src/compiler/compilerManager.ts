@@ -1,22 +1,12 @@
-import * as cp from 'child_process';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as cp from 'node:child_process';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import process from 'node:process';
 import * as vscode from 'vscode';
-import { COMPILER_KINDS, COMPILER_SETTINGS, CompilerKind, executableNames } from './compilerKinds';
-
-export interface FoundCompiler {
-    readonly kind: CompilerKind;
-    readonly path?: string;
-    readonly version?: string;
-    readonly source?: 'setting' | 'found';
-}
-
-export interface DiscoveryEnvironment {
-    readonly platform: NodeJS.Platform;
-    readonly pathVariable: string;
-    readonly extraDirectories: readonly string[];
-    readonly exists: (file: string) => boolean;
-}
+import type { HostPlatform } from '../shared/types';
+import { executableNames } from './compilerCommand';
+import { COMPILER_KINDS, COMPILER_SETTINGS } from './constants/compilers';
+import type { CompilerKind, DiscoveryEnvironment, FoundCompiler } from './types';
 
 export function findExecutable(kind: CompilerKind, environment: DiscoveryEnvironment): string | undefined {
     const separator = environment.platform === 'win32' ? ';' : ':';
@@ -37,14 +27,8 @@ export function parseCompilerVersion(output: string): string | undefined {
     return /version\s+(\S+)/i.exec(output)?.[1];
 }
 
-// Common install folders. Only names are checked here; nothing runs until a version check.
-function installFolders(platform: NodeJS.Platform, installRoot: string | undefined): string[] {
+function installFolders(platform: HostPlatform): string[] {
     const folders: string[] = [];
-    if (installRoot) {
-        for (const kind of COMPILER_KINDS) {
-            folders.push(path.join(installRoot, kind));
-        }
-    }
     if (platform === 'win32') {
         try {
             for (const entry of fs.readdirSync('C:\\', { withFileTypes: true })) {
@@ -53,7 +37,7 @@ function installFolders(platform: NodeJS.Platform, installRoot: string | undefin
                 }
             }
         } catch {
-            // The folder can't be read, so there's nothing to add.
+            return folders;
         }
     }
     return folders;
@@ -71,8 +55,6 @@ function readVersion(executable: string): Promise<string | undefined> {
 export class CompilerManager {
     private found: readonly FoundCompiler[] = [];
 
-    constructor(private readonly installRoot: string | undefined) {}
-
     get compilers(): readonly FoundCompiler[] {
         return this.found;
     }
@@ -82,7 +64,7 @@ export class CompilerManager {
         const environment: DiscoveryEnvironment = {
             platform: process.platform,
             pathVariable: process.env.PATH ?? '',
-            extraDirectories: installFolders(process.platform, this.installRoot),
+            extraDirectories: installFolders(process.platform),
             exists: (file) => fs.existsSync(file)
         };
 

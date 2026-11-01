@@ -1,16 +1,22 @@
-import * as crypto from 'crypto';
-import * as path from 'path';
+import * as crypto from 'node:crypto';
+import * as path from 'node:path';
+import process from 'node:process';
 import * as vscode from 'vscode';
 import { analyzeDocument } from '../architecture/documentAnalysis';
-import { areColorsOn, colorRoleDetails, turnOnColors, turnOffColors, setColorOverride } from '../colors/colorCommands';
-import { createBuildPlan } from '../compiler/buildTarget';
-import { COMPILER_LABELS, COMPILER_SETTINGS, CompilerKind, chooseCompilerKind } from '../compiler/compilerKinds';
-import { installCompiler } from '../compiler/compilerInstaller';
-import { CompilerManager } from '../compiler/compilerManager';
-import { InstallableKind, isInstallable } from '../compiler/compilerPackages';
-import { targetFor } from '../language/languageProviders';
+import { createBuildPlan } from '../build/buildTarget';
+import { areColorsOn, colorRoleDetails, setColorOverride, turnOffColors, turnOnColors } from '../colors/colorCommands';
+import { chooseCompilerKind } from '../compiler/compilerCommand';
+import type { CompilerManager } from '../compiler/compilerManager';
+import { COMPILER_LABELS, COMPILER_SETTINGS } from '../compiler/constants/compilers';
+import type { CompilerKind } from '../compiler/types';
+import { targetFor } from '../snippets/snippetProvider';
 import { convertNumber } from '../tools/numberConverter';
-import { PANEL_SETTINGS, PROJECT_LINKS, PanelMessage, issueUrl, parsePanelMessage, renderPanelHtml } from './panelModel';
+import { PANEL_SETTINGS } from './constants/panelSettings';
+import { PROJECT_LINKS } from './constants/projectLinks';
+import { issueUrl } from './issueLink';
+import { renderPanelHtml } from './panelHtml';
+import { parsePanelMessage } from './panelMessages';
+import type { PanelMessage } from './types';
 
 export class FasmPanelProvider implements vscode.WebviewViewProvider, vscode.Disposable {
     private readonly views = new Set<vscode.WebviewView>();
@@ -21,8 +27,7 @@ export class FasmPanelProvider implements vscode.WebviewViewProvider, vscode.Dis
     constructor(
         private readonly extensionUri: vscode.Uri,
         private readonly version: string,
-        private readonly manager: CompilerManager,
-        private readonly installRoot: string
+        private readonly manager: CompilerManager
     ) {
         this.lastFasmDocument = vscode.window.activeTextEditor?.document.languageId === 'fasm' ? vscode.window.activeTextEditor.document : undefined;
         this.listeners = [
@@ -44,6 +49,7 @@ export class FasmPanelProvider implements vscode.WebviewViewProvider, vscode.Dis
             cspSource: view.webview.cspSource,
             nonce: crypto.randomBytes(16).toString('hex'),
             scriptUri: view.webview.asWebviewUri(vscode.Uri.joinPath(media, 'panel.js')).toString(),
+            iconsUri: view.webview.asWebviewUri(vscode.Uri.joinPath(media, 'icons.js')).toString(),
             styleUri: view.webview.asWebviewUri(vscode.Uri.joinPath(media, 'panel.css')).toString()
         });
 
@@ -94,14 +100,6 @@ export class FasmPanelProvider implements vscode.WebviewViewProvider, vscode.Dis
             case 'browseCompiler':
                 await this.browseCompiler(message.kind);
                 break;
-            case 'installCompiler':
-                if (isInstallable(message.kind, process.platform)) {
-                    await installCompiler(message.kind as InstallableKind, this.installRoot);
-                    await this.manager.refresh();
-                } else {
-                    await vscode.env.openExternal(vscode.Uri.parse(message.kind === 'fasmarm' ? PROJECT_LINKS.fasmarm.url : PROJECT_LINKS.fasmDownload.url));
-                }
-                break;
             case 'openLink':
                 await vscode.env.openExternal(vscode.Uri.parse(PROJECT_LINKS[message.link].url));
                 return;
@@ -149,7 +147,6 @@ export class FasmPanelProvider implements vscode.WebviewViewProvider, vscode.Dis
         }
     }
 
-    // Commands act on the active editor, and the panel has just taken focus from it.
     private async focusFasmDocument(): Promise<void> {
         if (this.lastFasmDocument && !this.lastFasmDocument.isClosed) {
             await vscode.window.showTextDocument(this.lastFasmDocument, { preserveFocus: false, preview: false });
@@ -217,8 +214,7 @@ export class FasmPanelProvider implements vscode.WebviewViewProvider, vscode.Dis
             compilers: this.manager.compilers.map((compiler) => ({
                 ...compiler,
                 label: COMPILER_LABELS[compiler.kind],
-                active: compiler.kind === activeKind,
-                installable: isInstallable(compiler.kind, process.platform)
+                active: compiler.kind === activeKind
             })),
             settings: Object.fromEntries(PANEL_SETTINGS.map((setting) => {
                 const config = vscode.workspace.getConfiguration(setting.section, setting.languageScoped ? { languageId: 'fasm' } : undefined);
@@ -248,7 +244,6 @@ export function registerPanelVisibility(context: vscode.ExtensionContext): void 
     }));
 }
 
-// Editors without a right-side sidebar fall back to the left, so the panel always opens.
 export async function openPanel(): Promise<void> {
     const onRight = vscode.workspace.getConfiguration('fasm').get<string>('panelSide', 'right') === 'right';
     if (onRight) {

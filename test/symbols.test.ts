@@ -1,7 +1,7 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import { MNEMONIC_GROUPS } from '../src/data/mnemonics';
-import { INSTRUCTION_OR_OPERATOR_WORDS, SYMBOL_GROUPS, findSymbolGroup } from '../src/data/symbols';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { INSTRUCTION_OR_OPERATOR_WORDS, MNEMONIC_GROUPS, SYMBOL_GROUPS } from '../src/grammar/constants/symbolGroups';
+import { findSymbolGroup } from '../src/grammar/symbols';
 
 const ROOT = path.join(__dirname, '..');
 

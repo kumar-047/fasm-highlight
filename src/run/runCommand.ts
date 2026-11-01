@@ -1,5 +1,6 @@
-// Builds the line typed into a terminal to start a program, quoted for the shell in use.
-export function formatRunCommand(programPath: string, shellPath: string, platform: NodeJS.Platform): string {
+import type { HostPlatform } from '../shared/types';
+
+export function formatRunCommand(programPath: string, shellPath: string, platform: HostPlatform): string {
     const shell = shellPath.toLowerCase();
 
     if (/(^|[\\/])(powershell|pwsh)(\.exe)?$/.test(shell)) {

@@ -1,11 +1,5 @@
-export interface ConvertedNumber {
-    readonly decimal: string;
-    readonly hex: string;
-    readonly binary: string;
-    readonly octal: string;
-}
+import type { ConvertedNumber } from './types';
 
-// Reads the number forms in the fasm manual, such as 255, 0FFh, 0xFF, $FF, 11111111b and 377o.
 export function parseFasmNumber(text: string): bigint | undefined {
     const value = text.trim().replace(/_/g, '');
     const lower = value.toLowerCase();

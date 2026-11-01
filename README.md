@@ -9,7 +9,7 @@ FASM Highlight is an unofficial flat assembler extension for VS Code compatible 
 - hover cards for instructions, registers, directives, data directives, and size specifiers
 - optional FASM Colors, which colour FASM text only and leave your theme alone
 - a side panel with a Control Panel, Settings and Project tab, opened from the gear icon on FASM files
-- automatic detection of fasm, fasm 2, fasmg and FASMARM, with install on request for the official ones
+- automatic detection of fasm, fasm 2, fasmg and FASMARM
 - a formatter that only changes whitespace
 - a number converter and starter programs for the current system
 - instruction colours and build support for 8051, AVR, JVM bytecode, WebAssembly, AArch64 and ARM

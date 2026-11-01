@@ -1,6 +1,10 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import { PANEL_SETTINGS, PROJECT_LINKS, issueUrl, parsePanelMessage, renderPanelHtml } from '../src/panel/panelModel';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { PANEL_SETTINGS } from '../src/panel/constants/panelSettings';
+import { PROJECT_LINKS } from '../src/panel/constants/projectLinks';
+import { issueUrl } from '../src/panel/issueLink';
+import { renderPanelHtml } from '../src/panel/panelHtml';
+import { parsePanelMessage } from '../src/panel/panelMessages';
 
 const ROOT = path.join(__dirname, '..');
 const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
@@ -14,7 +18,6 @@ describe('panel messages', () => {
         [{ type: 'resetSetting', id: 'fontSize' }],
         [{ type: 'setScope', scope: 'user' }],
         [{ type: 'browseCompiler', kind: 'fasmg' }],
-        [{ type: 'installCompiler', kind: 'fasm' }],
         [{ type: 'openLink', link: 'fasmDocs' }],
         [{ type: 'reportIssue', issue: 'bug' }],
         [{ type: 'setColors', enabled: true }],
@@ -34,6 +37,7 @@ describe('panel messages', () => {
         [{ type: 'setSetting', id: 'fontSize', value: -1 }],
         [{ type: 'setSetting', id: 'targetSystem', value: 'plan9' }],
         [{ type: 'browseCompiler', kind: 'nasm' }],
+        [{ type: 'installCompiler', kind: 'fasm' }],
         [{ type: 'openLink', link: 'https://evil.example' }],
         [{ type: 'openLink', link: 'constructor' }],
         [{ type: 'setColor', role: 'comment', color: 'red; x' }],
@@ -66,7 +70,45 @@ describe('settings', () => {
     });
 });
 
+describe('control tab', () => {
+    const script = fs.readFileSync(path.join(ROOT, 'media', 'panel.js'), 'utf8');
+
+    test('editor tools come first', () => {
+        const control = script.slice(script.indexOf('function renderControl'), script.indexOf('function renderScope'));
+        expect(control.indexOf("'Editor tools'")).toBeGreaterThan(-1);
+        expect(control.indexOf("'Editor tools'")).toBeLessThan(control.indexOf("'Current file'"));
+        expect(control.indexOf("'Current file'")).toBeLessThan(control.indexOf("'Compilers'"));
+    });
+
+    test('there is no download or install option', () => {
+        const control = script.slice(script.indexOf('function renderControl'), script.indexOf('function renderScope'));
+        expect(control).not.toContain('fasmDownload');
+        expect(script).not.toMatch(/installCompiler|data-install/);
+    });
+
+    test('a missing compiler points to the Project tab', () => {
+        expect(script).toContain('data-tab="project"');
+    });
+});
+
 describe('links', () => {
+    test('the official section only has the four main links', () => {
+        const script = fs.readFileSync(path.join(ROOT, 'media', 'panel.js'), 'utf8');
+        expect(script).toContain("['fasmSite', 'fasmDocs', 'fasmDownload', 'fasmForum']");
+        expect(Object.keys(PROJECT_LINKS)).not.toEqual(expect.arrayContaining(['fasmRepo']));
+        expect(Object.keys(PROJECT_LINKS)).not.toContain('fasmarm');
+    });
+
+    test('every icon the panel asks for exists', () => {
+        const script = fs.readFileSync(path.join(ROOT, 'media', 'panel.js'), 'utf8');
+        const icons = fs.readFileSync(path.join(ROOT, 'media', 'icons.js'), 'utf8');
+        const names = new Set([...script.matchAll(/'([a-z]+(?:-[a-z]+)*)'/g)].map((match) => match[1]).filter((name) => icons.includes(`"${name}":`)));
+        expect(names.size).toBeGreaterThan(20);
+        for (const name of ['dashboard', 'settings-gear', 'info', 'tools', 'play', 'debug-stop', 'globe', 'book', 'bug']) {
+            expect(icons).toContain(`"${name}":`);
+        }
+    });
+
     test('all use https', () => {
         for (const link of Object.values(PROJECT_LINKS)) {
             expect(link.url).toMatch(/^https:\/\//);
@@ -89,7 +131,7 @@ describe('links', () => {
 });
 
 describe('panel page', () => {
-    const html = renderPanelHtml({ cspSource: 'vscode-resource:', nonce: 'abc123', scriptUri: 'panel.js', styleUri: 'panel.css' });
+    const html = renderPanelHtml({ cspSource: 'vscode-resource:', nonce: 'abc123', scriptUri: 'panel.js', iconsUri: 'icons.js', styleUri: 'panel.css' });
 
     test('its security policy blocks everything except its own files', () => {
         expect(html).toContain("default-src 'none'");
@@ -101,6 +143,7 @@ describe('panel page', () => {
     test('the script loads nothing from outside', () => {
         const script = fs.readFileSync(path.join(ROOT, 'media', 'panel.js'), 'utf8');
         expect(script).not.toMatch(/\bfetch\(|XMLHttpRequest|https?:\/\/|\beval\(/);
+        expect(fs.readFileSync(path.join(ROOT, 'media', 'icons.js'), 'utf8')).not.toMatch(/<script|on[a-z]+=|\bfetch\(/);
     });
 
     test('every value shown in the panel goes through escaping', () => {
@@ -129,7 +172,7 @@ describe('manifest', () => {
     });
 
     test('its files exist', () => {
-        for (const file of ['media/panel.js', 'media/panel.css', 'media/panel-icon.svg', 'snippets/fasm.json']) {
+        for (const file of ['media/icons.js', 'media/panel.js', 'media/panel.css', 'media/panel-icon.svg', 'snippets/fasm.json']) {
             expect(fs.existsSync(path.join(ROOT, file))).toBe(true);
         }
     });

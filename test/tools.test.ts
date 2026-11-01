@@ -1,8 +1,10 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import { findSymbolGroup } from '../src/data/symbols';
-import { BLOCK_END, BLOCK_START, formatFasmSource } from '../src/language/formatter';
-import { SnippetDefinition, rankSnippets, starterSnippet } from '../src/language/snippetRanking';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { BLOCK_END, BLOCK_START } from '../src/formatter/constants/blockPatterns';
+import { formatFasmSource } from '../src/formatter/formatter';
+import { findSymbolGroup } from '../src/grammar/symbols';
+import { rankSnippets, starterSnippet } from '../src/snippets/snippetRanking';
+import type { SnippetDefinition } from '../src/snippets/types';
 import { resolveTargetSystem } from '../src/system/targetSystem';
 import { convertNumber, parseFasmNumber } from '../src/tools/numberConverter';
 

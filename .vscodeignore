@@ -17,7 +17,9 @@ examples/*.exe
 test/**
 scripts/**
 coverage/**
-out/grammar/**
+out/grammar/buildGrammar.js
+out/grammar/constants/grammarPatterns.js
 jest.config.js
 eslint.config.mjs
-tsconfig.test.json
+**/tsconfig.*.json
+**/jsconfig.json

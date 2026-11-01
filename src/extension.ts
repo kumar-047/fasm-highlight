@@ -1,26 +1,25 @@
-import * as path from 'path';
 import * as vscode from 'vscode';
 import { clearAnalysisCache } from './architecture/documentAnalysis';
+import { registerBuildCommands } from './build/buildCommands';
 import { registerColorCommands } from './colors/colorCommands';
-import { registerBuildCommands } from './commands/buildCommands';
 import { CompilerManager } from './compiler/compilerManager';
 import { FasmCompiler } from './compiler/fasmCompiler';
-import { FasmHoverProvider } from './language/hoverProvider';
-import { FasmFormattingProvider, FasmSnippetProvider, insertStarter, loadSnippets } from './language/languageProviders';
-import { FasmSemanticTokensProvider, semanticLegend } from './language/semanticTokens';
+import { FasmFormattingProvider } from './formatter/formattingProvider';
+import { FasmHoverProvider } from './hover/hoverProvider';
 import { FasmPanelProvider, openPanel, registerPanelVisibility } from './panel/panelProvider';
 import { ProgramRunner } from './run/programRunner';
+import { FasmSemanticTokensProvider, semanticLegend } from './semantic/semanticTokens';
+import { FasmSnippetProvider, insertStarter, loadSnippets } from './snippets/snippetProvider';
 
 export function activate(context: vscode.ExtensionContext) {
     const outputChannel = vscode.window.createOutputChannel('FASM');
     const diagnostics = vscode.languages.createDiagnosticCollection('fasm');
     const runner = new ProgramRunner();
-    const installRoot = path.join(context.globalStorageUri.fsPath, 'compilers');
-    const manager = new CompilerManager(installRoot);
+    const manager = new CompilerManager();
     const compiler = new FasmCompiler(outputChannel, manager);
     const snippets = loadSnippets(context.extensionPath);
     const version = String(context.extension.packageJSON.version);
-    const panel = new FasmPanelProvider(context.extensionUri, version, manager, installRoot);
+    const panel = new FasmPanelProvider(context.extensionUri, version, manager);
 
     registerPanelVisibility(context);
 

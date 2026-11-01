@@ -1,8 +1,9 @@
-import { COMPILER_KINDS, buildCompilerCommand, chooseCompilerKind, executableNames } from '../src/compiler/compilerKinds';
-import { DiscoveryEnvironment, findExecutable, parseCompilerVersion } from '../src/compiler/compilerManager';
-import { isInstallable, packageUrl, parseDownloadLinks } from '../src/compiler/compilerPackages';
+import * as path from 'node:path';
+import { buildCompilerCommand, chooseCompilerKind, executableNames } from '../src/compiler/compilerCommand';
+import { findExecutable, parseCompilerVersion } from '../src/compiler/compilerManager';
+import { COMPILER_KINDS } from '../src/compiler/constants/compilers';
 import { parseFasmErrors } from '../src/compiler/fasmErrors';
-import * as path from 'path';
+import type { DiscoveryEnvironment } from '../src/compiler/types';
 
 const OPTIONS = { memoryLimit: 65536, passesLimit: 100 };
 
@@ -85,32 +86,6 @@ describe('finding compilers', () => {
         ['nothing useful', undefined]
     ])('version from %j', (output, version) => {
         expect(parseCompilerVersion(output)).toBe(version);
-    });
-});
-
-describe('official packages', () => {
-    const page = `<a href="fasmw17335.zip">Windows</a> <a href='fasm-1.73.35.tgz'>Linux</a> <a href="fasm17335.zip">DOS</a>
-        <a href="fasm-1.73.35.tar.gz">libc</a> <a href="fasm2.zip">2</a> <a href=fasmg.l8vn.zip>g</a> <a href="https://evil.example/fasmw1.zip">x</a>`;
-    const links = parseDownloadLinks(page);
-
-    test.each([
-        ['fasm', 'win32', 'https://flatassembler.net/fasmw17335.zip'],
-        ['fasm', 'linux', 'https://flatassembler.net/fasm-1.73.35.tgz'],
-        ['fasm2', 'linux', 'https://flatassembler.net/fasm2.zip'],
-        ['fasmg', 'darwin', 'https://flatassembler.net/fasmg.l8vn.zip']
-    ] as const)('%s on %s', (kind, platform, url) => {
-        expect(packageUrl(kind, platform, links)).toBe(url);
-    });
-
-    test('a link to another site is never used', () => {
-        expect(packageUrl('fasm', 'win32', ['https://evil.example/fasmw1.zip', 'x/fasmw1.zip'])).toBeUndefined();
-    });
-
-    test('only what exists can be installed', () => {
-        expect(isInstallable('fasm', 'darwin')).toBe(false);
-        expect(isInstallable('fasm2', 'darwin')).toBe(false);
-        expect(isInstallable('fasmg', 'darwin')).toBe(true);
-        expect(isInstallable('fasmarm', 'win32')).toBe(false);
     });
 });
 

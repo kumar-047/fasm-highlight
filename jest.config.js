@@ -6,6 +6,6 @@ module.exports = {
         '^vscode$': '<rootDir>/test/mocks/vscode.ts'
     },
     transform: {
-        '^.+\\.ts$': ['ts-jest', { tsconfig: 'tsconfig.test.json', isolatedModules: true }]
+        '^.+\\.ts$': ['ts-jest', { tsconfig: 'tsconfig.json', isolatedModules: true }]
     }
 };

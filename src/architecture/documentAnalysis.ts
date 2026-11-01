@@ -1,7 +1,9 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import process from 'node:process';
 import * as vscode from 'vscode';
-import { ArchitectureId, SourceAnalysis, analyzeSource } from './analysis';
+import { analyzeSource } from './analysis';
+import type { ArchitectureId, SourceAnalysis } from './types';
 
 const cache = new Map<string, { version: number; analysis: SourceAnalysis }>();
 

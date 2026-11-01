@@ -1,16 +1,15 @@
-import * as cp from 'child_process';
-import * as path from 'path';
+import * as cp from 'node:child_process';
+import * as path from 'node:path';
+import process from 'node:process';
 import * as vscode from 'vscode';
-import { COMPILER_LABELS, CompilerKind, buildCompilerCommand } from './compilerKinds';
-import { CompilerManager } from './compilerManager';
-import { FasmError, parseFasmErrors } from './fasmErrors';
+import type { HostPlatform } from '../shared/types';
+import { buildCompilerCommand } from './compilerCommand';
+import type { CompilerManager } from './compilerManager';
+import { COMPILER_LABELS } from './constants/compilers';
+import { parseFasmErrors } from './fasmErrors';
+import type { CompileResult, CompilerKind } from './types';
 
-export interface CompileResult {
-    readonly success: boolean;
-    readonly errors: readonly FasmError[];
-}
-
-export function defaultCompilerPath(platform: NodeJS.Platform): string {
+export function defaultCompilerPath(platform: HostPlatform): string {
     return platform === 'win32' ? 'C:\\fasmw17335\\fasm.exe' : 'fasm';
 }
 
