@@ -154,15 +154,19 @@ button.palette:hover:not(:disabled) { background: var(--vscode-list-hoverBackgro
 
 .swatch {
     display: block;
-    width: 28px;
-    height: 28px;
-    border: 1px solid var(--border);
+    width: 34px;
+    height: 34px;
+    border: 7px solid;
     border-radius: 50%;
+    box-shadow: 0 0 0 1px var(--border);
 }
+
+.swatch-dark { border-color: #1e1e1e; }
+.swatch-light { border-color: #ffffff; }
 
 button.palette.current .swatch {
     outline: 2px solid var(--vscode-focusBorder);
-    outline-offset: 2px;
+    outline-offset: 3px;
 }
 
 .palette-name {

@@ -38,7 +38,7 @@
         return state.palettes.filter((palette) => palette.kind === kind).map((palette) => {
             const current = state.colorsOn && state.palette === palette.id;
             return `<button class="palette${current ? ' current' : ''}" data-palette="${escapeHtml(palette.id)}" aria-pressed="${current}" title="${escapeHtml(palette.label)}">
-                <span class="swatch" data-colors="${escapeHtml(palette.colors.join(','))}"></span><span class="palette-name">${escapeHtml(palette.label)}</span></button>`;
+                <span class="swatch swatch-${escapeHtml(palette.kind)}" data-colors="${escapeHtml(palette.colors.join(','))}"></span><span class="palette-name">${escapeHtml(palette.label)}</span></button>`;
         }).join('');
     }
 
