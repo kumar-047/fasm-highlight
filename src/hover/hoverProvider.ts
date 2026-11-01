@@ -3,20 +3,12 @@ import * as vscode from 'vscode';
 import { analyzeDocument } from '../architecture/documentAnalysis';
 import type { SourceAnalysis } from '../architecture/types';
 import { manualUrl } from '../manual/manual';
-import type { FasmMenu } from '../menu/fasmMenu';
-import { numberHover } from '../menu/fasmMenu';
 import { findHoverEntry } from './hoverLookup';
+import { numberHover } from './numberHover';
 import type { HoverEntry, PlatformContext } from './types';
 
 export class FasmHoverProvider implements vscode.HoverProvider {
-    constructor(private readonly menu: FasmMenu) {}
-
     provideHover(document: vscode.TextDocument, position: vscode.Position): vscode.Hover | undefined {
-        const card = this.menu.takeCard(document);
-        if (card) {
-            return new vscode.Hover(card);
-        }
-
         const line = document.lineAt(position.line).text;
         if (!isInCommentOrString(line, position.character)) {
             const number = numberHover(line, position.character);

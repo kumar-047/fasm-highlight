@@ -60,7 +60,19 @@ async function applyColors(): Promise<void> {
     }
 }
 
-async function turnOff(): Promise<void> {
+export async function setPalette(id: string): Promise<void> {
+    await fasmConfig().update('colors.palette', id, vscode.ConfigurationTarget.Global);
+    await fasmConfig().update('colors.overrides', undefined, vscode.ConfigurationTarget.Global);
+    await applyColors();
+}
+
+export async function setRoleColor(role: ColorRole, color: string): Promise<void> {
+    await fasmConfig().update('colors.overrides', { ...overrides(), [role]: color }, vscode.ConfigurationTarget.Global);
+    await applyColors();
+}
+
+export async function resetColors(): Promise<void> {
+    await fasmConfig().update('colors.overrides', undefined, vscode.ConfigurationTarget.Global);
     const config = vscode.workspace.getConfiguration('editor');
     const values = inspected();
     if (values?.workspaceValue) {
@@ -71,27 +83,6 @@ async function turnOff(): Promise<void> {
     }
 }
 
-export function registerColorCommands(afterChange: () => Promise<void>, afterRoleChange: () => Promise<void>): vscode.Disposable[] {
-    return [
-        vscode.commands.registerCommand('fasm.setPalette', async (id: string) => {
-            await fasmConfig().update('colors.palette', id, vscode.ConfigurationTarget.Global);
-            await fasmConfig().update('colors.overrides', undefined, vscode.ConfigurationTarget.Global);
-            await applyColors();
-            await afterChange();
-        }),
-        vscode.commands.registerCommand('fasm.setRoleColor', async (role: ColorRole, color: string) => {
-            await fasmConfig().update('colors.overrides', { ...overrides(), [role]: color }, vscode.ConfigurationTarget.Global);
-            await applyColors();
-            await afterRoleChange();
-        }),
-        vscode.commands.registerCommand('fasm.resetRoleColors', async () => {
-            await fasmConfig().update('colors.overrides', undefined, vscode.ConfigurationTarget.Global);
-            await applyColors();
-            await afterRoleChange();
-        }),
-        vscode.commands.registerCommand('fasm.turnOffColors', async () => {
-            await turnOff();
-            await afterChange();
-        })
-    ];
+export function registerPaletteCommand(): vscode.Disposable {
+    return vscode.commands.registerCommand('fasm.setPalette', setPalette);
 }

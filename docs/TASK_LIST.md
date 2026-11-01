@@ -10,7 +10,7 @@ Details and history are in [plan.md](plan.md) and [CHANGE_LIST.md](CHANGE_LIST.m
 - [x] Colours for fasmg keywords and packages: 8051, AVR, JVM, WebAssembly, AArch64 and others read from includes
 - [x] Formatter that only changes whitespace
 - [x] FASM Colors, replacing the old theme
-- [x] FASM Menu card on right-click: Format File, number values, Colors, Fonts, Customize
+- [x] FASM Menu side panel on right-click: Format File, number values, Colors, Fonts, Customize
 - [x] 8 readable color palettes, 12 fonts and preset sizes
 - [x] `FASM: Build` with one compiler path, and errors in the Problems panel
 - [x] Hover cards, snippets ranked by system, and the `program` starter
@@ -18,7 +18,7 @@ Details and history are in [plan.md](plan.md) and [CHANGE_LIST.md](CHANGE_LIST.m
 
 ## Removed on purpose
 
-Run and Stop, compiler detection and install, the compiler list, FASMARM, project links and issue buttons, and the whole side panel.
+Run and Stop, compiler detection and install, the compiler list, FASMARM, project links and issue buttons, and the large control panel with tabs.
 
 ## Next: highlighting and formatting
 

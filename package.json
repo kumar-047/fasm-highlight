@@ -120,7 +120,7 @@
         "fasm.colors.overrides": {
           "type": "object",
           "default": {},
-          "description": "Custom FASM Colors, by role. The Settings tab of the FASM panel edits this."
+          "description": "Custom FASM Colors, by role. Customize in the FASM panel edits this."
         },
         "fasm.format.operandColumn": {
           "type": "number",
@@ -154,6 +154,15 @@
           ],
           "default": "auto",
           "description": "The FASM Colors palette. Automatic picks FASM Dark or FASM Light to match your theme."
+        },
+        "fasm.panelSide": {
+          "type": "string",
+          "enum": [
+            "right",
+            "left"
+          ],
+          "default": "right",
+          "description": "The side the FASM panel opens on. It opens on the left if your editor has no right sidebar."
         }
       }
     },
@@ -187,6 +196,40 @@
           "command": "fasm.openMenu",
           "when": "editorLangId == fasm",
           "group": "1_modification@9"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "fasmPanelLeft",
+          "title": "FASM",
+          "icon": "media/panel-icon.svg"
+        }
+      ],
+      "secondarySidebar": [
+        {
+          "id": "fasmPanelRight",
+          "title": "FASM",
+          "icon": "media/panel-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "fasmPanelLeft": [
+        {
+          "type": "webview",
+          "id": "fasm.panelLeft",
+          "name": "FASM",
+          "when": "fasm.panelReady && !fasm.panelOnRight"
+        }
+      ],
+      "fasmPanelRight": [
+        {
+          "type": "webview",
+          "id": "fasm.panelRight",
+          "name": "FASM",
+          "when": "fasm.panelReady && fasm.panelOnRight"
         }
       ]
     }

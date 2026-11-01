@@ -2,11 +2,11 @@
 
 All notable changes to the `fasm-highlight` extension are documented in this file.
 
-## [0.2.2] - Unreleased
+## [0.2.2] - 2026-11-01
 
 ### Added
 
-- **FASM Menu** on right-click: a card at your cursor with Format File, number values, Colors and Fonts, each with Customize where it applies.
+- **FASM Menu** on right-click: a small side panel with Format File, number values, Colors and Fonts, each with Customize where it applies.
 - Hover over any number to see its value in decimal, hex, binary and octal, and click to copy.
 - Formatter that only changes spaces and blank lines, with settings for operand column, comment column, commas and blank lines.
 - 8 color palettes that only change FASM text: FASM Dark, Ember, Ocean, Forest, Mono, FASM Light, Paper and Sky.
