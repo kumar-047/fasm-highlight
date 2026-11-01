@@ -8,4 +8,11 @@ export type TokenColorCustomizations = Record<string, unknown> & { textMateRules
 
 export type ColorRole = 'comment' | 'string' | 'label' | 'section' | 'data' | 'directive' | 'helper' | 'instruction' | 'register' | 'number' | 'operator';
 
+export interface ColorPalette {
+    readonly id: string;
+    readonly label: string;
+    readonly kind: 'dark' | 'light';
+    readonly colors: Readonly<Record<ColorRole, string>>;
+}
+
 export type ColorOverrides = Partial<Record<ColorRole, string>>;

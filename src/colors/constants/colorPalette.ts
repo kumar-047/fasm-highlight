@@ -115,7 +115,7 @@ export const FONT_STYLES: Partial<Record<ColorRole, string>> = {
 };
 
 export const DARK_COLORS: Readonly<Record<ColorRole, string>> = {
-    comment: '#6e7f8f',
+    comment: '#8498ab',
     string: '#d9b26f',
     label: '#7ec9c3',
     section: '#8fd0ff',

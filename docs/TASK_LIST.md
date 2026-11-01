@@ -10,19 +10,20 @@ Details and history are in [plan.md](plan.md) and [CHANGE_LIST.md](CHANGE_LIST.m
 - [x] Colours for fasmg keywords and packages: 8051, AVR, JVM, WebAssembly, AArch64 and others read from includes
 - [x] Formatter that only changes whitespace
 - [x] FASM Colors, replacing the old theme
-- [x] Small panel: Format, Colors, number converter, one compiler path
+- [x] Right-click FASM menu: Format File, Check Number Value, Font Palette, Color Palette
+- [x] 8 readable color palettes, 12 fonts and preset sizes
 - [x] `FASM: Build` with one compiler path, and errors in the Problems panel
 - [x] Hover cards, snippets ranked by system, and the `program` starter
 - [x] Same identity as the published 0.2.1, with the upgrade explained
 
 ## Removed on purpose
 
-Run and Stop, compiler detection and install, the compiler list, FASMARM, project links and issue buttons, the full control panel, and fonts in the panel.
+Run and Stop, compiler detection and install, the compiler list, FASMARM, project links and issue buttons, and the whole side panel.
 
 ## Next: highlighting and formatting
 
 - [x] fasmg and fasm 2 highlighting from their manuals and instruction sets
-- [ ] Improve the formatter from real use
+- [x] Formatter: fasmg blocks, labels, operand and comment columns, commas, blank lines
 - [ ] Improve FASM Colors from real use
 
 ## Before publishing
@@ -31,4 +32,5 @@ Run and Stop, compiler detection and install, the compiler list, FASMARM, projec
 - [ ] Test on Linux and macOS
 - [ ] Run tests on every push with GitHub Actions
 - [ ] Open VSX access token (the namespace and listing already exist)
+- [ ] Decide the release version: 0.2.1 is already published on Open VSX
 - [ ] Publish to Open VSX

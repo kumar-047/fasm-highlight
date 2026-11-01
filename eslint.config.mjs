@@ -4,7 +4,7 @@ import tseslint from 'typescript-eslint';
 const NODE_BUILT_INS = ['child_process', 'crypto', 'fs', 'https', 'os', 'path', 'process'];
 
 export default tseslint.config(
-    { ignores: ['out/**', 'node_modules/**', 'coverage/**', 'examples/**', 'syntaxes/**', 'media/**'] },
+    { ignores: ['out/**', 'node_modules/**', 'coverage/**', 'examples/**', 'syntaxes/**'] },
     js.configs.recommended,
     ...tseslint.configs.recommended,
     {

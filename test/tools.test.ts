@@ -2,18 +2,26 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { BLOCK_END, BLOCK_START } from '../src/formatter/constants/blockPatterns';
 import { formatFasmSource } from '../src/formatter/formatter';
+import type { FormatOptions } from '../src/formatter/types';
+import { FONT_PALETTE, FONT_SIZES } from '../src/fonts/constants/fontPalette';
+import { validateFontSize } from '../src/fonts/fontSettings';
+import { isHexColor } from '../src/colors/colorRules';
 import { findSymbolGroup } from '../src/grammar/symbols';
 import { rankSnippets, starterSnippet } from '../src/snippets/snippetRanking';
 import type { SnippetDefinition } from '../src/snippets/types';
 import { resolveTargetSystem } from '../src/system/targetSystem';
-import { convertNumber, parseFasmNumber } from '../src/tools/numberConverter';
+import { convertNumber, numberAt, parseFasmNumber } from '../src/tools/numberConverter';
 
 const ROOT = path.join(__dirname, '..');
 
-function format(text: string, commentColumn = 0): string {
+function format(text: string, commentColumn = 0, extra: Partial<FormatOptions> = {}): string {
     return formatFasmSource(text, {
         indent: '    ',
         commentColumn,
+        operandColumn: 0,
+        spaceAfterComma: false,
+        maxBlankLines: 0,
+        ...extra,
         isInstruction: (word) => findSymbolGroup(word)?.kind === 'instruction'
     });
 }
@@ -24,7 +32,7 @@ describe('formatter', () => {
     });
 
     test('blocks indent their contents', () => {
-        expect(format('if x\nnop\nend if\n')).toBe('if x\n        nop\nend if\n');
+        expect(format('if x\nnop\nend if\n')).toBe('if x\n    nop\nend if\n');
     });
 
     test('else lines up with its if', () => {
@@ -32,7 +40,58 @@ describe('formatter', () => {
     });
 
     test('macro braces indent', () => {
-        expect(format('macro m {\nnop\n}')).toBe('macro m {\n        nop\n}');
+        expect(format('macro m {\nnop\n}')).toBe('macro m {\n    nop\n}');
+    });
+
+    test('fasm 1 macros with the brace on the next line indent once', () => {
+        expect(format('macro m\n{\nnop\n}\nnop')).toBe('macro m\n{\n    nop\n}\n    nop');
+    });
+
+    test('fasmg macros without braces indent their body', () => {
+        expect(format('macro m\nnop\nend macro\nnop')).toBe('macro m\n    nop\nend macro\n    nop');
+    });
+
+    test('nested fasmg blocks indent by level', () => {
+        expect(format('macro m\nif x\nnop\nend if\nend macro')).toBe('macro m\n    if x\n        nop\n    end if\nend macro');
+    });
+
+    test('one-line macros do not open a block', () => {
+        expect(format('macro m { nop }\nnop')).toBe('macro m { nop }\n    nop');
+    });
+
+    test('CALM commands inside calminstruction open no blocks', () => {
+        const source = 'calminstruction x\nmatch a, b\nrawmatch c, d\nend calminstruction\nnop';
+        expect(format(source)).toBe('calminstruction x\n    match a, b\n    rawmatch c, d\nend calminstruction\n    nop');
+    });
+
+    test('labels sit left of the code in a block', () => {
+        expect(format('proc f\n.loop:\nmov eax,1\nret\nendp')).toBe('proc f\n.loop:\n    mov eax,1\n    ret\nendp');
+    });
+
+    test('labels inside an if stay one level in', () => {
+        expect(format('proc f\nif x\n.a:\nnop\nend if\nendp')).toBe('proc f\n    if x\n    .a:\n        nop\n    end if\nendp');
+    });
+
+    test('operands can align to a column', () => {
+        expect(format('mov eax,1\nnop', 0, { operandColumn: 12 })).toBe('    mov     eax,1\n    nop');
+    });
+
+    test('a long instruction still has a gap before its operands', () => {
+        expect(format('vfmadd132ps xmm0,xmm1,xmm2', 0, { operandColumn: 8 })).toBe('    vfmadd132ps xmm0,xmm1,xmm2');
+    });
+
+    test('a space can be added after commas, but never in strings', () => {
+        expect(format("mov eax,ebx\nmsg db 'a,b',0", 0, { spaceAfterComma: true })).toBe("    mov eax, ebx\nmsg db 'a,b', 0");
+    });
+
+    test('blank lines in a row can be limited', () => {
+        expect(format('nop\n\n\n\nnop', 0, { maxBlankLines: 1 })).toBe('    nop\n\n    nop');
+    });
+
+    test('every option together is stable on a second format', () => {
+        const options = { operandColumn: 12, spaceAfterComma: true, maxBlankLines: 1 };
+        const once = format('macro m\nif x\nstart:   mov  eax,1 ; c\nend if\nend macro\n\n\nmov eax,ebx', 30, options);
+        expect(format(once, 30, options)).toBe(once);
     });
 
     test('nothing inside strings changes', () => {
@@ -88,10 +147,58 @@ describe('formatter', () => {
     });
 });
 
+describe('number at the cursor', () => {
+    test.each([
+        ['mov eax,0FFh', 9, '0FFh'],
+        ['mov eax,0FFh', 12, '0FFh'],
+        ['mov al,$1F', 8, '$1F'],
+        ["dw 1'000", 4, "1'000"],
+        ['mov eax,ebx', 9, undefined],
+        ['r8 dd 5', 1, undefined]
+    ])('%s at %i is %s', (line, character, value) => {
+        expect(numberAt(line, character)).toBe(value);
+    });
+});
+
+describe('font palette', () => {
+    test('there are several fonts, with safe fallbacks', () => {
+        expect(FONT_PALETTE.length).toBeGreaterThanOrEqual(8);
+        for (const font of FONT_PALETTE) {
+            expect(font.family).toContain('monospace');
+        }
+    });
+
+    test('labels are unique', () => {
+        expect(new Set(FONT_PALETTE.map((font) => font.label)).size).toBe(FONT_PALETTE.length);
+    });
+
+    test('every preset size is valid', () => {
+        for (const size of FONT_SIZES) {
+            expect(validateFontSize(String(size))).toBeUndefined();
+        }
+    });
+});
+
+describe('font and colour input', () => {
+    test.each(['6', '14', '72'])('font size %s is accepted', (value) => {
+        expect(validateFontSize(value)).toBeUndefined();
+    });
+
+    test.each(['5', '73', '1.5', 'big', ''])('font size %j is refused', (value) => {
+        expect(validateFontSize(value)).toBeDefined();
+    });
+
+    test('colours must be full hex values', () => {
+        expect(isHexColor('#ff8f6b')).toBe(true);
+        expect(isHexColor('red')).toBe(false);
+        expect(isHexColor('#fff')).toBe(false);
+    });
+});
+
 describe('number converter', () => {
     test.each([
         ['255', 255n], ['255d', 255n], ['0FFh', 255n], ['0xFF', 255n], ['$FF', 255n], ['11111111b', 255n],
-        ['377o', 255n], ['377q', 255n], ['1_000', 1000n], ['  10  ', 10n], ['18446744073709551616', 18446744073709551616n]
+        ['377o', 255n], ['377q', 255n], ['1_000', 1000n], ["1'000", 1000n], ['  10  ', 10n], ['18446744073709551616', 18446744073709551616n]
     ])('reads %s', (text, value) => {
         expect(parseFasmNumber(text)).toBe(value);
     });

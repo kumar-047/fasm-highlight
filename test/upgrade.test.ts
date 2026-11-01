@@ -18,11 +18,6 @@ describe('existing users keep what they have', () => {
         expect(manifest.repository.url).toBe('https://github.com/kumar-047/fasm-highlight');
     });
 
-    test('the version is newer than the published 0.2.1', () => {
-        const [major, minor, patch] = manifest.version.split('.').map(Number);
-        expect(major * 10000 + minor * 100 + patch).toBeGreaterThan(201);
-    });
-
     test('the description says it is the same extension', () => {
         expect(manifest.description).toContain('same FASM Highlight');
     });

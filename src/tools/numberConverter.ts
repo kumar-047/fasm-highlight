@@ -1,7 +1,7 @@
 import type { ConvertedNumber } from './types';
 
 export function parseFasmNumber(text: string): bigint | undefined {
-    const value = text.trim().replace(/_/g, '');
+    const value = text.trim().replace(/[_']/g, '');
     const lower = value.toLowerCase();
 
     if (/^0x[0-9a-f]+$/.test(lower)) {
@@ -21,6 +21,15 @@ export function parseFasmNumber(text: string): bigint | undefined {
     }
     if (/^[0-9]+d?$/.test(lower)) {
         return BigInt(lower.replace(/d$/, ''));
+    }
+    return undefined;
+}
+
+export function numberAt(line: string, character: number): string | undefined {
+    for (const match of line.matchAll(/(?<![\w.$])(?:\$[0-9a-fA-F][\w']*|[0-9][\w']*)/g)) {
+        if (character >= match.index && character <= match.index + match[0].length) {
+            return match[0];
+        }
     }
     return undefined;
 }

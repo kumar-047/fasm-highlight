@@ -48,7 +48,7 @@ export class FasmCompiler {
             child.on('error', (error) => {
                 this.outputChannel.appendLine(`Error: ${error.message}`);
                 this.outputChannel.appendLine('');
-                this.outputChannel.appendLine('Set the path to your compiler in the FASM panel, or in the fasm.compilerPath setting.');
+                this.outputChannel.appendLine('Set the path to your compiler in the fasm.compilerPath setting.');
                 resolve({ success: false, errors: [] });
             });
 

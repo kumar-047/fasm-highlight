@@ -2,7 +2,7 @@
 
 All notable changes to the `fasm-highlight` extension are documented in this file.
 
-## [0.3.0] - Unreleased
+## [Unreleased]
 
 The same extension, upgraded. The identifier is still `kumar-047.fasm-highlight`, and your settings, commands, shortcuts and snippet prefixes all carry over.
 
@@ -15,9 +15,11 @@ The same extension, upgraded. The identifier is still `kumar-047.fasm-highlight`
 - colours for macros and structures defined in the same file, operators such as `>=` and `&`, `?`, `__file__`, AVX-512 decorators such as `{z}`, line continuations, and `1'000` numbers
 - colours for 8051, AVR, JVM bytecode, WebAssembly and AArch64 instructions, detected from include lines
 - colours and hover cards for other fasmg packages, read from the file's includes
-- a formatter that only changes whitespace
+- a formatter that only changes whitespace, with fasmg block support and settings for operand column, comment column, commas and blank lines
 - FASM Colors, which colour FASM text only, for this workspace or all windows
-- a small panel with Format and Colors tabs, a number converter and your compiler path
+- a right-click FASM menu with Format File, Check Number Value, Font Palette and Color Palette
+- 8 color palettes: FASM Dark, Ember, Ocean, Forest, Mono, FASM Light, Paper and Sky
+- a font palette with 12 coding fonts and preset sizes, for FASM files only
 - hover cards for 44 more instructions, and basic hover cards for all other instructions and registers
 - snippets ranked for the target system, and a `program` starter
 - build errors in the Problems panel, with links to where a failing macro was used
@@ -31,7 +33,6 @@ The same extension, upgraded. The identifier is still `kumar-047.fasm-highlight`
 - hover categories reduced to 7, with manual links built in one place
 - reorganised the source into module folders with their own types and constants
 - updated the development tools, including TypeScript 6, ESLint 10, Jest 30 and vsce 4
-- panel: rounded controls and Codicons icons (CC BY 4.0)
 
 ### Fixed
 

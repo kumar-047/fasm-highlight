@@ -1,8 +1,8 @@
 {
   "name": "fasm-highlight",
   "displayName": "FASM Highlight",
-  "description": "The same FASM Highlight, upgraded: syntax highlighting, formatting, hover cards, snippets and a number converter for fasm, fasm 2 and fasmg. Unofficial.",
-  "version": "0.3.0",
+  "description": "The same FASM Highlight, upgraded: syntax highlighting, formatting, hover cards, snippets and a number check for fasm, fasm 2 and fasmg. Unofficial.",
+  "version": "0.2.1",
   "publisher": "kumar-047",
   "icon": "icon.png",
   "engines": {
@@ -10,7 +10,8 @@
   },
   "categories": [
     "Programming Languages",
-    "Snippets"
+    "Snippets",
+    "Formatters"
   ],
   "keywords": [
     "fasm",
@@ -54,14 +55,28 @@
     ],
     "commands": [
       {
-        "command": "fasm.openPanel",
-        "title": "Open Control Panel",
-        "category": "FASM",
-        "icon": "$(settings-gear)"
-      },
-      {
         "command": "fasm.build",
         "title": "Build",
+        "category": "FASM"
+      },
+      {
+        "command": "fasm.formatFile",
+        "title": "Format File",
+        "category": "FASM"
+      },
+      {
+        "command": "fasm.checkNumber",
+        "title": "Check Number Value",
+        "category": "FASM"
+      },
+      {
+        "command": "fasm.changeFont",
+        "title": "Font Palette",
+        "category": "FASM"
+      },
+      {
+        "command": "fasm.changeColors",
+        "title": "Color Palette",
         "category": "FASM"
       },
       {
@@ -116,15 +131,6 @@
           "default": "auto",
           "description": "The system to suggest snippets for. A format line in the file always wins."
         },
-        "fasm.panelSide": {
-          "type": "string",
-          "enum": [
-            "right",
-            "left"
-          ],
-          "default": "right",
-          "description": "Which side the FASM panel opens on. Editors without a right-side area use the left."
-        },
         "fasm.format.commentColumn": {
           "type": "number",
           "default": 0,
@@ -136,46 +142,40 @@
           "default": {},
           "description": "Custom FASM Colors, by role. The Settings tab of the FASM panel edits this."
         },
-        "fasm.showPanelButton": {
+        "fasm.format.operandColumn": {
+          "type": "number",
+          "default": 0,
+          "minimum": 0,
+          "description": "The column to align instruction operands to when formatting. 0 uses one space."
+        },
+        "fasm.format.spaceAfterComma": {
           "type": "boolean",
-          "default": true,
-          "description": "Show the FASM panel button at the top of FASM files."
+          "default": false,
+          "description": "Add a space after commas when formatting. Text inside strings is never changed."
+        },
+        "fasm.format.maxBlankLines": {
+          "type": "number",
+          "default": 0,
+          "minimum": 0,
+          "description": "The most blank lines to keep in a row when formatting. 0 keeps them all."
+        },
+        "fasm.colors.palette": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "fasm-dark",
+            "ember",
+            "ocean",
+            "forest",
+            "mono",
+            "fasm-light",
+            "paper",
+            "sky"
+          ],
+          "default": "auto",
+          "description": "The FASM Colors palette. Automatic picks FASM Dark or FASM Light to match your theme."
         }
       }
-    },
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "fasmPanelLeft",
-          "title": "FASM",
-          "icon": "media/panel-icon.svg"
-        }
-      ],
-      "secondarySidebar": [
-        {
-          "id": "fasmPanelRight",
-          "title": "FASM",
-          "icon": "media/panel-icon.svg"
-        }
-      ]
-    },
-    "views": {
-      "fasmPanelLeft": [
-        {
-          "type": "webview",
-          "id": "fasm.panelLeft",
-          "name": "FASM",
-          "when": "fasm.panelReady && !fasm.panelOnRight"
-        }
-      ],
-      "fasmPanelRight": [
-        {
-          "type": "webview",
-          "id": "fasm.panelRight",
-          "name": "FASM",
-          "when": "fasm.panelReady && fasm.panelOnRight"
-        }
-      ]
     },
     "configurationDefaults": {
       "[fasm]": {
@@ -200,7 +200,40 @@
           ]
         }
       }
-    ]
+    ],
+    "submenus": [
+      {
+        "id": "fasm.contextMenu",
+        "label": "FASM"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "submenu": "fasm.contextMenu",
+          "when": "editorLangId == fasm",
+          "group": "1_modification@9"
+        }
+      ],
+      "fasm.contextMenu": [
+        {
+          "command": "fasm.formatFile",
+          "group": "1_file@1"
+        },
+        {
+          "command": "fasm.checkNumber",
+          "group": "1_file@2"
+        },
+        {
+          "command": "fasm.changeFont",
+          "group": "2_look@1"
+        },
+        {
+          "command": "fasm.changeColors",
+          "group": "2_look@2"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

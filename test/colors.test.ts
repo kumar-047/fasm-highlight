@@ -1,7 +1,8 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { addFasmRules, fasmColorRules, hasFasmRules, removeFasmRules } from '../src/colors/colorRules';
-import { SEMANTIC_SCOPES } from '../src/colors/constants/colorPalette';
+import { addFasmRules, defaultRoleColor, fasmColorRules, orderedPalettes, hasFasmRules, removeFasmRules } from '../src/colors/colorRules';
+import { COLOR_ROLES, SEMANTIC_SCOPES } from '../src/colors/constants/colorPalette';
+import { COLOR_PALETTES } from '../src/colors/constants/colorPalettes';
 
 const userRule = { scope: 'comment', settings: { foreground: '#111111' } };
 
@@ -76,5 +77,57 @@ describe('adding and removing', () => {
 
     test('turning off with no settings is safe', () => {
         expect(removeFasmRules(undefined)).toBeUndefined();
+    });
+});
+
+function luminance(hex: string): number {
+    const channels = [1, 3, 5].map((start) => parseInt(hex.slice(start, start + 2), 16) / 255);
+    const [r, g, b] = channels.map((value) => (value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function contrast(first: string, second: string): number {
+    const [light, dark] = [luminance(first), luminance(second)].sort((a, b) => b - a);
+    return (light + 0.05) / (dark + 0.05);
+}
+
+describe('colour palettes', () => {
+    test('there are several for dark and light themes', () => {
+        expect(COLOR_PALETTES.filter((palette) => palette.kind === 'dark').length).toBeGreaterThanOrEqual(3);
+        expect(COLOR_PALETTES.filter((palette) => palette.kind === 'light').length).toBeGreaterThanOrEqual(3);
+    });
+
+    test('ids are unique, and match package.json', () => {
+        const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
+        const ids = COLOR_PALETTES.map((palette) => palette.id);
+        expect(new Set(ids).size).toBe(ids.length);
+        expect(manifest.contributes.configuration.properties['fasm.colors.palette'].enum).toEqual(['auto', ...ids]);
+    });
+
+    test.each(COLOR_PALETTES.map((palette) => [palette.label, palette] as const))('%s is readable on its background', (_label, palette) => {
+        const background = palette.kind === 'light' ? '#ffffff' : '#1e1e1e';
+        for (const role of COLOR_ROLES) {
+            expect(contrast(palette.colors[role], background)).toBeGreaterThanOrEqual(4.5);
+        }
+    });
+
+    test('choosing a palette changes the colours', () => {
+        const ocean = fasmColorRules(false, {}, 'ocean').find((rule) => rule.name === 'FASM instruction');
+        expect(ocean?.settings.foreground).toBe(COLOR_PALETTES.find((palette) => palette.id === 'ocean')?.colors.instruction);
+    });
+
+    test('your own colour wins over the palette', () => {
+        const rule = fasmColorRules(false, { comment: '#123456' }, 'ocean').find((item) => item.name === 'FASM comment');
+        expect(rule?.settings.foreground).toBe('#123456');
+    });
+
+    test('automatic follows the theme, and an unknown palette falls back safely', () => {
+        expect(defaultRoleColor('comment', true)).toBe(defaultRoleColor('comment', true, 'fasm-light'));
+        expect(defaultRoleColor('comment', false, 'missing')).toBe(defaultRoleColor('comment', false, 'fasm-dark'));
+    });
+
+    test('palettes for your theme are listed first', () => {
+        expect(orderedPalettes(true)[0].kind).toBe('light');
+        expect(orderedPalettes(false)[0].kind).toBe('dark');
     });
 });
