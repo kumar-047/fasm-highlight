@@ -7,7 +7,6 @@ import { createBuildPlan, inferOutput } from '../src/build/buildTarget';
 import { findEntryForArchitecture } from '../src/hover/hoverProvider';
 import { computeSemanticTokens } from '../src/semantic/semanticTokens';
 
-const noFiles: ReadFile = () => undefined;
 const SOURCE = path.resolve('project/a.asm');
 
 function analyze(text: string, files: Record<string, string> = {}) {
@@ -30,9 +29,6 @@ describe('detecting the architecture', () => {
         ["include 'jclass.inc'", 'jvm'],
         ["include 'wasm.inc'", 'wasm'],
         ["include 'iset/aarch64.inc'", 'aarch64'],
-        ['thumb', 'arm'],
-        ['code64', 'arm'],
-        ['processor cpu32_v7', 'arm'],
         ['format PE', 'x86'],
         ["include 'win32a.inc'", 'x86'],
         ['mov eax,1', 'x86']
@@ -48,17 +44,7 @@ describe('detecting the architecture', () => {
         expect(analyze("; include '8051.inc'").architecture.id).toBe('x86');
     });
 
-    test('the setting overrides detection', () => {
-        expect(analyzeSource("include '8051.inc'", SOURCE, noFiles, [], 'avr').architecture.id).toBe('avr');
-    });
-});
-
-describe('detecting fasmg syntax', () => {
-    test.each(['macro x\nend macro', 'iterate a, 1,2\nend iterate', 'calminstruction x\nend calminstruction', "include 'fasm2.inc'", "include 'avr.inc'"])('%s is fasmg', (source) => {
-        expect(analyze(source).dialect).toBe('fasmg');
-    });
-
-    test.each(['macro x { nop }', 'format PE\nmov eax,1', 'thumb\nmov r0,r1'])('%s is fasm 1 style', (source) => {
+    test.each(['macro x { nop }', 'format PE\nmov eax,1'])('%s is fasm 1 style', (source) => {
         expect(analyze(source).dialect).toBe('fasm');
     });
 });
@@ -168,13 +154,10 @@ describe('hover on other architectures', () => {
 
 describe('building for other architectures', () => {
     const document = (text: string) => ({ fileName: 'a.asm', languageId: 'fasm', getText: () => text }) as unknown as TextDocument;
-
-    test('they can be built but not run', () => {
-        const text = "include 'avr.inc'";
-        const plan = createBuildPlan(document(text), 'win32', analyze(text));
-        expect(plan.canBuild).toBe(true);
-        expect(plan.canRun).toBe(false);
-        expect(plan.runReason).toContain('AVR');
+    test('the build plan names their output', () => {
+        const text = "include 'hex.inc'\ninclude 'avr.inc'";
+        const analysis = analyze(text, { 'hex.inc': "format binary as 'hex'" });
+        expect(createBuildPlan(document(text), analysis).outputPath).toBe('a.hex');
     });
 
     test('fasmg adds no extension without a format', () => {

@@ -1,9 +1,10 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import process from 'node:process';
-import * as vscode from 'vscode';
+import type * as vscode from 'vscode';
+
 import { analyzeSource } from './analysis';
-import type { ArchitectureId, SourceAnalysis } from './types';
+import type { SourceAnalysis } from './types';
 
 const cache = new Map<string, { version: number; analysis: SourceAnalysis }>();
 
@@ -15,7 +16,7 @@ function readTextFile(filePath: string): string | undefined {
     }
 }
 
-export function includePaths(): string[] {
+function includePaths(): string[] {
     return (process.env.INCLUDE ?? '').split(path.delimiter).filter(Boolean);
 }
 
@@ -26,13 +27,7 @@ export function analyzeDocument(document: vscode.TextDocument): SourceAnalysis {
         return cached.analysis;
     }
 
-    const setting = vscode.workspace.getConfiguration('fasm').get<string>('architecture', 'auto');
-    const override = setting === 'auto' ? undefined : (setting as ArchitectureId);
-    const analysis = analyzeSource(document.getText(), document.fileName, readTextFile, includePaths(), override);
+    const analysis = analyzeSource(document.getText(), document.fileName, readTextFile, includePaths());
     cache.set(key, { version: document.version, analysis });
     return analysis;
-}
-
-export function clearAnalysisCache(): void {
-    cache.clear();
 }

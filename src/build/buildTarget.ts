@@ -1,8 +1,7 @@
 import * as path from 'node:path';
-import process from 'node:process';
 import type * as vscode from 'vscode';
+
 import type { Dialect, SourceAnalysis } from '../architecture/types';
-import type { HostPlatform } from '../shared/types';
 import { COM_ORIGIN, CUSTOM_EXTENSION, FORMAT_LINE } from './constants/formatPatterns';
 import type { BuildPlan, OutputFormat, OutputInfo } from './types';
 
@@ -70,70 +69,17 @@ function peExtension(words: readonly string[]): string {
     return '.exe';
 }
 
-export function createBuildPlan(
-    document: vscode.TextDocument,
-    platform: HostPlatform = process.platform,
-    analysis?: SourceAnalysis
-): BuildPlan {
+export function createBuildPlan(document: vscode.TextDocument, analysis?: SourceAnalysis): BuildPlan {
     const sourcePath = document.fileName;
-    const sourceText = analysis?.combinedText ?? document.getText();
 
     if (document.languageId !== 'fasm') {
-        return {
-            sourcePath,
-            canBuild: false,
-            buildReason: 'The active file is not using the FASM language mode.',
-            canRun: false,
-            runReason: 'Only FASM source files can be run from this extension.'
-        };
+        return { sourcePath, canBuild: false, buildReason: 'The active file is not using the FASM language mode.' };
     }
 
     if (path.extname(sourcePath).toLowerCase() === '.inc') {
-        return {
-            sourcePath,
-            canBuild: false,
-            buildReason: 'Include files (.inc) are not standalone build targets.',
-            canRun: false,
-            runReason: 'Include files are support files, not runnable programs.'
-        };
+        return { sourcePath, canBuild: false, buildReason: 'Include files (.inc) are not standalone build targets.' };
     }
 
-    const output = inferOutput(sourceText, analysis?.dialect);
-    const outputPath = `${sourcePath.replace(/\.[^.\\/]+$/, '')}${output.extension}`;
-    const architecture = analysis?.architecture.id ?? 'x86';
-
-    if (architecture !== 'x86') {
-        return {
-            sourcePath,
-            canBuild: true,
-            outputPath,
-            canRun: false,
-            runReason: `Build succeeded. ${analysis?.architecture.label} output needs its own device, simulator or runtime.`
-        };
-    }
-
-    if (!isRunnable(output, platform)) {
-        return {
-            sourcePath,
-            canBuild: true,
-            outputPath,
-            canRun: false,
-            runReason: `Build succeeded, but ${path.basename(outputPath)} can't be run directly on ${platform}.`
-        };
-    }
-
-    return { sourcePath, canBuild: true, outputPath, canRun: true };
-}
-
-function isRunnable(output: OutputInfo, platform: HostPlatform): boolean {
-    switch (platform) {
-        case 'win32':
-            return output.extension === '.exe';
-        case 'linux':
-            return output.format === 'elf' && output.extension === '';
-        case 'darwin':
-            return output.format === 'macho' && output.extension === '';
-        default:
-            return false;
-    }
+    const output = inferOutput(analysis?.combinedText ?? document.getText(), analysis?.dialect);
+    return { sourcePath, canBuild: true, outputPath: `${sourcePath.replace(/\.[^.\\/]+$/, '')}${output.extension}` };
 }

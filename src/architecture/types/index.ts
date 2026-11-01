@@ -1,4 +1,4 @@
-export type ArchitectureId = 'x86' | '8051' | 'avr' | 'jvm' | 'wasm' | 'aarch64' | 'arm' | 'other';
+export type ArchitectureId = 'x86' | '8051' | 'avr' | 'jvm' | 'wasm' | 'aarch64' | 'other';
 export type Dialect = 'fasm' | 'fasmg';
 
 export interface Architecture {

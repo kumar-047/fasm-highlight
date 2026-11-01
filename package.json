@@ -1,8 +1,8 @@
 {
   "name": "fasm-highlight",
   "displayName": "FASM Highlight",
-  "description": "Syntax highlighting, hover cards, snippets, a control panel and build commands for flat assembler (fasm). Unofficial.",
-  "version": "0.2.1",
+  "description": "The same FASM Highlight, upgraded: syntax highlighting, formatting, hover cards, snippets and a number converter for fasm, fasm 2 and fasmg. Unofficial.",
+  "version": "0.3.0",
   "publisher": "kumar-047",
   "icon": "icon.png",
   "engines": {
@@ -65,16 +65,6 @@
         "category": "FASM"
       },
       {
-        "command": "fasm.buildAndRun",
-        "title": "Build and Run",
-        "category": "FASM"
-      },
-      {
-        "command": "fasm.stop",
-        "title": "Stop Running Program",
-        "category": "FASM"
-      },
-      {
         "command": "fasm.turnOnColors",
         "title": "Turn On FASM Colors",
         "category": "FASM"
@@ -83,22 +73,12 @@
         "command": "fasm.turnOffColors",
         "title": "Turn Off FASM Colors",
         "category": "FASM"
-      },
-      {
-        "command": "fasm.insertStarter",
-        "title": "Insert Starter Program",
-        "category": "FASM"
       }
     ],
     "keybindings": [
       {
         "command": "fasm.build",
         "key": "ctrl+shift+b",
-        "when": "editorLangId == fasm"
-      },
-      {
-        "command": "fasm.buildAndRun",
-        "key": "ctrl+shift+r",
         "when": "editorLangId == fasm"
       }
     ],
@@ -108,7 +88,7 @@
         "fasm.compilerPath": {
           "type": "string",
           "default": "",
-          "description": "Path to the fasm executable. Leave empty to use C:\\fasmw17335\\fasm.exe on Windows and fasm from PATH on other systems."
+          "description": "Path to your fasm, fasm 2 or fasmg compiler, used by FASM: Build. Leave empty to use C:\\fasmw17335\\fasm.exe on Windows and fasm from PATH on other systems."
         },
         "fasm.memoryLimit": {
           "type": "number",
@@ -124,48 +104,6 @@
           "type": "boolean",
           "default": false,
           "description": "Generate symbolic information for debugging with the -s flag"
-        },
-        "fasm.fasm2Path": {
-          "type": "string",
-          "default": "",
-          "description": "Path to fasm2.cmd or fasm2. Leave empty to search for it."
-        },
-        "fasm.fasmgPath": {
-          "type": "string",
-          "default": "",
-          "description": "Path to the fasmg executable. Leave empty to search for it."
-        },
-        "fasm.fasmarmPath": {
-          "type": "string",
-          "default": "",
-          "description": "Path to the FASMARM executable. Leave empty to search for it."
-        },
-        "fasm.assembler": {
-          "type": "string",
-          "enum": [
-            "auto",
-            "fasm",
-            "fasm2",
-            "fasmg",
-            "fasmarm"
-          ],
-          "default": "auto",
-          "description": "Which compiler builds FASM files. Automatic picks one from the file."
-        },
-        "fasm.architecture": {
-          "type": "string",
-          "enum": [
-            "auto",
-            "x86",
-            "8051",
-            "avr",
-            "jvm",
-            "wasm",
-            "aarch64",
-            "arm"
-          ],
-          "default": "auto",
-          "description": "The architecture of FASM files. Automatic reads the file's include lines."
         },
         "fasm.targetSystem": {
           "type": "string",
@@ -197,6 +135,11 @@
           "type": "object",
           "default": {},
           "description": "Custom FASM Colors, by role. The Settings tab of the FASM panel edits this."
+        },
+        "fasm.showPanelButton": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the FASM panel button at the top of FASM files."
         }
       }
     },
@@ -231,15 +174,6 @@
           "id": "fasm.panelRight",
           "name": "FASM",
           "when": "fasm.panelReady && fasm.panelOnRight"
-        }
-      ]
-    },
-    "menus": {
-      "editor/title": [
-        {
-          "command": "fasm.openPanel",
-          "when": "editorLangId == fasm",
-          "group": "navigation"
         }
       ]
     },

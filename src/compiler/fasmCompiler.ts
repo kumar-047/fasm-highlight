@@ -2,33 +2,23 @@ import * as cp from 'node:child_process';
 import * as path from 'node:path';
 import process from 'node:process';
 import * as vscode from 'vscode';
+
 import type { HostPlatform } from '../shared/types';
 import { buildCompilerCommand } from './compilerCommand';
-import type { CompilerManager } from './compilerManager';
-import { COMPILER_LABELS } from './constants/compilers';
 import { parseFasmErrors } from './fasmErrors';
-import type { CompileResult, CompilerKind } from './types';
+import type { CompileResult } from './types';
 
 export function defaultCompilerPath(platform: HostPlatform): string {
     return platform === 'win32' ? 'C:\\fasmw17335\\fasm.exe' : 'fasm';
 }
 
 export class FasmCompiler {
-    constructor(
-        private readonly outputChannel: vscode.OutputChannel,
-        private readonly manager: CompilerManager
-    ) {}
+    constructor(private readonly outputChannel: vscode.OutputChannel) {}
 
-    async compile(sourcePath: string, kind: CompilerKind): Promise<CompileResult> {
+    compile(sourcePath: string): Promise<CompileResult> {
         const config = vscode.workspace.getConfiguration('fasm');
-        await this.manager.refresh();
-        const compilerPath = this.manager.pathFor(kind) ?? (kind === 'fasm' ? defaultCompilerPath(process.platform) : undefined);
-        if (!compilerPath) {
-            this.outputChannel.appendLine(`${COMPILER_LABELS[kind]} wasn't found. Choose it in the FASM Control Panel.`);
-            return { success: false, errors: [] };
-        }
-
-        const command = buildCompilerCommand(kind, compilerPath, sourcePath, {
+        const compilerPath = config.get<string>('compilerPath', '') || defaultCompilerPath(process.platform);
+        const command = buildCompilerCommand(compilerPath, sourcePath, {
             memoryLimit: config.get<number>('memoryLimit', 65536),
             passesLimit: config.get<number>('passesLimit', 100),
             symbolsPath: config.get<boolean>('generateSymbols', false) ? sourcePath.replace(/\.(asm|inc)$/i, '.fas') : undefined
@@ -58,7 +48,7 @@ export class FasmCompiler {
             child.on('error', (error) => {
                 this.outputChannel.appendLine(`Error: ${error.message}`);
                 this.outputChannel.appendLine('');
-                this.outputChannel.appendLine('Make sure the compiler is installed and its path is correct in the FASM Control Panel.');
+                this.outputChannel.appendLine('Set the path to your compiler in the FASM panel, or in the fasm.compilerPath setting.');
                 resolve({ success: false, errors: [] });
             });
 

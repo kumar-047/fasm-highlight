@@ -2,31 +2,30 @@
 
 All notable changes to the `fasm-highlight` extension are documented in this file.
 
-## [Unreleased]
+## [0.3.0] - Unreleased
+
+The same extension, upgraded. The identifier is still `kumar-047.fasm-highlight`, and your settings, commands, shortcuts and snippet prefixes all carry over.
 
 ### Added
 
 - all 1,931 instructions in fasm 1.73.35, and the registers that were missing, such as `rip`, `eip`, `xmm16-31` and `ymm16-31`
 - float, `$FF`, `10d`, `17q` and `1_000` number highlighting, `@b`, `@f` and `@r` references, and section names
 - format keywords on `format`, `section`, `segment` and `data` lines
-- hover cards for 44 more instructions, and basic hover cards for all other instructions and registers
-- Jest, ESLint and typecheck scripts
-- `FASM: Turn On FASM Colors` and `FASM: Turn Off FASM Colors`, which colour FASM text only, for this workspace or all windows
-- build errors in the Problems panel, with links to where a failing macro was used
-- `FASM: Stop Running Program`
-- a side panel with a Control Panel, Settings and Project tab, opened from a gear icon on FASM files
-- detection of fasm, fasm 2, fasmg and FASMARM, with build support for each
-- 8051, AVR, JVM bytecode, WebAssembly, AArch64 and ARM instruction colours, detected from include lines and source
-- colours and hover cards for unknown fasmg packages, read from the file's includes
+- colours for fasmg keywords, and for 8051, AVR, JVM bytecode, WebAssembly and AArch64 instructions, detected from include lines
+- colours and hover cards for other fasmg packages, read from the file's includes
 - a formatter that only changes whitespace
-- a number converter
-- snippets ranked for the target system, a `program` starter and `FASM: Insert Starter Program`
+- FASM Colors, which colour FASM text only, for this workspace or all windows
+- a small panel with Format and Colors tabs, a number converter and your compiler path
+- hover cards for 44 more instructions, and basic hover cards for all other instructions and registers
+- snippets ranked for the target system, and a `program` starter
+- build errors in the Problems panel, with links to where a failing macro was used
+- fasm 2 and fasmg support in `FASM: Build`, chosen from the compiler path
+- Jest, ESLint and typecheck scripts
 
 ### Changed
 
 - grammar word lists are now generated from one data table
 - renamed the `keyword.mnemonic` scopes to `keyword.other.mnemonic`
-- programs now run in a terminal, so they can read input and use the Windows console API
 - hover categories reduced to 7, with manual links built in one place
 - reorganised the source into module folders with their own types and constants
 - updated the development tools, including TypeScript 6, ESLint 10, Jest 30 and vsce 4
@@ -46,6 +45,7 @@ All notable changes to the `fasm-highlight` extension are documented in this fil
 
 ### Removed
 
+- `FASM: Build and Run` and its `Ctrl+Shift+R` shortcut, because this extension is a highlighter, not a toolchain
 - the `FASM Workshop Dark` theme, which took over the whole window and left other languages without syntax colours
 
 ## [0.2.1] - 2026-04-24

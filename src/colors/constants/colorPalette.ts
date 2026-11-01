@@ -1,5 +1,7 @@
 import type { ColorRole } from '../types';
 
+export const OLD_THEME_NAME = 'FASM Workshop Dark';
+
 export const COLOR_ROLES: readonly ColorRole[] = ['instruction', 'register', 'directive', 'data', 'helper', 'label', 'section', 'number', 'string', 'comment', 'operator'];
 
 export const ROLE_LABELS: Readonly<Record<ColorRole, string>> = {

@@ -1,10 +1,15 @@
 import type { TextDocument } from 'vscode';
+
 import { createBuildPlan, inferOutput } from '../src/build/buildTarget';
+import { buildCompilerCommand, detectCompilerKind } from '../src/compiler/compilerCommand';
 import { defaultCompilerPath } from '../src/compiler/fasmCompiler';
+import * as path from 'node:path';
 
 function document(fileName: string, text: string, languageId = 'fasm'): TextDocument {
     return { fileName, languageId, getText: () => text } as unknown as TextDocument;
 }
+
+const OPTIONS = { memoryLimit: 65536, passesLimit: 100 };
 
 describe('inferOutput', () => {
     // Each pair was recorded from fasm 1.73.35.
@@ -68,29 +73,45 @@ describe('createBuildPlan', () => {
     test('dots in folder names are kept', () => {
         expect(createBuildPlan(document('my.dir/prog', 'format PE')).outputPath).toBe('my.dir/prog.exe');
     });
-
-    test.each([
-        ['format PE console', 'win32', true],
-        ['format PE DLL', 'win32', false],
-        ['format PE native', 'win32', false],
-        ['format ELF executable', 'win32', false],
-        ['format PE console', 'linux', false],
-        ['format ELF executable', 'linux', true],
-        ['format ELF', 'linux', false],
-        ["format binary as ''", 'linux', false],
-        ['format ELF executable', 'darwin', false],
-        ['use32', 'win32', false]
-    ] as const)('%s on %s: run is %s', (source, platform, canRun) => {
-        expect(createBuildPlan(document('a.asm', source), platform).canRun).toBe(canRun);
-    });
 });
 
-describe('defaultCompilerPath', () => {
-    test('Windows uses the standard install folder', () => {
+describe('the one compiler path', () => {
+    test.each([
+        ['C:\\fasmw17335\\fasm.exe', 'fasm'],
+        ['/usr/bin/fasm', 'fasm'],
+        ['D:\\tools\\FASMG.EXE', 'fasmg'],
+        ['/opt/fasmg.x64', 'fasmg'],
+        ['D:\\fasm2\\fasm2.cmd', 'fasm2'],
+        ['/opt/fasm2/fasm2', 'fasm2']
+    ])('%s is %s', (compilerPath, kind) => {
+        expect(detectCompilerKind(compilerPath)).toBe(kind);
+    });
+
+    test('fasm 1 uses its own options', () => {
+        expect(buildCompilerCommand('fasm', 'a.asm', { ...OPTIONS, symbolsPath: 'a.fas' }, 'linux').args)
+            .toEqual(['a.asm', '-m', '65536', '-p', '100', '-s', 'a.fas']);
+    });
+
+    test('fasmg gets no -m or -s', () => {
+        expect(buildCompilerCommand('fasmg', 'a.asm', { ...OPTIONS, symbolsPath: 'a.fas' }, 'linux').args).toEqual(['a.asm', '-e100', '-p100']);
+    });
+
+    test('fasm 2 runs fasmg with its include', () => {
+        const command = buildCompilerCommand(path.join('tools', 'fasm2.cmd'), 'a.asm', OPTIONS, 'win32');
+        expect(command.command).toBe(path.join('tools', 'fasmg.exe'));
+        expect(command.args).toContain("-iInclude('fasm2.inc')");
+        expect(command.includePaths).toEqual([path.join('tools', 'include')]);
+    });
+
+    test('fasm 2 on Linux uses the 64-bit fasmg', () => {
+        expect(buildCompilerCommand(path.join('t', 'fasm2'), 'a.asm', OPTIONS, 'linux').command).toBe(path.join('t', 'fasmg.x64'));
+    });
+
+    test('Windows defaults to the standard install folder', () => {
         expect(defaultCompilerPath('win32')).toBe('C:\\fasmw17335\\fasm.exe');
     });
 
-    test.each(['linux', 'darwin', 'freebsd'] as const)('%s uses fasm from PATH', (platform) => {
+    test.each(['linux', 'darwin', 'freebsd'] as const)('%s defaults to fasm from PATH', (platform) => {
         expect(defaultCompilerPath(platform)).toBe('fasm');
     });
 });

@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 import { ARCHITECTURES } from './constants/architectures';
-import { ARCHITECTURE_INCLUDES, ARM_SOURCE, FASMG_SOURCE, INCLUDE_LINE, MAX_FILE_LENGTH, MAX_INCLUDE_FILES, X86_G_INCLUDES } from './constants/includePatterns';
+import { ARCHITECTURE_INCLUDES, FASMG_SOURCE, INCLUDE_LINE, MAX_FILE_LENGTH, MAX_INCLUDE_FILES, X86_G_INCLUDES } from './constants/includePatterns';
 import type { ArchitectureId, ReadFile, ScannedSymbol, SourceAnalysis } from './types';
 
 function includesOf(text: string): string[] {
@@ -48,8 +48,7 @@ export function analyzeSource(
     text: string,
     filePath: string,
     read: ReadFile,
-    includePaths: readonly string[] = [],
-    override: ArchitectureId | undefined = undefined
+    includePaths: readonly string[] = []
 ): SourceAnalysis {
     const seen = new Set<string>([path.resolve(filePath)]);
     const pending: { text: string; file: string }[] = [{ text, file: path.resolve(filePath) }];
@@ -84,15 +83,12 @@ export function analyzeSource(
         }
     }
 
-    if (!detected && ARM_SOURCE.test(text)) {
-        detected = 'arm';
-    }
     if (!detected) {
         detected = isFasmg && scanned.size > 0 ? 'other' : 'x86';
     }
 
-    const id = override ?? detected;
-    const usesFasmg = isFasmg || (id !== 'x86' && id !== 'arm');
+    const id = detected;
+    const usesFasmg = isFasmg || id !== 'x86';
     return {
         dialect: usesFasmg ? 'fasmg' : 'fasm',
         architecture: ARCHITECTURES[id],

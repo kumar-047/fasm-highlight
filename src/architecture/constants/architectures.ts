@@ -9,13 +9,6 @@ function numbered(prefix: string, first: number, last: number): string[] {
     return names;
 }
 
-const ARM_INSTRUCTIONS = (
-    'add adds addw sub subs mov movs movw movn movz movk mvn cpy cmp cmn and bic lsl lsr ror mul pkhtb b bl blx bkpt '
-    + 'ldr ldrb ldrh ldrd ldm ldmia ldmfd str strb strh strd stm stmia stmdb push pop strex adrp ssat ssat16 sxtb sxth '
-    + 'uxtb uxth smlald smlsld umaal vmull crc32 cps cpsie cpsid srs srsdb mrc dsb dmb isb vmov vmvn vmrs fmrx vldm vstm '
-    + 'vpush vpop fldmd fstmd it ite itt ittt itttt'
-).split(' ');
-
 function architecture(id: ArchitectureId, label: string, instructions: readonly string[], registers: readonly string[]): Architecture {
     return { id, label, instructions: new Set(instructions), registers: new Set(registers) };
 }
@@ -28,10 +21,6 @@ export const ARCHITECTURES: Readonly<Record<ArchitectureId, Architecture>> = {
     wasm: architecture('wasm', 'WebAssembly', instructions.wasm, []),
     aarch64: architecture('aarch64', 'AArch64', instructions.aarch64, [
         'sp', 'lr', 'xzr', 'wzr', 'wsp', ...numbered('x', 0, 30), ...numbered('w', 0, 30), ...numbered('v', 0, 31)
-    ]),
-    arm: architecture('arm', 'ARM (FASMARM)', ARM_INSTRUCTIONS, [
-        ...numbered('r', 0, 15), ...numbered('a', 1, 4), ...numbered('v', 1, 8), 'sb', 'sl', 'fp', 'ip', 'sp', 'lr', 'pc',
-        ...numbered('x', 0, 30), ...numbered('w', 0, 30), 'wsp', 'xzr', 'wzr'
     ]),
     other: architecture('other', 'Other fasmg package', [], [])
 };

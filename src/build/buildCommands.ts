@@ -1,67 +1,45 @@
-import * as fs from 'node:fs';
 import * as path from 'node:path';
-import process from 'node:process';
 import * as vscode from 'vscode';
+
 import { analyzeDocument } from '../architecture/documentAnalysis';
-import { chooseCompilerKind } from '../compiler/compilerCommand';
+import type { FasmCompiler } from '../compiler/fasmCompiler';
 import type { FasmError } from '../compiler/types/fasmError';
 import { createBuildPlan } from './buildTarget';
-import type { BuildPlan } from './types';
-import type { BuildServices } from './types/services';
 
-export function registerBuildCommands(services: BuildServices): vscode.Disposable[] {
-    return [
-        vscode.commands.registerCommand('fasm.build', async () => {
-            const buildPlan = await buildActiveFile(services);
-            if (buildPlan?.outputPath) {
-                vscode.window.showInformationMessage(`Build successful: ${path.basename(buildPlan.outputPath)}`);
-            }
-        }),
-        vscode.commands.registerCommand('fasm.buildAndRun', async () => {
-            const buildPlan = await buildActiveFile(services);
-            if (buildPlan) {
-                runBuildOutput(buildPlan, services);
-            }
-        }),
-        vscode.commands.registerCommand('fasm.stop', async () => {
-            const stopped = await services.runner.stop();
-            if (!stopped) {
-                vscode.window.showInformationMessage('No FASM program is running.');
-            }
-        })
-    ];
-}
+export function registerBuildCommand(
+    outputChannel: vscode.OutputChannel,
+    compiler: FasmCompiler,
+    diagnostics: vscode.DiagnosticCollection
+): vscode.Disposable {
+    return vscode.commands.registerCommand('fasm.build', async () => {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            void vscode.window.showErrorMessage('No active editor');
+            return;
+        }
 
-async function buildActiveFile(services: BuildServices): Promise<BuildPlan | undefined> {
-    const editor = vscode.window.activeTextEditor;
-    if (!editor) {
-        vscode.window.showErrorMessage('No active editor');
-        return undefined;
-    }
+        await editor.document.save();
 
-    const document = editor.document;
-    await document.save();
+        const buildPlan = createBuildPlan(editor.document, analyzeDocument(editor.document));
+        if (!buildPlan.canBuild) {
+            void vscode.window.showErrorMessage(buildPlan.buildReason ?? 'This file cannot be built.');
+            return;
+        }
 
-    const analysis = analyzeDocument(document);
-    const buildPlan = createBuildPlan(document, process.platform, analysis);
-    if (!buildPlan.canBuild) {
-        vscode.window.showErrorMessage(buildPlan.buildReason ?? 'This file cannot be built.');
-        return undefined;
-    }
+        outputChannel.show(true);
+        outputChannel.appendLine(`Building ${path.basename(buildPlan.sourcePath)}...`);
+        outputChannel.appendLine('');
 
-    showBuildHeader(services.outputChannel, buildPlan.sourcePath, buildPlan.outputPath);
+        diagnostics.clear();
+        const result = await compiler.compile(buildPlan.sourcePath);
+        showDiagnostics(diagnostics, result.errors);
 
-    services.diagnostics.clear();
-    const assembler = vscode.workspace.getConfiguration('fasm').get<string>('assembler', 'auto');
-    const kind = chooseCompilerKind(assembler, analysis.dialect, analysis.architecture.id);
-    const result = await services.compiler.compile(buildPlan.sourcePath, kind);
-    showDiagnostics(services.diagnostics, result.errors);
-    if (!result.success) {
-        vscode.window.showErrorMessage('Build failed. Check the Problems panel for details.');
-        return undefined;
-    }
-
-    return buildPlan;
+        if (!result.success) {
+            void vscode.window.showErrorMessage('Build failed. Check the Problems panel for details.');
+        } else if (buildPlan.outputPath) {
+            void vscode.window.showInformationMessage(`Build successful: ${path.basename(buildPlan.outputPath)}`);
+        }
+    });
 }
 
 function showDiagnostics(collection: vscode.DiagnosticCollection, errors: readonly FasmError[]): void {
@@ -84,34 +62,4 @@ function showDiagnostics(collection: vscode.DiagnosticCollection, errors: readon
 function lineRange(line: number): vscode.Range {
     const index = Math.max(line - 1, 0);
     return new vscode.Range(index, 0, index, Number.MAX_SAFE_INTEGER);
-}
-
-function runBuildOutput(buildPlan: BuildPlan, services: BuildServices): void {
-    const { outputChannel, runner } = services;
-
-    if (!buildPlan.outputPath || !buildPlan.canRun) {
-        const message = buildPlan.runReason ?? 'Build succeeded, but automatic run is not available for this output.';
-        vscode.window.showWarningMessage(message);
-        outputChannel.appendLine(message);
-        return;
-    }
-
-    if (!fs.existsSync(buildPlan.outputPath)) {
-        const message = `Build succeeded, but the expected output was not found: ${buildPlan.outputPath}`;
-        vscode.window.showWarningMessage(message);
-        outputChannel.appendLine(message);
-        return;
-    }
-
-    outputChannel.appendLine(`Running ${path.basename(buildPlan.outputPath)} in the FASM Run terminal.`);
-    runner.run(buildPlan.outputPath);
-}
-
-function showBuildHeader(outputChannel: vscode.OutputChannel, sourcePath: string, outputPath?: string) {
-    outputChannel.show(true);
-    outputChannel.appendLine(`Building ${path.basename(sourcePath)}...`);
-    if (outputPath) {
-        outputChannel.appendLine(`Expected output: ${path.basename(outputPath)}`);
-    }
-    outputChannel.appendLine('');
 }

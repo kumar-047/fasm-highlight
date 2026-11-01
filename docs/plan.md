@@ -1,5 +1,7 @@
 # Next version plan
 
+> **Scope changed.** The extension is now a highlighter with a formatter, colours and a number converter. [TASK_LIST.md](TASK_LIST.md) is the current list, and larger ideas below are history, not plans.
+
 Product plan for `fasm-highlight` after v0.2.1. **Nothing here is implemented yet.** Fixes for existing bugs are in [CHANGE_LIST.md](CHANGE_LIST.md); this file covers the new direction.
 
 Checked on 2026-11-01 against the extension code, the official repos, flatassembler.net and an installed VS Code build.
@@ -56,7 +58,7 @@ Checked against the [fasmg manual](https://flatassembler.net/docs.php?article=fa
 | `src/fasmCompiler.ts` | Sits outside the `compiler/` folder | `src/compiler/` |
 | "FASMG", "FASM2" | Official name is intentionally lowercase | Always "fasmg" and "fasm 2" |
 
-Keep the extension ID `kumar-047.fasm-highlight`, because changing it would create a new Marketplace listing and lose existing installs. The display name can change (decision 1). Existing setting keys stay so users don't lose their settings.
+Keep the extension ID `kumar-047.fasm-highlight`, because changing it would create a new Marketplace listing and lose existing installs. The display name also stays (decision 1). Existing setting keys stay so users don't lose their settings.
 
 ## 2. Colours that don't take over
 
@@ -236,7 +238,7 @@ Decided: one complete release, with nothing published until the release checks a
 
 ## Decisions needed
 
-1. **Display name:** recommended **FASM Tools**, since the extension now does far more than highlight.
+1. **Display name:** decided: stays **FASM Highlight**, so existing users recognise the upgrade.
 2. **Colour theme:** recommended removing it completely rather than keeping it as an extra.
 3. **Donate link:** which service and URL? This can only come from you.
 4. **Panel default side:** recommended **right**, so it sits beside the code.
