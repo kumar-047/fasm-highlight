@@ -18,7 +18,7 @@ Details and history are in [plan.md](plan.md) and [CHANGE_LIST.md](CHANGE_LIST.m
 
 ## Removed on purpose
 
-Run and Stop, compiler detection and install, the compiler list, FASMARM, project links and issue buttons, and the whole side panel.
+Run and Stop, compiler detection and install, the compiler list, FASMARM, project links and issue buttons, and the large control panel with tabs.
 
 ## Next: highlighting and formatting
 

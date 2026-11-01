@@ -72,6 +72,10 @@ describe('panel page', () => {
         }
     });
 
+    test('palettes are shown by name, with no Dark or Light headings', () => {
+        expect(script).not.toMatch(/>(Dark|Light)</);
+    });
+
     test('every icon it uses is included', () => {
         const icons = fs.readFileSync(path.join(ROOT, 'media', 'icons.js'), 'utf8');
         const used = [...script.matchAll(/(?:icon|heading)\((?:'[^']+', )?'([a-z-]+)'\)/g)].map((match) => match[1]);

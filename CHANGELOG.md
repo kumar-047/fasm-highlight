@@ -2,7 +2,7 @@
 
 All notable changes to the `fasm-highlight` extension are documented in this file.
 
-## [0.2.2] - Unreleased
+## [0.2.2] - 2026-11-01
 
 ### Added
 

@@ -34,8 +34,8 @@
             <div id="number-result" class="result">${renderNumberResult()}</div></section>`;
     }
 
-    function renderSwatches(kind) {
-        return state.palettes.filter((palette) => palette.kind === kind).map((palette) => {
+    function renderSwatches() {
+        return state.palettes.map((palette) => {
             const current = state.colorsOn && state.palette === palette.id;
             return `<button class="palette${current ? ' current' : ''}" data-palette="${escapeHtml(palette.id)}" aria-pressed="${current}" title="${escapeHtml(palette.label)}">
                 <span class="swatch swatch-${escapeHtml(palette.kind)}" data-colors="${escapeHtml(palette.colors.join(','))}"></span><span class="palette-name">${escapeHtml(palette.label)}</span></button>`;
@@ -52,8 +52,7 @@
 
     function renderColors() {
         return `<section>${heading('Colors', 'symbol-color')}
-            <p class="group">Dark</p><div class="palettes">${renderSwatches('dark')}</div>
-            <p class="group">Light</p><div class="palettes">${renderSwatches('light')}</div>
+            <div class="palettes">${renderSwatches()}</div>
             <div class="actions">
                 <button class="secondary" data-action="toggleCustomize" aria-expanded="${customizing}">${icon('settings-gear')}Customize</button>
                 <button class="secondary" data-action="resetColors"${state.colorsOn ? '' : ' disabled'}>${icon('discard')}Reset</button>
