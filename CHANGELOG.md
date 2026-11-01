@@ -6,11 +6,11 @@ All notable changes to the `fasm-highlight` extension are documented in this fil
 
 ### Added
 
-- Right-click **FASM** menu with Format File, Check Number Value, Font Palette and Color Palette.
+- **FASM Menu** on right-click: a card at your cursor with Format File, number values, Colors and Fonts, each with Customize where it applies.
+- Hover over any number to see its value in decimal, hex, binary and octal, and click to copy.
 - Formatter that only changes spaces and blank lines, with settings for operand column, comment column, commas and blank lines.
 - 8 color palettes that only change FASM text: FASM Dark, Ember, Ocean, Forest, Mono, FASM Light, Paper and Sky.
 - Font palette with 12 coding fonts and preset sizes, for FASM files only.
-- Number check that shows a value in decimal, hex, binary and octal.
 - Highlighting for fasm 2 and fasmg, including `end` blocks and CALM commands.
 - Highlighting for 8051, AVR, AArch64, JVM bytecode and WebAssembly, detected from `include` lines.
 - Colors for macros and structures defined in the file, and for macros from included files in fasmg code.
@@ -39,7 +39,7 @@ All notable changes to the `fasm-highlight` extension are documented in this fil
 ### Removed
 
 - `FASM: Build and Run` and `Ctrl+Shift+R`.
-- The `FASM Workshop Dark` theme. Use the Color Palette instead.
+- The `FASM Workshop Dark` theme. Use the colors in the FASM Menu instead.
 
 ## [0.2.1] - 2026-04-24
 

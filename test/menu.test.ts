@@ -6,26 +6,15 @@ const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'ut
 const contributes = manifest.contributes;
 
 describe('right-click menu', () => {
-    test('it only shows on FASM files', () => {
-        expect(contributes.menus['editor/context'][0].when).toBe('editorLangId == fasm');
-        expect(contributes.menus['editor/context'][0].submenu).toBe('fasm.contextMenu');
+    test('it has one FASM item, only on FASM files', () => {
+        expect(contributes.menus['editor/context']).toEqual([{ command: 'fasm.openMenu', when: 'editorLangId == fasm', group: '1_modification@9' }]);
     });
 
-    test('it has the four options', () => {
-        expect(contributes.menus['fasm.contextMenu'].map((item: { command: string }) => item.command)).toEqual([
-            'fasm.formatFile', 'fasm.checkNumber', 'fasm.changeFont', 'fasm.changeColors'
-        ]);
-    });
-
-    test('fonts and colours are palettes', () => {
-        const titles = contributes.commands.map((item: { title: string }) => item.title);
-        expect(titles).toEqual(expect.arrayContaining(['Font Palette', 'Color Palette']));
-    });
-
-    test('every menu item is a real command', () => {
-        const commands = contributes.commands.map((item: { command: string }) => item.command);
-        for (const item of contributes.menus['fasm.contextMenu']) {
-            expect(commands).toContain(item.command);
+    test('it opens a card at the cursor, with nothing in the top bar', () => {
+        const walk = (dir: string): string[] => fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) =>
+            entry.isDirectory() ? walk(path.join(dir, entry.name)) : [path.join(dir, entry.name)]);
+        for (const file of walk(path.join(ROOT, 'src'))) {
+            expect(fs.readFileSync(file, 'utf8')).not.toMatch(/showQuickPick|showInputBox/);
         }
     });
 });
@@ -65,7 +54,7 @@ describe('documentation', () => {
 
     test('the README and changelog name every menu option', () => {
         const changelog = fs.readFileSync(path.join(ROOT, 'CHANGELOG.md'), 'utf8');
-        for (const option of ['Format File', 'Check Number Value', 'Font Palette', 'Color Palette']) {
+        for (const option of ['Format File', 'Customize', 'Fonts', 'Colors']) {
             expect(readme).toContain(option);
             expect(changelog).toContain(option);
         }

@@ -2,10 +2,6 @@ import { DARK_COLORS, FONT_STYLES, LIGHT_COLORS, ROLE_LABELS, SCOPES } from './c
 import { AUTO_PALETTE, COLOR_PALETTES } from './constants/colorPalettes';
 import type { ColorOverrides, ColorPalette, ColorRole, ColorRule, TokenColorCustomizations } from './types';
 
-export function isHexColor(value: string): boolean {
-    return /^#[0-9a-f]{6}$/i.test(value);
-}
-
 export function roleLabel(role: ColorRole): string {
     return ROLE_LABELS[role];
 }

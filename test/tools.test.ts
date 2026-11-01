@@ -3,9 +3,7 @@ import * as path from 'node:path';
 import { BLOCK_END, BLOCK_START } from '../src/formatter/constants/blockPatterns';
 import { formatFasmSource } from '../src/formatter/formatter';
 import type { FormatOptions } from '../src/formatter/types';
-import { FONT_PALETTE, FONT_SIZES } from '../src/fonts/constants/fontPalette';
-import { validateFontSize } from '../src/fonts/fontSettings';
-import { isHexColor } from '../src/colors/colorRules';
+import { FONT_PALETTE } from '../src/fonts/constants/fontPalette';
 import { findSymbolGroup } from '../src/grammar/symbols';
 import { rankSnippets, starterSnippet } from '../src/snippets/snippetRanking';
 import type { SnippetDefinition } from '../src/snippets/types';
@@ -172,27 +170,6 @@ describe('font palette', () => {
         expect(new Set(FONT_PALETTE.map((font) => font.label)).size).toBe(FONT_PALETTE.length);
     });
 
-    test('every preset size is valid', () => {
-        for (const size of FONT_SIZES) {
-            expect(validateFontSize(String(size))).toBeUndefined();
-        }
-    });
-});
-
-describe('font and colour input', () => {
-    test.each(['6', '14', '72'])('font size %s is accepted', (value) => {
-        expect(validateFontSize(value)).toBeUndefined();
-    });
-
-    test.each(['5', '73', '1.5', 'big', ''])('font size %j is refused', (value) => {
-        expect(validateFontSize(value)).toBeDefined();
-    });
-
-    test('colours must be full hex values', () => {
-        expect(isHexColor('#ff8f6b')).toBe(true);
-        expect(isHexColor('red')).toBe(false);
-        expect(isHexColor('#fff')).toBe(false);
-    });
 });
 
 describe('number converter', () => {

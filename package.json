@@ -1,7 +1,7 @@
 {
   "name": "fasm-highlight",
   "displayName": "FASM Highlight",
-  "description": "Syntax highlighting, formatting, hover cards, snippets and a number check for fasm, fasm 2 and fasmg. Unofficial.",
+  "description": "Highlights your fasm code, with hover cards, simple snippets, light formatting, and font and color styling. Works with fasm, fasm 2 and fasmg on Windows, Linux and macOS.",
   "version": "0.2.2",
   "publisher": "kumar-047",
   "icon": "icon.png",
@@ -65,28 +65,8 @@
         "category": "FASM"
       },
       {
-        "command": "fasm.checkNumber",
-        "title": "Check Number Value",
-        "category": "FASM"
-      },
-      {
-        "command": "fasm.changeFont",
-        "title": "Font Palette",
-        "category": "FASM"
-      },
-      {
-        "command": "fasm.changeColors",
-        "title": "Color Palette",
-        "category": "FASM"
-      },
-      {
-        "command": "fasm.turnOnColors",
-        "title": "Turn On FASM Colors",
-        "category": "FASM"
-      },
-      {
-        "command": "fasm.turnOffColors",
-        "title": "Turn Off FASM Colors",
+        "command": "fasm.openMenu",
+        "title": "FASM Menu",
         "category": "FASM"
       }
     ],
@@ -201,36 +181,12 @@
         }
       }
     ],
-    "submenus": [
-      {
-        "id": "fasm.contextMenu",
-        "label": "FASM"
-      }
-    ],
     "menus": {
       "editor/context": [
         {
-          "submenu": "fasm.contextMenu",
+          "command": "fasm.openMenu",
           "when": "editorLangId == fasm",
           "group": "1_modification@9"
-        }
-      ],
-      "fasm.contextMenu": [
-        {
-          "command": "fasm.formatFile",
-          "group": "1_file@1"
-        },
-        {
-          "command": "fasm.checkNumber",
-          "group": "1_file@2"
-        },
-        {
-          "command": "fasm.changeFont",
-          "group": "2_look@1"
-        },
-        {
-          "command": "fasm.changeColors",
-          "group": "2_look@2"
         }
       ]
     }

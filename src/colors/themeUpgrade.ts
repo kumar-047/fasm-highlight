@@ -16,11 +16,11 @@ export function offerThemeReplacement(context: vscode.ExtensionContext): void {
     void context.globalState.update(SHOWN_KEY, true);
     void vscode.window.showInformationMessage(
         `${OLD_THEME_NAME} has been removed from FASM Highlight. FASM Colors gives FASM files similar colours without changing the rest of your editor.`,
-        'Turn On FASM Colors',
+        'Use FASM Colors',
         'Choose a Theme'
     ).then((choice) => {
-        if (choice === 'Turn On FASM Colors') {
-            void vscode.commands.executeCommand('fasm.turnOnColors');
+        if (choice === 'Use FASM Colors') {
+            void vscode.commands.executeCommand('fasm.setPalette', 'auto');
         } else if (choice === 'Choose a Theme') {
             void vscode.commands.executeCommand('workbench.action.selectTheme');
         }
